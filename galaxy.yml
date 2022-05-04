@@ -1,0 +1,16 @@
+
+---
+namespace: selfhostx
+name: ansible
+version: 0.0.1
+readme: README.md
+authors:
+- FIXME
+description: ansible-Collection for selhosters
+license_file: LICENSE
+# tags:
+repository: https://github.com/selfhostx/ansible.git
+documentation: https://github.com/selfhostx/ansible.git
+homepage: https://github.com/selfhostx/ansible
+issues: https://github.com/selfhostx/ansible/issues
+# dependencies:
