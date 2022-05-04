@@ -21,6 +21,8 @@ roles:
   - src: tcharl.ansible_role_libvirt_host
 
 collections:
+  - name: https://github.com/selfhostx/ansible.git
+    type: git
   - name: community.libvirt
   - name: community.mysql
   - name: community.zabbix
