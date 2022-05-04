@@ -1,0 +1,26 @@
+---
+# Roles or collections we use in playbook
+
+# ansible-galaxy install -r requirements.yml --ignore-errors
+# ansible-galaxy collection install -r requirements.yml
+# needs recent version of ansible-galaxy (4.3?)!
+
+roles:
+  - src: geerlingguy.apache
+  - src: geerlingguy.git
+  - src: geerlingguy.gitlab
+  - src: geerlingguy.mysql
+  - src: geerlingguy.ntp
+  - src: geerlingguy.php
+  - src: geerlingguy.php-versions
+  - src: geerlingguy.pip
+  - src: geerlingguy.postgresql
+  - src: jnv.unattended-upgrades
+  - src: powerdns.pdns_recursor
+  - src: powerdns.dnsdist
+  - src: tcharl.ansible_role_libvirt_host
+
+collections:
+  - name: community.libvirt
+  - name: community.mysql
+  - name: community.zabbix

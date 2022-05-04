@@ -1,0 +1,145 @@
+---
+
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+- name: Classify hosts (virtual or bare metal)
+  ansible.builtin.group_by:
+    key: machine_is_{{ "virtual" if ansible_facts['virtualization_role'] == "guest" else "metal" }}
+  changed_when: false
+  tags:
+    - packages
+    - unattended
+
+- name: Manage sysctl settings
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: yes
+    state: "{{ item.state | default(omit) }}"
+    sysctl_file: "{{ baserole_sysctl_path | default(omit) }}"
+    ignoreerrors: "{{ baserole_sysctl_ignoreerrors | default(omit) }}"
+  loop: "{{ baserole_sysctl_key_value }}"
+  when:
+    - baserole_sysctl_key_value is defined
+    - baserole_sysctl_key_value|length>0
+  tags: sysctl
+
+- name: Include grub-config.yml
+  ansible.builtin.include_tasks:
+    file: "grub-config.yml"
+    apply:
+      tags:
+        - grub
+  tags: grub
+  when: baserole_grub_config_enable
+
+- name: Include dns-config.yml
+  ansible.builtin.include_tasks:
+    file: "dns-config.yml"
+    apply:
+      tags:
+        - dns
+  tags: dns
+  when: baserole_dns_config_enable
+
+- name: Include ntp-config.yml
+  ansible.builtin.include_tasks:
+    file: "ntp-config.yml"
+    apply:
+      tags:
+        - ntp
+  tags: ntp
+  when: baserole_ntp_config_enable
+
+- name: Include package-sources.yml
+  ansible.builtin.include_tasks:
+    file: "package-sources.yml"
+    apply:
+      tags:
+        - packages
+  tags: packages
+  loop: "{{ baserole_packagesources }}"
+  when:
+    - baserole_package_source_enable
+    - baserole_packagesources is defined
+    - baserole_packagesources|length>0
+
+- name: Include packages-apt-preferences.yml
+  ansible.builtin.include_tasks:
+    file: "packages-apt-preferences.yml"
+    apply:
+      tags:
+        - packages
+  tags: packages
+
+- name: Include packages-install-defaults.yml
+  ansible.builtin.include_tasks:
+    file: "packages-install-defaults.yml"
+    apply:
+      tags:
+        - packages
+  tags: packages
+  when: baserole_package_install_default_enable
+
+- name: Include package-upgrade.yml
+  ansible.builtin.include_tasks:
+    file: "package-upgrade.yml"
+    apply:
+      tags:
+        - packages
+  tags: packages
+  when: baserole_package_upgrade_enable
+
+- name: Include user-root.yml
+  ansible.builtin.include_tasks:
+    file: "user-root.yml"
+  tags: 
+    - bash
+    - pubkey
+    - ssh
+    - userlocal
+
+- name: Include user-manage-local.yml
+  ansible.builtin.include_tasks:
+    file: "user-manage-local.yml"
+    apply:
+      tags:
+        - userlocal
+  loop: "{{ baserole_userlist_local }}"
+  when:
+    - baserole_usercreate_local
+    - baserole_userlist_local is defined
+    - baserole_userlist_local|length>0
+  # add all tags from user-create.yml here:
+  tags:
+    - pubkey
+    - ssh
+    - sudo
+    - userlocal
+
+- name: Include group-manage-local.yml
+  ansible.builtin.include_tasks:
+    file: "group-manage-local.yml"
+    apply:
+      tags:
+        - grouplocal
+  loop: "{{ baserole_grouplist_local }}"
+  when:
+    - baserole_groupcreate_local
+    - baserole_grouplist_local is defined
+    - baserole_grouplist_local|length>0
+  tags:
+    - grouplocal
+    - sudo
+
+- name: Include sshd-config.yml
+  ansible.builtin.include_tasks:
+    file: "sshd-config.yml"
+    apply:
+      tags:
+        - ssh
+  tags: ssh
+  when: baserole_sshd_conf_enable

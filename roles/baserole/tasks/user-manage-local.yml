@@ -1,0 +1,195 @@
+---
+  # conditions for user-tasks:
+  - name: No Conditions set for skipping
+    ansible.builtin.set_fact:
+      skip_this_user: False
+    when:
+      - item.conditional_hostgroup is undefined
+      - item.conditional_var_name_exists is undefined
+    tags:
+      - pubkey
+      - ssh
+      - sudo
+      - userlocal
+
+  - name: Set Condition Skip
+    ansible.builtin.set_fact:
+      skip_this_user: True
+    when:
+      - item.conditional_hostgroup is defined
+      - item.conditional_var_name_exists is defined
+    tags:
+      - pubkey
+      - ssh
+      - sudo
+      - userlocal
+
+  - name: Check if conditional_hostgroup is present
+    ansible.builtin.set_fact:
+      skip_this_user: False
+    when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
+    tags:
+      - pubkey
+      - ssh
+      - sudo
+      - userlocal
+
+  - name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
+    ansible.builtin.set_fact:
+      skip_this_user: False
+    when:
+      - lookup('vars', item.conditional_var_name_exists) is defined
+    ignore_errors: True
+    tags:
+      - pubkey
+      - ssh
+      - sudo
+      - userlocal
+
+  - name: Manage user accounts
+    ansible.builtin.user:
+      name:               '{{ item.user }}'
+      group:              '{{ item.group              | d(omit) }}'
+      home:               '{{ item.home               | d(omit) }}'
+      uid:                '{{ item.uid                | d(omit) }}'
+      state:              '{{ item.state              | d("present") }}'
+      comment:            '{{ item.comment            | d(omit) }}'
+      password:           '{{ item.password           | d("*") }}'
+      update_password:    '{{ item.update_password    | d("on_create") }}'
+      system:             '{{ item.system             | d(omit) }}'
+      shell:              '{{ item.shell              | d(omit) }}'
+      create_home:        '{{ item.create_home        | d(omit) }}'
+      move_home:          '{{ item.move_home          | d(omit) }}'
+      skeleton:           '{{ item.skeleton           | d(omit) }}'
+      expires:            '{{ item.expires            | d(omit) }}'
+      remove:             '{{ item.remove             | d(omit) }}'
+      force:              '{{ item.force              | d(omit) }}'
+      non_unique:         '{{ item.non_unique         | d(omit) }}'
+      generate_ssh_key:   '{{ item.generate_ssh_key   | d(omit) }}'
+      ssh_key_bits:       '{{ item.ssh_key_bits       | d(omit) }}'
+      ssh_key_comment:    '{{ item.ssh_key_comment    | d(omit) }}'
+      ssh_key_file:       '{{ item.ssh_key_file       | d(omit) }}'
+      ssh_key_passphrase: '{{ item.ssh_key_passphrase | d(omit) }}'
+      ssh_key_type:       '{{ item.ssh_key_type       | d(omit) }}'
+    when:
+      - not skip_this_user
+
+  - name: Set Skip if state (of user) is absent
+    ansible.builtin.set_fact:
+      skip_this_user: True
+    when:
+      - item.state is defined
+      - item.state == "absent"
+
+  - name: User Create block
+    when:
+      - not skip_this_user
+    block:
+
+    - name: Create .ssh dir
+      ansible.builtin.file:
+        path: /home/{{ item.user }}/.ssh
+        state: directory
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
+        mode: 0700
+      tags:
+        - pubkey
+        - ssh
+
+    - name: Copy pubkeys to authorized_keys
+      ansible.builtin.copy:
+        src: "{{ item.ssh_authorizedkeys_file }}"
+        dest: "/home/{{ item.user }}/.ssh/authorized_keys"
+        owner: "{{ item.user }}"
+        group: "{{ item.group | default(item.user) }}"
+        mode: 0600
+      when:
+        - item.ssh_authorizedkeys_file is defined
+        - item.ssh_authorizedkeys_file|length>0
+      tags:
+        - pubkey
+        - ssh
+
+    - name: Sudo with password
+      ansible.builtin.copy:
+        content: '{{ item.user }} ALL=(ALL:ALL) {{ item.sudo_commands | default("ALL") }}'
+        dest: /etc/sudoers.d/{{ item.sudofilename | default(item.user) }}
+        owner: root
+        group: root
+        mode: 0640
+        validate: 'visudo -cf %s'
+      when:
+        - item.sudo_pass is defined
+        - item.sudo_pass
+        - not item.sudo_nopass
+      tags:
+        - sudo
+
+    - name: Sudo without password
+      ansible.builtin.copy:
+        content: '{{ item.user }} ALL=(ALL:ALL) NOPASSWD:{{ item.sudo_commands | default("ALL") }}'
+        dest: /etc/sudoers.d/{{ item.sudofilename | default(item.user) }}
+        owner: root
+        group: root
+        mode: 0640
+        validate: 'visudo -cf %s'
+      when:
+        - item.sudo_nopass is defined
+        - item.sudo_nopass
+      tags:
+        - sudo
+
+    - name: Configure bashrc
+      ansible.builtin.template:
+        src: "{{ baserole_bashrc_template }}"
+        dest: "/home/{{ item.user }}/.bashrc"
+        mode: '0600'
+      when:
+        - baserole_bashrc_configure or item.shell == "/bin/bash"
+      tags:
+        - bash
+
+    - name: Include Optional taks for users (if enabled)
+      ansible.builtin.include_tasks:
+        file: "{{ baserole_users_optional_tasks_template }}"
+      when:
+        - baserole_users_optional_tasks_enable
+        - baserole_users_optional_tasks_template is defined
+        - baserole_users_optional_tasks_template|length>0
+
+  - name: User Remove block
+    when:
+      - skip_this_user
+      - baserole_users_remove_userdata_when_state_absent
+    block:
+
+    - name: Remove Home-directory
+      ansible.builtin.file:
+        path: '{{ item.home | default("/home/" + item.user) }}'
+        state: absent
+
+    - name: Remove sudoers file (with password)
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
+        state: absent
+      when:
+        - item.sudo_pass is defined
+        - item.sudo_pass
+        - not item.sudo_nopass
+        - item.state is defined
+        - item.state == "absent"
+      tags:
+        - sudo
+
+    - name: Remove sudoers file (without password)
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
+        state: absent
+      when:
+        - item.sudo_nopass is defined
+        - item.sudo_nopass
+        - item.state is defined
+        - item.state == "absent"
+      tags:
+        - sudo

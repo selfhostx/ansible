@@ -1,0 +1,35 @@
+baserole feature-list
+=====================
+
+- grub configuration
+- **packages**
+  - default packages
+  - upgrade
+- **DNS**
+  - resolv.conf
+  - FQDN (+reverse) 2DO (check if hostname --fqdn is not just hostname)
+- **SSHD**
+  - config of sshd
+  - **fail2ban** (-> oefenweb.fail2ban ; optional helpers https://github.com/stefanux/fail2ban-remove-ban)
+- **Usermanagement** (incl. authorized keys und sudo) 2DO generic with dictionary
+- **configs** (of systemapps)
+  - bashrc
+  - htop
+  - ...
+- **NTP**
+  - systemd-timesyncd (ntpd -> geerlingguy.ntp is also good)
+
+
+recommended:
+  - unattended upgrades ( -> jnv.unattended-upgrades )
+
+
+Requirements
+------------
+
+minimum ansible version: 2.10
+
+License
+-------
+
+GPLv3

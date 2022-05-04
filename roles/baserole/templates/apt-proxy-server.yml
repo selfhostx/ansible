@@ -1,0 +1,9 @@
+// {{ ansible_managed }}
+Acquire {
+    http {
+        Proxy "{{ baserole_package_proxy_address }}";
+{% if baserole_package_proxy_direct is defined and baserole_package_proxy_direct|length>0 %}
+        Proxy::{{ baserole_package_proxy_direct }} "DIRECT";
+{% endif %}
+    };
+}

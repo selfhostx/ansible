@@ -1,0 +1,42 @@
+---
+  - name: Set root Passwort
+    ansible.builtin.user:
+      name: root
+      password: '{{ baserole_root_password_hash | d("*") }}'
+    tags:
+      - userlocal
+
+  - name: Bashrc for root
+    ansible.builtin.template:
+      src: "{{ baserole_bashrc_template }}"
+      dest: "/root/.bashrc"
+      mode: '0600'
+    when:
+      - baserole_bashrc_configure
+    tags:
+      - bash
+
+  - name: Create .ssh dir for root
+    ansible.builtin.file:
+      path: "/root/.ssh"
+      state: directory
+      owner: "root"
+      group: "root"
+      mode: 0700
+    tags:
+      - ssh
+      - userlocal
+
+  - name: Copy pubkeys to authorized_keys for root
+    ansible.builtin.copy:
+      src: "{{ baserole_root_authorizedkeys }}"
+      dest: "/root/.ssh/authorized_keys"
+      owner: root
+      group: root
+      mode: 0600
+    when:
+      - baserole_root_authorizedkeys is defined
+    tags:
+      - pubkey
+      - ssh
+      - userlocal

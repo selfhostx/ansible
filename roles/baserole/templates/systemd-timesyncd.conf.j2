@@ -1,0 +1,47 @@
+# {{ ansible_managed }}
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+#
+# Entries in this file show the compile time defaults.
+# You can change settings by editing this file.
+# Defaults can be restored by simply deleting this file.
+#
+# See timesyncd.conf(5) for details.
+
+[Time]
+NTP={{ baserole_ntp_systemd_timesyncd_ntp_primary }}
+{% if baserole_ntp_systemd_timesyncd_ntp_fallback is defined and baserole_ntp_systemd_timesyncd_ntp_fallback|length>0 %}
+FallbackNTP={{ baserole_ntp_systemd_timesyncd_ntp_fallback }}
+{% else %}
+#If this option is not given, a compiled-in list of NTP servers is used.
+#FallbackNTP=ntp.ubuntu.com
+{% endif %}
+{% if baserole_ntp_systemd_timesyncd_rootdistancemaxsec is defined and baserole_ntp_systemd_timesyncd_rootdistancemaxsec|length>0 %}
+RootDistanceMaxSec={{ baserole_ntp_systemd_timesyncd_rootdistancemaxsec }}
+{% else %}
+#RootDistanceMaxSec=5
+{% endif %}
+{% if baserole_ntp_systemd_timesyncd_pollintervalminsec is defined and baserole_ntp_systemd_timesyncd_pollintervalminsec|length>0 %}
+PollIntervalMinSec={{ baserole_ntp_systemd_timesyncd_pollintervalminsec }}
+{% else %}
+#PollIntervalMinSec=32
+{% endif %}
+{% if baserole_ntp_systemd_timesyncd_pollintervalmaxsec is defined and baserole_ntp_systemd_timesyncd_pollintervalmaxsec|length>0 %}
+PollIntervalMaxSec={{ baserole_ntp_systemd_timesyncd_pollintervalmaxsec }}
+{% else %}
+#PollIntervalMaxSec=2048
+{% endif %}
+{% if baserole_ntp_systemd_timesyncd_connectionretrysec is defined and baserole_ntp_systemd_timesyncd_connectionretrysec|length>0 %}
+ConnectionRetrySec={{ baserole_ntp_systemd_timesyncd_connectionretrysec }}
+{% else %}
+#ConnectionRetrySec=30
+{% endif %}
+{% if baserole_ntp_systemd_timesyncd_saveintervalsec is defined and baserole_ntp_systemd_timesyncd_saveintervalsec|length>0 %}
+SaveIntervalSec={{ baserole_ntp_systemd_timesyncd_saveintervalsec }}
+{% else %}
+#SaveIntervalSec=60
+{% endif %}

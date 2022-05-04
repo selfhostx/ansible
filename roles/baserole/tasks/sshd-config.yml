@@ -1,0 +1,45 @@
+---
+  - name: Template SSHD Config (template)
+    ansible.builtin.template:
+      src: "{{ baserole_openssh_template }}"
+      dest: "/etc/ssh/sshd_config"
+      owner: root
+      group: root
+      mode: '0644'
+      validate: "/usr/sbin/sshd -T -C user=root -C host=localhost -C addr=localhost -f %s"
+    notify: Restart SSHD
+    when:
+      - baserole_openssh_use_template
+
+  - name: Template default SSHD Config (template)
+    ansible.builtin.template:
+      src: sshd_default_template.j2
+      dest: "/etc/default/ssh"
+      backup: yes
+      owner: root
+      group: root
+      mode: '0644'
+    notify: Restart SSHD
+    when:
+      - baserole_openssh_sshd_opts is defined
+      - baserole_openssh_sshd_opts|length>0
+
+  - name: Generate SSH host keys
+    ansible.builtin.command: "/usr/bin/ssh-keygen -q -t {{ item }} -f /etc/ssh/ssh_host_{{ item }}_key -C '' -N ''"
+    args:
+      creates: "/etc/ssh/ssh_host_{{ item }}_key"
+    with_items:
+      - "{{ baserole_openssh_key_types }}"
+    when:
+      - baserole_openssh_gen_keys
+    notify: Restart SSHD
+
+  - name: Create SSHRC (Skript runs when user logins)
+    ansible.builtin.template:
+      src: "{{ baserole_openssh_sshrc_template }}"
+      dest: /etc/ssh/sshrc
+      owner: root
+      group: root
+      mode: 0755
+    when:
+    - baserole_openssh_sshrc_enable

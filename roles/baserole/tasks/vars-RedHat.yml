@@ -1,0 +1,4 @@
+---
+# Tasks specific for RedHat systems
+
+baserole_openssh_sftp_subsystem_path: "/usr/libexec/openssh/sftp-server"

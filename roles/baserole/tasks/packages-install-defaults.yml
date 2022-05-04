@@ -1,0 +1,71 @@
+---
+# python3-apt is installed on current debian (9+)
+
+  - name: Install standard-packages (Debian)
+    ansible.builtin.apt:
+      name: "{{ baserole_package_defaults_debian }}"
+      state: present
+      install_recommends: no
+      cache_valid_time: "{{ baserole_package_cache_valid_time }}"
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: Install Standard-packages (Redhat)
+    ansible.builtin.yum:
+      name: "{{ baserole_package_defaults_redhat }}"
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: Install Baremetal tools (Debian)
+    ansible.builtin.apt:
+      state: present
+      install_recommends: no
+      cache_valid_time: "{{ baserole_package_cache_valid_time }}"
+      pkg: "{{ baserole_package_baremetal_debian }}"
+    when:
+      - ansible_os_family == "Debian"
+      - baserole_package_extra_baremetal_enable
+      - "'machine_is_metal' in group_names"
+
+  - name: Install Baremetal tools (RedHat)
+    ansible.builtin.yum:
+      name: "{{ baserole_package_baremetal_redhat }}"
+    when:
+      - ansible_os_family == "RedHat"
+      - baserole_package_extra_baremetal_enable
+      - "'machine_is_metal' in group_names"
+
+  - name: Install Qemu Guest Agent (except Windows)
+    package: name="{{ baserole_package_guest_agent_qemu }}" state=present
+    when:
+    - baserole_package_guest_agent_enable 
+    - "'machine_is_virtual' in group_names"
+    - ansible_system_vendor == 'QEMU'
+    - not ansible_os_family == "Windows"
+    notify:
+    - Manage Qemu Guest Agent
+
+  - name: Install openVM guest tools (except Windows)
+    package: name="{{ baserole_package_guest_agent_vmware }}" state=present
+    when:
+    - baserole_package_guest_agent_enable
+    - "'machine_is_virtual' in group_names"
+    - ansible_system_vendor == "VMware, Inc."
+    - not ansible_os_family == "Windows"
+    notify:
+    - Manage OpenVM Tools
+
+  - name: De-Install unwanted packages (Debian)
+    ansible.builtin.apt:
+      state: absent
+      pkg: "{{ baserole_package_unwanted_packages_debian }}"
+    when:
+    - ansible_os_family == "Debian"
+    - baserole_package_unwanted_packages_remove_enabled
+
+  - name: De-Install unwanted packages (RedHat)
+    ansible.builtin.yum:
+      name: "{{ baserole_package_baremetal_redhat }}"
+    when:
+    - ansible_os_family == "RedHat"
+    - baserole_package_unwanted_packages_remove_enabled

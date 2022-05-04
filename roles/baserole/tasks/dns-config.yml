@@ -1,0 +1,50 @@
+---
+  - name: Populate service facts
+    ansible.builtin.service_facts:
+
+  - name: Install systemd-resolved (Redhat-family)
+    ansible.builtin.package:
+      name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
+      state: present
+    when:
+      - ansible_os_family == "RedHat"
+      - baserole_dns_resolver_daemon == "systemd-resolved"
+
+  - name: Write resolv.conf
+    ansible.builtin.template: 
+      src: "{{ baserole_dns_template_resolv_conf }}"
+      dest: /etc/resolv.conf
+      owner: root
+      group: root
+      mode: '0644'
+      follow: yes
+
+  - name: Configure systemd-resolved (native config)
+    ansible.builtin.template:
+      src: "{{ baserole_dns_systemd_resolved_config_template }}"
+      dest: "{{ baserole_dns_systemd_resolved_config_target }}"
+      owner: "{{ baserole_dns_systemd_resolved_config_owner }}"
+      group: "{{ baserole_dns_systemd_resolved_config_group }}"
+      mode: '0644'
+    when:
+      - baserole_dns_resolver_daemon == "systemd-resolved"
+    notify: Restart systemd-resolved
+
+  - name: Start and Enable systemd-resolved.service
+    ansible.builtin.systemd:
+      name: "{{ baserole_dns_systemd_resolved_servicename }}"
+      enabled: true
+      state: started
+    when:
+      - baserole_dns_resolver_daemon == "systemd-resolved"
+
+  - name: Stop and Disable systemd-resolved.service
+    ansible.builtin.systemd:
+      name: "{{ baserole_dns_systemd_resolved_servicename }}"
+      enabled: false
+      state: stopped
+    when:
+      - baserole_dns_resolver_daemon == "glibc"
+      - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['status'] is defined
+      - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['state'] is defined
+      - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['status'] == 'enabled' or ansible_facts.services[baserole_dns_systemd_resolved_servicename]['state'] == 'running'

@@ -1,0 +1,22 @@
+galaxy_info:
+  author: selfhostix
+  description: baserole
+  company: selfhostix
+
+  license: GPL-3.0-or-later
+
+  min_ansible_version: 2.10
+
+  platforms:
+  - name: Debian
+    versions:
+    - 10
+    - 11
+  - name: Ubuntu
+    versions:
+    - 18.04
+    - 20.04
+
+  galaxy_tags: []
+
+dependencies: []

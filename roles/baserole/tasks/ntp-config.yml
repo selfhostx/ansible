@@ -1,0 +1,30 @@
+---
+- name: Install systemd-resolved (Redhat-family)
+  ansible.builtin.yum:
+    name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
+    state: present
+    update_cache: yes
+  when:
+    - ansible_os_family == "RedHat"
+    - baserole_ntp_daemon == "systemd-timesyncd"
+  notify: "Enable systemd-timesyncd"
+
+- name: Configure systemd-timesyncd
+  ansible.builtin.template:
+    src: "{{ baserole_ntp_systemd_timesyncd_template }}"
+    dest: "{{ baserole_ntp_systemd_timesyncd_config_target }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: "Restart systemd-timesyncd"
+  when:
+    - baserole_ntp_daemon == "systemd-timesyncd"
+
+- name: Start and Enable systemd-resolved.service
+  ansible.builtin.systemd:
+    name: "{{ baserole_dns_systemd_resolved_servicename }}"
+    enabled: true
+    masked: no
+    state: started
+  when:
+    - baserole_ntp_daemon == "systemd-timesyncd"

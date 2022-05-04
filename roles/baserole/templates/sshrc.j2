@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Logs Logins from users, requirements:
+# a) PermitUserEnvironment yes
+# b) .ssh/authorized_keys contain pubkeys in the following format:
+# environment="SSH_USER=My_user" ssh-rsa AAAAB...
+
+IP=$(echo $SSH_CLIENT | cut -d " " -f 1)
+hostname=$(hostname --fqdn)
+
+if [ -z "$SSH_USER" ]; then
+  SSH_USER="unknown"
+fi
+
+{% if baserole_openssh_permituserenvironment %}
+# log the login:
+if [ "$USER" != "{{ ansible_user_id }}" ]; then
+    logger -pauth.info "Login by $SSH_USER as $USER. IP: $IP"
+fi
+{% endif %}
+
+{% if baserole_openssh_send_mail_on_login %}
+# sends mail on login:
+if [ "$USER" != "{{ ansible_user_id }}" ]; then
+mail -s "SSH Login of $USER on ${hostname} from $SSH_USER" {{ baserole_openssh_send_mail_to }} <<EOF
+User $SSH_USER just logged in from IP: $IP
+EOF
+fi
+{% endif %}

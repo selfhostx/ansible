@@ -1,0 +1,37 @@
+---
+  - name: Update package list and autoremove (debian family)
+    ansible.builtin.apt:
+      upgrade: no
+      update_cache: yes
+      autoremove: yes
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: Upgrade packages (debian family)
+    ansible.builtin.command: apt-get -y -o DPkg::options::="--force-confdef" -o DPkg::options::="--force-confold" upgrade
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    args:
+      warn: False
+    register: upgrade_output_debian
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: Upgrade packages (redhat family)
+    ansible.builtin.yum:
+      name: '*'
+      state: latest # noqa package-latest
+      update_cache: yes
+    register: upgrade_output_redhat
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: Show upgrade stderr output (Debian)
+    ansible.builtin.debug:
+      msg: "{{ upgrade_output_debian.stderr_lines }}"
+    when: upgrade_output_debian.stderr is defined and upgrade_output_debian.stderr | length > 0 and upgrade_output_debian.stderr != none
+
+  - name: Show upgrade stderr (Redhat)
+    ansible.builtin.debug:
+      msg: "{{ upgrade_output_redhat.stderr_lines }}"
+    when: upgrade_output_redhat.stderr is defined and upgrade_output_redhat.stderr | length > 0 and upgrade_output_redhat.stderr != none

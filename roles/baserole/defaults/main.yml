@@ -1,0 +1,319 @@
+---
+# Defaults für baserole
+
+# print additional debug output:
+baserole_debug_mode_enable: False
+
+# enable/disable Parts of baserole: ===========
+baserole_package_upgrade_enable: True
+
+# SYSCTL Config ===
+baserole_sysctl_config: True
+# ansible sysctl module: https://docs.ansible.com/ansible/latest/collections/ansible/posix/sysctl_module.html
+
+# valid attributes in baserole_sysctl_key_value dictionary:
+# name: useful description
+# key: configkey
+# value: its_value
+# state: present|absent (default: present)
+
+#Example: Enable v4 + v6 routing:
+#
+#baserole_sysctl_key_value:
+#  - name: IPv4 Forwarding
+#    key: net.ipv4.conf.all.forwarding
+#    value: 1
+#    state: present
+#  - name: IPv6 Forwarding
+#    key: net.ipv6.conf.all.forwarding
+#    value: 1
+
+# optional vars:
+# baserole_sysctl_path: "/etc/sysctl.d/99-my-settings" -> set a path for the config (default is: /etc/sysctl.conf)
+# baserole_sysctl_ignoreerrors: yes|no (default: no) -> use this option to ignore errors about unknown keys.
+
+# GRUB ===
+baserole_grub_config_enable: False
+# example: switch to eth0 (kvm has ens3)
+# baserole_grub_commandline: "net.ifnames=0 biosdevname=0"
+# ! Centos needs full line, so you`ll need to include all options (not just your added options like on debian-family)
+baserole_grub_default_file: "/etc/default/grub"
+
+# DNS ===
+baserole_dns_config_enable: True
+# most glibc-clients cannot user more than 3 nameserver, when v6 only add more v6-servers
+baserole_dns_nameservers:
+- 8.8.4.4
+- 9.9.9.9
+- 2001:4860:4860::8888
+- 2a01:4f8:0:a102::add:9999
+# systemd_resolved only:
+baserole_dns_nameservers_fallback:
+- 1.1.1.1
+# baserole_dns_searchdomains: "domain1.tld domain2.tld"
+
+baserole_dns_template_resolv_conf: "resolv.conf.j2"
+
+# which dns-resolver to use? choices: glibc|systemd-resolved
+baserole_dns_resolver_daemon: "glibc"
+
+baserole_dns_template_systemd_resolved_package_name: "systemd-resolved"
+
+baserole_dns_systemd_resolved_config_template: "systemd-resolved.conf.j2"
+baserole_dns_systemd_resolved_config_target: "/etc/systemd/resolved.conf"
+baserole_dns_systemd_resolved_config_owner: "systemd-resolve"
+baserole_dns_systemd_resolved_config_group: "systemd-resolve"
+baserole_dns_systemd_resolved_servicename: "systemd-resolved.service"
+
+
+# systemd-timesyncd ====
+baserole_ntp_config_enable: True
+baserole_ntp_daemon: "systemd-timesyncd"
+baserole_ntp_systemd_timesyncd_package_name: "systemd-timesyncd"
+baserole_ntp_systemd_timesyncd_config_target: "/etc/systemd/timesyncd.conf"
+baserole_ntp_systemd_timesyncd_config_owner: "root"
+baserole_ntp_systemd_timesyncd_config_group: "root"
+baserole_ntp_systemd_timesyncd_servicename: "systemd-timesyncd.service"
+baserole_ntp_systemd_timesyncd_template: "systemd-timesyncd.conf.j2"
+# see https://www.freedesktop.org/software/systemd/man/timesyncd.conf.html for information about config:
+baserole_ntp_systemd_timesyncd_ntp_primary: "pool.ntp.org"
+baserole_ntp_systemd_timesyncd_ntp_fallback: "0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org"
+# baserole_ntp_systemd_timesyncd_rootdistancemaxsec: 5
+# baserole_ntp_systemd_timesyncd_pollintervalminsec: 32
+# baserole_ntp_systemd_timesyncd_pollintervalmaxsec: 2048
+
+# APT preferences: ===
+
+# Proxy Server for apt?
+baserole_package_proxy_enable: False
+baserole_package_proxy_template: "apt-proxy-server.yml"
+baserole_package_proxy_target: "/etc/apt/apt.conf.d/02proxy-settings"
+# baserole_package_proxy_address: "http://proxy.example.com:8080"
+# go directly to internal package source for "internal.package.source":
+# baserole_package_proxy_direct: "internal.package.source"
+
+# install only needed (NOT recommends and suggestions):
+baserole_package_no_recommends_and_suggestions_enabled: True
+baserole_package_no_recommends_and_suggestions_target: "/etc/apt/apt.conf.d/00-no-recommends-and-suggestions"
+
+
+# PACKAGE-SOURCES ===
+baserole_package_source_enable: True
+
+# FIXME will {{ ansible_distribution_release }} work?
+
+#baserole_packagesources:
+#  repotype: deb|rpm (required)
+#  filename: "reponame.list"
+#  deb_line: "deb http://url.domain.tld/deb/ distribution main
+#  gpg_url: "https://url.domain.tld/gpg.key"
+#  pgp_id: "HEX-ID of GPG-Key" -> required-for-absent
+#  validate_certs: yes|no (default: yes)
+#  state: absent|present (default: present)
+
+# Example:
+#baserole_packagesources:
+#- name: sury-php
+#  repotype: deb
+#  filename: "sury-php.list"
+#  deb_line: "deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main"
+#  gpg_url: "https://packages.sury.org/php/apt.gpg"
+#  pgp_id: "15058500A0235D97F5D10063B188E2B695BD4743"
+#  state: present
+
+
+# PACKAGES Install defaults ===
+baserole_package_install_default_enable: True
+# update the apt cache if it is older than the cache_valid_time (in seconds):
+baserole_package_cache_valid_time: 86400
+baserole_package_defaults_debian:
+  - bzip2
+  - curl
+  - dnsutils
+  - ethtool
+  - gpg
+  - gpg-agent
+  - htop
+  - iftop
+  - iotop
+  - iputils-ping
+  - less
+  - lsof
+  - lsscsi
+  - mc
+  - net-tools
+  - pciutils
+  - psmisc
+  - rsync
+  - sudo
+  - sysstat
+  - traceroute
+  - unzip
+
+baserole_package_defaults_redhat:
+  - epel-release
+  - bind-utils
+  - bzip2
+  - curl
+  - ethtool
+  - gpg
+  - iotop
+  - iputils
+  - less
+  - lsof
+  - net-tools
+  - pciutils
+  - rsync
+  - sudo
+  - sysstat
+  - tcpdump
+  - traceroute
+  - unzip
+
+# some tools are only necessary on non-virtualized hosts, like raid tools etc.:
+baserole_package_extra_baremetal_enable: True
+baserole_package_baremetal_debian:
+  - ethtool
+  - memtest86+
+  - smartmontools
+
+baserole_package_baremetal_redhat:
+  - ethtool
+  - memtest86+
+  - smartmontools
+
+baserole_package_guest_agent_enable: True
+baserole_package_guest_agent_qemu_package: "qemu-guest-agent"
+baserole_package_guest_agent_qemu_service: "qemu-guest-agent"
+baserole_package_guest_agent_vmware_package: "open-vm-tools"
+baserole_package_guest_agent_vmware_service: "open-vm-tools"
+
+baserole_package_unwanted_packages_remove_enabled: False
+baserole_package_unwanted_packages_debian: []
+baserole_package_unwanted_packages_redhat: []
+
+
+# SSHD =================
+baserole_sshd_conf_enable: True
+
+baserole_openssh_use_template: True
+# OR (and) you can configure options to be included in /etc/default/ssh
+# baserole_openssh_sshd_opts: "-o TCPKeepAlive=no -o ClientAliveInterval=180 -o DebianBanner=no"
+
+baserole_openssh_include_pattern: "/etc/ssh/sshd_config.d/*.conf"
+
+# baserole_openssh_port: 22
+baserole_openssh_gen_keys: False
+baserole_openssh_host_key:
+- /etc/ssh/ssh_host_rsa_key
+- /etc/ssh/ssh_host_ecdsa_key
+- /etc/ssh/ssh_host_ed25519_key
+baserole_openssh_key_types:
+- rsa
+- ecdsa
+- ed25519
+# gen keys but not if already present:
+# baserole_openssh_gen_keys: True
+
+baserole_openssh_template: "sshd_template.j2"
+baserole_openssh_skip_include: False
+
+baserole_openssh_tcpkeepalive: yes
+# recommending the following two lines (ClientAliveInterval is more stable and secure than "TCPKeepAlive yes"):
+#   baserole_openssh_tcpkeepalive: no
+#   baserole_openssh_clientaliveinterval: 180
+
+baserole_openssh_permituserenvironment: False
+baserole_openssh_sshrc_enable: False
+baserole_openssh_sshrc_template: "sshrc.j2"
+baserole_openssh_send_mail_on_login: False
+baserole_openssh_send_mail_to: root
+
+# Packageupgrade ===
+baserole_package_upgrade_disabled: False
+
+# USER root ================================
+# define file-path with pubkeys for user root
+# baserole_root_authorizedkeys: "local/path/to/authorized-keyfile"
+
+# USER Creation ===========================
+baserole_usercreate_local: True
+
+# remove user-data (home-dir etc.) when state is set to "absent"
+baserole_users_remove_userdata_when_state_absent: False
+
+# see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html
+
+# valid attributes in baserole_userlist_local dictionary:
+# name: -> username # REQUIRED
+# group: -> group(s)
+# conditional_hostgroup: group -> only create the user when this ansible-group membership is present (from inventory)
+# home: -> home-directory
+# uid: user id
+# state: "present" or "absent"
+# comment: comment for this user
+# password: Optionally set the user's password to this crypted value
+# update_password: "always" will update passwords if they differ. "on_create" (default) will only set the password for newly created users.
+# system: "no" (UID below 1000) or "yes" (UID > 1000)
+# shell: user shell, example: "/bin/bash"
+# create_home: # whether or not to create the home directory. yes (default)|no
+# move_home: yes|no (default)
+# skeleton: optionally set a home skeleton directory (default: empty), requires create_home
+# expires: epoch time (default: empty), negativ time to remove (since ansible 2.6)
+# remove: no (default)|yes
+# force: no (default)|yes
+# non_unique: no (default)|yes
+# generate_ssh_key: no (default)|yes
+# ssh_authorizedkeys_file: "local/path/to/authorized-keyfile" use to upload authorizedkeys.
+# ssh_key_bits: integer, default set by ssh-keygen, 4096 for rsa recommended
+# ssh_key_comment: text
+# ssh_key_file: Optionally specify the SSH key filename (defaults to .ssh/id_rsa)
+# ssh_key_passphrase: string
+# ssh_key_type: rsa (default)|ed25519
+# sudofilename: optional filename for sudoers-file
+# sudo_pass: False  # False|True when sudo group is not wanted
+# sudo_nopass: True|False (default)
+# sudo_commands: "optional/sudo/command/allowed/for/sudo"
+# default_editor: set your favorite editor here, default is emty
+
+# EXAMPLE:
+#baserole_userlist_local:
+#  - username: alice
+#    password: $6$hash_of_alice_password   # to create a disabled account: '!' or '*' (Linux) or '*************' (OpenBSD)
+#    sudo_nopass: True
+#    # only add user when host has this group:
+#    conditional_hostgroup: hosts_with_alice
+#  - username: bob
+#    password: $6$bob_hash
+#    shell: /bin/sh
+#    group: bob, additionalgroup
+#    sudo_group: True
+#  - username: normaluser
+#    password: $6$normaluser_hash
+#    shell: /bin/bash
+
+
+# GROUP Creation =================
+baserole_groupcreate_local: True
+
+# valid attributes in baserole_grouplist_local dictionary:
+# groupname: "Groupname" (required!)
+# gid: Number
+# state: absent|present (default)
+# non_unique: no (default)|yes
+# system: "no" (GID below 1000; default) or "yes" (GID > 1000)
+# sudofilename: optional filename for sudoers-file
+# sudo_pass: False  # False|True when sudo group is not wanted
+# sudo_nopass: True|False (default)
+
+# Example for group "admins" (sudo without password):
+#baserole_grouplist_local:
+#- groupname: admins
+#  sudo_nopass: True
+
+baserole_default_editor: vi
+
+baserole_users_optional_tasks_enable: False
+baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
+baserole_bashrc_configure: True
+baserole_bashrc_template: "bashrc.j2"

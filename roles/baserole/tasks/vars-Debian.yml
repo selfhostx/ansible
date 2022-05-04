@@ -1,0 +1,4 @@
+---
+# Tasks specific for Debian/Ubuntu Systems
+
+baserole_openssh_sftp_subsystem_path: "/usr/lib/openssh/sftp-server"
