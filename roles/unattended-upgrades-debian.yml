@@ -1,0 +1,33 @@
+---
+# Example playbook for jnv.unattended-upgrades
+- hosts: all
+  roles:
+    - { role: jnv.unattended-upgrades, tags: unattended_upgrades }
+
+  # OR just for virtual systems:
+  tasks:
+    - name: Classify hosts (virtual or bare metal)
+      ansible.builtin.group_by:
+        key: machine_is_{{ "virtual" if ansible_facts['virtualization_role'] == "guest" else "metal" }}
+      changed_when: false
+
+    - name: Include unattended-upgrades for virtual systems
+      ansible.builtin.include_role:
+        name: jnv.unattended-upgrades
+      when:
+      - "'machine_is_virtual' in group_names"
+      - ansible_os_family == "Debian"
+
+  vars:
+    # VARS FOR jnv.unattended-upgrades:
+    #unattended_origins_patterns:
+    #- 'origin=Ubuntu,archive=${distro_codename}-security'
+    #- 'o=Ubuntu,a=${distro_codename}-updates'
+    # unattended_package_blacklist: [cowsay, vim]
+    unattended_mail: 'root'
+    unattended_minimal_steps: true
+    unattended_mail_only_on_error: true
+    unattended_remove_unused_dependencies: true
+    unattended_automatic_reboot: true
+    unattended_automatic_reboot_time: 03:00
+    unattended_random_sleep: 300
