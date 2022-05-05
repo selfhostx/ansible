@@ -99,8 +99,6 @@ fi
 #if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 #    . /etc/bash_completion
 #fi
-{% if item.default_editor is defined and item.default_editor|length>0 %}
-export EDITOR={{ item.default_editor }}
-{% elif baserole_default_editor is defined and baserole_default_editor|length>0 %}
-export EDITOR={{ baserole_default_editor }}
-{% endif %}
+
+export VISUAL={{ item.default_editor | default (baserole_default_editor) }}
+export EDITOR="$VISUAL"
