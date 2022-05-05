@@ -36,9 +36,10 @@
       - "'machine_is_metal' in group_names"
 
   - name: Install Qemu Guest Agent (except Windows)
-    package: name="{{ baserole_package_guest_agent_qemu }}" state=present
+    package: name="{{ baserole_package_guest_agent_qemu_package }}" state=present
     when:
-    - baserole_package_guest_agent_enable 
+    - baserole_package_guest_agent_enable
+    - baserole_package_guest_agent_qemu_package is defined
     - "'machine_is_virtual' in group_names"
     - ansible_system_vendor == 'QEMU'
     - not ansible_os_family == "Windows"
