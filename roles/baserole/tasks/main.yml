@@ -115,10 +115,12 @@
     - baserole_userlist_local|length>0
   # add all tags from user-create.yml here:
   tags:
+    - nano
     - pubkey
     - ssh
     - sudo
     - userlocal
+    - vim
 
 - name: Include group-manage-local.yml
   ansible.builtin.include_tasks:
