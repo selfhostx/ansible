@@ -7,10 +7,12 @@
       - item.conditional_hostgroup is undefined
       - item.conditional_var_name_exists is undefined
     tags:
+      - nano
       - pubkey
       - ssh
       - sudo
       - userlocal
+      - vim
 
   - name: Set Condition Skip
     ansible.builtin.set_fact:
@@ -19,20 +21,24 @@
       - item.conditional_hostgroup is defined
       - item.conditional_var_name_exists is defined
     tags:
+      - nano
       - pubkey
       - ssh
       - sudo
       - userlocal
+      - vim
 
   - name: Check if conditional_hostgroup is present
     ansible.builtin.set_fact:
       skip_this_user: False
     when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
     tags:
+      - nano
       - pubkey
       - ssh
       - sudo
       - userlocal
+      - vim
 
   - name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
     ansible.builtin.set_fact:
@@ -41,10 +47,12 @@
       - lookup('vars', item.conditional_var_name_exists) is defined
     ignore_errors: True
     tags:
+      - nano
       - pubkey
       - ssh
       - sudo
       - userlocal
+      - vim
 
   - name: Manage user accounts
     ansible.builtin.user:
@@ -169,7 +177,7 @@
         mode: '0600'
       when:
         - baserole_nanorc_configure
-        - item.default_editor == "nano" or baserole_default_editor == "nano"
+        - item.default_editor is defined and item.default_editor == "nano" or baserole_default_editor == "nano"
       tags:
         - nano
 
