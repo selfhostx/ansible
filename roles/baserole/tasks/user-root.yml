@@ -13,7 +13,6 @@
       mode: '0600'
     when:
       - baserole_bashrc_configure
-      - item.shell == "/bin/bash"
     tags:
       - bash
 
@@ -24,7 +23,7 @@
       mode: '0600'
     when:
       - baserole_vi_configure
-      - item.default_editor == "vi" or baserole_default_editor == "vim"
+      - baserole_default_editor == "vim"
     tags:
       - vim
 
@@ -35,7 +34,7 @@
       mode: '0600'
     when:
       - baserole_nanorc_configure
-      - item.default_editor == "nano" or baserole_default_editor == "nano"
+      - baserole_default_editor == "nano"
     tags:
       - nano
 
