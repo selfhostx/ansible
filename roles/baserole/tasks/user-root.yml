@@ -22,7 +22,7 @@
       dest: "/home/{{ item.user }}/.vimrc"
       mode: '0600'
     when:
-      - baserole_vi_configure
+      - baserole_vimrc_configure
       - baserole_default_editor == "vim"
     tags:
       - vim
