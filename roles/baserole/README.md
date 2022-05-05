@@ -1,21 +1,23 @@
-Purpose and principles
-======================
+Baserole features
+=================
 
-- packages
+- package-management:
   - apt preferences (incl. proxy)
   - default packages
   - upgrade
   - add repositories
-- DNS
+- DNS:
   - resolv.conf/glibc or systemd-resolved
   - FQDN (+reverse) 2DO (check if hostname --fqdn is not just hostname)
-- SSHD-config
+- SSHD configuration
 - usermanagement (incl. authorized keys and sudo)
   - root
   - own users
-  - configs
+- configs
+  - bashrc
+  - nano
+  - vim
 - groupmanagement
-- SSHD-Config
 - sysctl settings
 - NTP systemd-timesyncd
 

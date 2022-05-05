@@ -311,9 +311,15 @@ baserole_groupcreate_local: True
 #- groupname: admins
 #  sudo_nopass: True
 
-baserole_default_editor: vi
+baserole_default_editor: vim
 
 baserole_users_optional_tasks_enable: False
 baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
 baserole_bashrc_configure: True
 baserole_bashrc_template: "bashrc.j2"
+
+baserole_vimrc_configure: True
+baserole_vimrc_template: "vimrc.j2"
+
+baserole_nanorc_configure: True
+baserole_nanorc_template: "nanorc.j2"

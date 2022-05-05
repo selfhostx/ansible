@@ -13,8 +13,31 @@
       mode: '0600'
     when:
       - baserole_bashrc_configure
+      - item.shell == "/bin/bash"
     tags:
       - bash
+
+  - name: Configure vim
+    ansible.builtin.template:
+      src: "{{ baserole_vimrc_template }}"
+      dest: "/home/{{ item.user }}/.vimrc"
+      mode: '0600'
+    when:
+      - baserole_vi_configure
+      - item.default_editor == "vi" or baserole_default_editor == "vim"
+    tags:
+      - vim
+
+  - name: Configure nano
+    ansible.builtin.template:
+      src: "{{ baserole_nanorc_template }}"
+      dest: "/home/{{ item.user }}/.nanorc"
+      mode: '0600'
+    when:
+      - baserole_nanorc_configure
+      - item.default_editor == "nano" or baserole_default_editor == "nano"
+    tags:
+      - nano
 
   - name: Create .ssh dir for root
     ansible.builtin.file:
