@@ -19,7 +19,7 @@
   - name: Configure vim
     ansible.builtin.template:
       src: "{{ baserole_vimrc_template }}"
-      dest: "/home/{{ item.user }}/.vimrc"
+      dest: "/root/.vimrc"
       mode: '0600'
     when:
       - baserole_vimrc_configure
@@ -30,7 +30,7 @@
   - name: Configure nano
     ansible.builtin.template:
       src: "{{ baserole_nanorc_template }}"
-      dest: "/home/{{ item.user }}/.nanorc"
+      dest: "/root/.nanorc"
       mode: '0600'
     when:
       - baserole_nanorc_configure
