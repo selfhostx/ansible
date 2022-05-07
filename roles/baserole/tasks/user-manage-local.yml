@@ -7,6 +7,7 @@
       - item.conditional_hostgroup is undefined
       - item.conditional_var_name_exists is undefined
     tags:
+      - htop
       - nano
       - pubkey
       - ssh
@@ -21,6 +22,7 @@
       - item.conditional_hostgroup is defined
       - item.conditional_var_name_exists is defined
     tags:
+      - htop
       - nano
       - pubkey
       - ssh
@@ -33,6 +35,7 @@
       skip_this_user: False
     when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
     tags:
+      - htop
       - nano
       - pubkey
       - ssh
@@ -47,6 +50,7 @@
       - lookup('vars', item.conditional_var_name_exists) is defined
     ignore_errors: True
     tags:
+      - htop
       - nano
       - pubkey
       - ssh
@@ -181,7 +185,27 @@
       tags:
         - nano
 
-    - name: Include Optional taks for users (if enabled)
+    - name: Create htop config folder
+      ansible.builtin.file:
+        path: "/home/{{ item.user }}/.config/htop"
+        state: directory
+        mode: '0750'
+      when:
+        - baserole_htoprc_configure
+      tags:
+        - htop
+
+    - name: Configure htop
+      ansible.builtin.template:
+        src: "{{ baserole_htoprc_template }}"
+        dest: "/home/{{ item.user }}/.config/htop/htoprc"
+        mode: '0600'
+      when:
+        - baserole_htoprc_configure
+      tags:
+        - htop
+
+    - name: Include Optional tasks for users (if enabled)
       ansible.builtin.include_tasks:
         file: "{{ baserole_users_optional_tasks_template }}"
       when:

@@ -113,8 +113,9 @@
     - baserole_usercreate_local
     - baserole_userlist_local is defined
     - baserole_userlist_local|length>0
-  # add all tags from user-create.yml here:
+  # add all used tags from user-create.yml here:
   tags:
+    - htop
     - nano
     - pubkey
     - ssh
