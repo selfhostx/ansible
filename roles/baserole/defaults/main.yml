@@ -233,8 +233,10 @@ baserole_openssh_send_mail_to: root
 baserole_package_upgrade_disabled: False
 
 # USER root ================================
-# define file-path with pubkeys for user root
+# define file-path with pubkeys for user root (optional):
 # baserole_root_authorizedkeys: "local/path/to/authorized-keyfile"
+# define password for root (optional):
+# baserole_root_password_hash: "$hashed_password"
 
 # USER Creation ===========================
 baserole_usercreate_local: True
@@ -267,7 +269,8 @@ baserole_users_remove_userdata_when_state_absent: False
 # ssh_authorizedkeys_file: "local/path/to/authorized-keyfile" use to upload authorizedkeys.
 # ssh_key_bits: integer, default set by ssh-keygen, 4096 for rsa recommended
 # ssh_key_comment: text
-# ssh_key_file: Optionally specify the SSH key filename (defaults to .ssh/id_rsa)
+# ssh_key_file_content: string (contains the private key)
+# ssh_key_file_name: Optionally specify the filename for SSH private key (defaults to .ssh/id_rsa but .ssh/id_ed25519 or any other value is possible). hint: generate pubkey from private key with (rsa): ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub )
 # ssh_key_passphrase: string
 # ssh_key_type: rsa (default)|ed25519
 # sudofilename: optional filename for sudoers-file
@@ -315,6 +318,7 @@ baserole_default_editor: vim
 
 baserole_users_optional_tasks_enable: False
 baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
+
 baserole_bashrc_configure: True
 baserole_bashrc_template: "bashrc.j2"
 
@@ -323,3 +327,6 @@ baserole_vimrc_template: "vimrc.j2"
 
 baserole_nanorc_configure: True
 baserole_nanorc_template: "nanorc.j2"
+
+baserole_htoprc_configure: True
+baserole_htoprc_template: "htoprc.j2"
