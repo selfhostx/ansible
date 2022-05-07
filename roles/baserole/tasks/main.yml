@@ -113,6 +113,8 @@
     - baserole_usercreate_local
     - baserole_userlist_local is defined
     - baserole_userlist_local|length>0
+  # ssh-private-keys could be shown:
+  no_log: true
   # add all used tags from user-create.yml here:
   tags:
     - htop
