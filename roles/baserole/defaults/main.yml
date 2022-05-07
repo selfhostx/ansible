@@ -238,6 +238,13 @@ baserole_package_upgrade_disabled: False
 # define password for root (optional):
 # baserole_root_password_hash: "$hashed_password"
 
+#baserole_root_ssh_key_file_name: ".ssh/id_ed25519"
+#baserole_root_ssh_key_file_content: |+
+#  -----BEGIN OPENSSH PRIVATE KEY-----
+#  (contents)
+#  -----END OPENSSH PRIVATE KEY-----
+
+
 # USER Creation ===========================
 baserole_usercreate_local: True
 
@@ -269,10 +276,10 @@ baserole_users_remove_userdata_when_state_absent: False
 # ssh_authorizedkeys_file: "local/path/to/authorized-keyfile" use to upload authorizedkeys.
 # ssh_key_bits: integer, default set by ssh-keygen, 4096 for rsa recommended
 # ssh_key_comment: text
-# ssh_key_file_content: string (contains the private key)
-# ssh_key_file_name: Optionally specify the filename for SSH private key (defaults to .ssh/id_rsa but .ssh/id_ed25519 or any other value is possible). hint: generate pubkey from private key with (rsa): ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub )
+# ssh_key_file_content: jinja-multine-string (contains the private key, see "baserole_root_ssh_key_file_content" as example), if provided ssh_key_file_name must be defined too!
+# ssh_key_file_name: specify the filename for SSH private key (defaults to ".ssh/id_rsa" but ".ssh/id_ed25519" or any other value is possible). hint: generate pubkey from private key with (rsa): ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub )
 # ssh_key_passphrase: string
-# ssh_key_type: rsa (default)|ed25519
+# ssh_key_type: rsa (default)|ed25519 specify type of SSH-Key (to generate it)
 # sudofilename: optional filename for sudoers-file
 # sudo_pass: False  # False|True when sudo group is not wanted
 # sudo_nopass: True|False (default)
