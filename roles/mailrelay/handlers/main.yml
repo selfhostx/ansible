@@ -1,0 +1,13 @@
+---
+- name: restart postfix
+  service: name=postfix state=restarted
+
+- name: restart saslauthd
+  service: name="{{ postfix_saslauthd_daemon_name }}" state=restarted
+
+- name: postmap postfix_smtp_sasl_password_maps
+  command: postmap "{{ postfix_smtp_sasl_password_maps }}"
+
+- name: postmap postfix_relaydomains_file
+  command: postmap "{{ postfix_relaydomains_file }}"
+

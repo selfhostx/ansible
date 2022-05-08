@@ -1,0 +1,24 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: stefanux
+  description: Postfix Mailrelay Role.
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.10
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - networking
+    - system
+    - mail
+    - postfix
+    - sendmail

@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+## received mails for relay_domains are routed to:
+# put manual transports for other (external non-relayed) domains in extra file!
+#
+# UPDATE CHANGES with "postmap /etc/postfix/relay_domains"!
+# examples: a specific recipient is somewhere else than his domain:
+# user@domain.tld  smtp:[secret.mail.server]
+# domain.tld      :[mailserver.domain.tld]
+{% for domain in postfix_relaydomains_domainlist %}
+{{ domain }}
+{% endfor %}
+

@@ -1,0 +1,218 @@
+---
+- name: Ensure postfix is installed.
+  ansible.builtin.package:
+    name: postfix
+    state: present
+
+- name: Take myorigin from ansible_name
+  ansible.builtin.set_fact:
+    postfix_myorigin: "{{ inventory_hostname }}"
+  when:
+  - postfix_myorigin is not defined
+  - postfix_myorigin | length = 0
+  - postfix_myorigin == none
+  - postfix_take_ansible_name_as_myorigin
+
+- name: Take myorigin from ansible_domain
+  ansible.builtin.set_fact:
+    postfix_myorigin: "{{ ansible_domain }}"
+  when:
+  - postfix_myorigin is not defined
+  - postfix_myorigin | length = 0
+  - postfix_myorigin == none
+  - not postfix_take_ansible_name_as_myorigin
+
+- name: warn if domainname is missing
+  ansible.builtin.debug: msg='Warning - domainname is not set (usually in /etc/hosts), most MTAs will refuse non-FQDN-senders...'
+  when:
+  - postfix_myorigin is not defined
+  - postfix_myorigin | length = 0
+  - postfix_myorigin == none
+  - not postfix_fail_if_domainname_is_missing
+
+- name: Show some important vars
+  debug:
+    msg: ansible_fqdn is {{ ansible_fqdn }}, ansible_domain is {{ ansible_domain }}, postfix_myorigin is {{ postfix_myorigin }}
+
+- name: fail if domainname is missing
+  ansible.builtin.fail: msg='Failing - ansible_domain is not set up properly (usually in /etc/hosts) for postfix_myorigin, most MTAs will refuse non-FQDN-senders...'
+  when:
+  - postfix_myorigin is not defined
+  - postfix_myorigin | length = 0
+  - postfix_myorigin == none
+  - ansible_domain == "localdomain"
+  - postfix_fail_if_domainname_is_missing
+
+# FIXME Check for existing Files (register facts and check for it in template main.cf.j2):
+#postfix_smtpd_tls_cert_file: "/etc/letsencrypt/live/FQDN/cert.pem"
+#postfix_smtpd_tls_key_file: "/etc/letsencrypt/live/FQDN/privkey.pem"
+#postfix_smtpd_tls_ca_file: "/etc/letsencrypt/live/FQDN/fullchain.pem"
+#postfix_smtpd_tls_cert_file_debian: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+#postfix_smtpd_tls_key_file_debian: "/etc/ssl/private/ssl-cert-snakeoil.key"
+
+- name: Template Postfix configuration
+  ansible.builtin.template:
+    src: etc/postfix/main.cf.j2
+    dest: "{{ postfix_main_config_file }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify: restart postfix
+  when:
+  - postfix_relay_role is defined
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Install sasl packages (Debian-family)
+  ansible.builtin.package: name={{ item }} state=present
+  with_items:
+    - libsasl2-2
+    - sasl2-bin
+    - libsasl2-modules
+  when:
+  - postfix_smtp_sasl_auth_enable|bool or postfix_smtpd_sasl_auth
+  - ansible_os_family == "Debian"
+
+- name: Install sasl packages (RedHat-family)
+  ansible.builtin.package: name={{ item }} state=present
+  with_items:
+    - cyrus-sasl
+    - cyrus-sasl-plain
+  when:
+  - postfix_smtp_sasl_auth_enable|bool or postfix_smtpd_sasl_auth
+  - ansible_os_family == "RedHat"
+
+- name: Add the user postfix to group sasl
+  ansible.builtin.user:
+    name: postfix
+    groups: sasl
+    append: yes
+  notify:
+    - restart postfix
+  when:
+  - postfix_smtpd_sasl_auth
+
+- name: Configure sasl file for postfix
+  ansible.builtin.template:
+    src: etc/default/saslauthd-postfix.j2
+    dest: "{{ postfix_smtpd_sasl_auth_default_file }}"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: true
+  notify:
+    - restart saslauthd
+  when:
+  - postfix_smtpd_sasl_auth
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Configure sasl default file
+  ansible.builtin.template:
+    src: etc/postfix/sasl/smtpd.conf.j2
+    dest: "{{ postfix_smtpd_sasl_auth_conf_file }}"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: true
+  notify:
+    - restart postfix
+  when:
+  - postfix_smtpd_sasl_auth
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Add sasl user
+  ansible.builtin.shell: echo "{{ postfix_sasl_password }}" | saslpasswd2 -p -c -u "{{ ansible_fqdn | default('localhost') }}" "{{ postfix_sasl_user }}"
+  no_log: true
+  when:
+  - postfix_smtpd_sasl_auth
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Configure sasl client username/password
+  ansible.builtin.template:
+    src: etc/postfix/sasl_passwd.j2
+    dest: "{{ postfix_smtp_sasl_password_maps_file }}"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: true
+  notify:
+    - postmap postfix_smtp_sasl_password_maps
+    - restart postfix
+  when:
+  - postfix_smtp_sasl_password_maps is defined
+  - postfix_smtp_sasl_auth_enable|bool
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Not using chroot for Postfix
+  ansible.builtin.template:
+    src: etc/postfix/master.cf.j2
+    dest: "{{ postfix_master_config_file }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify:
+    - restart postfix
+  when:
+  - postfix_master_config_file is defined
+  - postfix_relay_role == "master"
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Configure relaydomains
+  ansible.builtin.template:
+    src: etc/postfix/relay_domains.j2
+    dest: "{{ postfix_relaydomains_file }}"
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - postmap postfix_relaydomains_file
+    - restart postfix
+  when:
+  - postfix_relaydomains_file is defined
+  - postfix_relay_role == "master"
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Guess myorigin from System
+  ansible.builtin.set_fact:
+    postfix_myorigin: "{{ ansible_domain | default('localhost') }}"
+  when:
+  - postfix_myorigin is not defined
+  - postfix_myorigin | length = 0
+  - postfix_myorigin == none
+
+- name: Create myorigin-file (Debian-family)
+  ansible.builtin.template:
+    src: etc/mailname.j2
+    dest: "{{ postfix_myorigin_file_debian }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart postfix
+  when:
+  - postfix_myorigin is defined
+  - postfix_myorigin | length > 0
+  - postfix_myorigin != none
+  - ansible_os_family == "Debian"
+  - not postfix_mailrelay_unmanaged_config
+
+- name: Ensure postfix is started and enabled at boot.
+  ansible.builtin.service:
+    name: postfix
+    state: "{{ postfix_service_state }}"
+    enabled: "{{ postfix_service_enabled }}"
+
+- name: Force handlers to run before testing'
+  meta: flush_handlers
+
+- name: Send a success email
+  ansible.builtin.mail:
+   host: "{{ postfix_send_test_mail_host }}"
+   secure: never
+   port: "{{ postfix_send_test_mail_port }}"
+   from: "{{ postfix_send_test_mail_from }}"
+   to: "{{ postfix_send_test_mail_to }}"
+   subject: "{{ postfix_send_test_mail_subject }} {{ ansible_fqdn }}"
+   body: "{{ postfix_send_test_mail_body }}"
+  when:
+    - postfix_send_test_mail

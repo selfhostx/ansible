@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+{% if postfix_relayhost is defined and postfix_relayhost != '' %}
+{{ postfix_relayhost }} {{ postfix_sasl_user }}:{{ postfix_sasl_password }}
+{% else %}
+{{ postfix_sasl_user }}:{{ postfix_sasl_password }}
+{% endif %}

@@ -1,0 +1,157 @@
+---
+# Defaults for this role:
+
+# override with "True" whenever the postfix-config should left untouched:
+postfix_mailrelay_unmanaged_config: False
+
+postfix_main_config_file: /etc/postfix/main.cf
+postfix_master_config_file: /etc/postfix/master.cf
+
+postfix_service_state: started
+postfix_service_enabled: true
+
+postfix_inet_interfaces: "loopback-only"
+postfix_inet_protocols: "all"
+
+# postfix should relay all its mail:
+postfix_mydestination: "no.local.destination"
+
+postfix_myorigin: "{{ ansible_domain | default('localdomain') }}"
+postfix_myorigin_file_debian: "/etc/mailname"
+
+# if system has no FQDN, abort further tasks
+postfix_fail_if_domainname_is_missing: True
+# if system has no FQDN, take name from inventory:
+postfix_take_ansible_name_as_myorigin: False
+
+# format $domain :transport_optional
+# examples:
+# $domain :[my_mailserver_by_a_record]
+# figure out by my-record:
+# $domain :
+postfix_relaydomains_domainlist:
+  - "localdomain :"
+
+postfix_relaydomains_file: "/etc/postfix/relay_domains"
+postfix_relaydomains: "hash:{{ postfix_relaydomains_file }}"
+postfix_transport_maps: "hash:{{ postfix_relaydomains_file }}"
+
+postfix_mynetworks:
+  - 127.0.0.0/8
+  - '[::ffff:127.0.0.0]/104'
+  - '[::1]/128'
+
+# optional: add more networks:
+# postfix_additional_mynetworks:
+#  - 1.2.3.4
+#  - 5.6.7.8
+
+# if relayhost is empty, postfix will go directly to target MX-server...
+#   see http://www.postfix.org/postconf.5.html#relayhost for more information
+#  you can use:
+#  a) default value (false), postfix will deliver directly to target servers (mx-records, fallback to a-record)
+#  b) a specific server(-cluster), postfix will resolve the a-record of "server.domain.tld: '[server.domain.tld]'
+#  c) use MX-Records for a domain (contact all mx and fallback to a-record if none exists): 'domain.tld'
+postfix_relayhost: ""
+
+# most providers use port 587 (25 might be blocked on some providers due to botnet-spamming):
+postfix_relayhost_port: 25
+
+postfix_smtpd_banner: '$myhostname ESMTP $mail_name'
+
+# SASL-Auth ===
+# offer SASL on server:
+postfix_smtpd_sasl_auth: False
+postfix_smtpd_sasl_auth_default_file: "/etc/default/saslauthd-postfix"
+postfix_smtpd_sasl_auth_conf_file: "/etc/postfix/sasl/smtpd.conf"
+
+postfix_saslauthd_daemon_name: "saslauthd"
+
+# user SASL as client
+postfix_smtp_sasl_auth_enable: False
+
+postfix_smtp_sasl_password_maps_file: "/etc/postfix/sasl_passwd"
+postfix_smtp_sasl_password_maps: 'hash:{{ postfix_smtp_sasl_password_maps_file }}'
+
+# most providers only allow PLAIN and LOGIN, which postfix is refusing in default-settings:
+postfix_smtp_sasl_security_options: noanonymous
+postfix_sasl_user: relayuser
+# some random password (as fallback) if not set anywhere else:
+postfix_sasl_password: gcoZqM9vmmzVsDWJPqQX
+
+# SASL-Auth Serverside (2DO)
+# postfix_smtpd_sasl_auth_enable: false
+#    postfix-config server-side:
+#    https://www.df.eu/de/support/df-faq/cloudserver/anleitungen/smtp-authentifizierung-mit-postfix-debian/
+
+# 50MB might be too big for some servers:
+postfix_message_size_limit: 50000000
+
+# send a real test-mail to verify if postfix is working?
+# (some configuration errors are not detected by "postfix check" and the daemon is in fact doing nothing
+# ...throwing only warnings "/usr/lib/postfix/sbin/smtpd: bad command startup -- throttling")
+postfix_send_test_mail: False
+postfix_send_test_mail_from: "root"
+postfix_send_test_mail_host: "localhost"
+# 1 recipient with name: "Admin <admin@domain.tld>"
+# more than one: "Admin1 <admin@domain.tld>, Admin2 <admin2@domain.tld>"
+postfix_send_test_mail_to: "root"
+postfix_send_test_mail_port: 25
+postfix_send_test_mail_subject: "Installation of postfix is working on:"
+postfix_send_test_mail_body: "...and i did it with Ansible!"
+
+# SSL ===
+postfix_smtpd_tls_debug: True
+# add information about used encryption-parameters in received-header,
+# example: "(using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))"
+postfix_smtpd_tls_received_header: True
+
+# enable STARTTLS outgoing
+#   Postfix 2.2 http://www.postfix.org/postconf.5.html#smtp_use_tls
+#   Postfix 2.3+ http://www.postfix.org/postconf.5.html#smtp_tls_security_level
+# none (no TLS)
+# may (opportunistic TLS)
+# encrypt (mandatory encryption)
+# dane (opportunistic DANE)
+# dane-only (mandatory DANE)
+# fingerprint (fingerprint verification)
+# verify (mandatory TLS verification)
+# secure (mandatory TLS verification, but mistrust MX lookups)
+postfix_smtp_tls_security_level: "may"
+
+# enable STARTTLS incoming:
+# Postfix 2.2 http://www.postfix.org/postconf.5.html#smtpd_use_tls
+# Postfix 2.3+ http://www.postfix.org/postconf.5.html#smtpd_tls_security_level
+postfix_smtpd_tls_security_level: "none"
+
+# TLS parameters (certs/keys in pem-format) (2DO)
+#postfix_smtpd_tls_cert_file: "/etc/letsencrypt/live/FQDN/cert.pem"
+#postfix_smtpd_tls_key_file: "/etc/letsencrypt/live/FQDN/privkey.pem"
+#postfix_smtpd_tls_ca_file: "/etc/letsencrypt/live/FQDN/fullchain.pem"
+postfix_smtpd_tls_cert_file_debian: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+postfix_smtpd_tls_key_file_debian: "/etc/ssl/private/ssl-cert-snakeoil.key"
+
+# The SSL/TLS protocols accepted:
+# ...for oppotunistic encryption:
+postfix_tls_opportunistic_protocols: "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1"
+# ...for mandatory encryption:
+postfix_tls_mandatory_protocols: "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1"
+
+# some extra Config:
+
+# Queue lifetimes (24h is also ok):
+postfix_maximal_queue_lifetime: "1d"
+postfix_bounce_queue_lifetime: "1d"
+
+# generate delay warnings (may confuse users):
+postfix_delay_warnings: False
+postfix_delay_warning_time: "4h"
+
+# notify postmaster about ... (see: http://www.postfix.org/postconf.5.html#notify_classes )
+# postfix_notify_classes: "resource, software"
+# postfix_bounce_notice_recipient: "postmaster"
+# postfix_error_notice_recipient: "postmaster"
+
+postfix_set_compatibility_level: True
+# debian buster did set level 0:
+postfix_compatibility_level: 2
