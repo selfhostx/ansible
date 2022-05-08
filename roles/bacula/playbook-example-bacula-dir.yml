@@ -1,0 +1,11 @@
+# remember --ask-vault-pass
+---
+- hosts: bacula_dir
+  roles:
+    # - { role: geerlingguy.mysql }
+    - { role: "stefanux.bacula" }
+  vars:
+    - bacula_dir_fqdn: "fqdn.of.director.domain.tld"
+    - bacula_sd_fqdn: "fqdn.of.sd.domain.tld"
+  vars_files:
+    - my_vault.yml

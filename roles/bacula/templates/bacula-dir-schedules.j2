@@ -1,0 +1,29 @@
+# When to do the backups, full backup on first sunday of the month,
+#  differential (i.e. incremental since full) every other sunday,
+#  and incremental backups other days
+Schedule {
+  # use the sunday for backups:
+  Name = "WeeklyCycle"
+  Run = Full 1st sun at 01:00
+  Run = Differential 2nd-5th sun at 01:00
+  Run = Incremental mon-sat at 01:00
+  # this is default:
+  #Run = Full 1st sun at 23:05
+  #Run = Differential 2nd-5th sun at 23:05
+  #Run = Incremental mon-sat at 23:05
+}
+
+# This schedule does the catalog. It starts after the WeeklyCycle
+Schedule {
+  Name = "WeeklyCycleAfterBackup"
+  Run = Full sun-sat at 01:10
+  # Run = Full sun-sat at 23:10
+}
+
+Schedule {
+  Name = "Never"
+}
+
+{% if bacula_dir_schedule_extra_template is defined %}
+{% include bacula_dir_schedule_extra_template %}
+{% endif %}

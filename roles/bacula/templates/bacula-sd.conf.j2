@@ -1,0 +1,46 @@
+# bacula-config for {{ bacula_dir_name }}
+# {{ ansible_managed }}
+
+Storage {                             # definition of myself
+  Name = {{ bacula_sd_name }}
+  SDport = {{ bacula_sd_port }}
+  WorkingDirectory = "{{ bacula_workingdirectory }}"
+  Pid Directory = "{{ bacula_piddirectory }}"
+  Plugin Directory = "{{ bacula_plugindirectory }}"
+  Maximum Concurrent Jobs = {{ bacula_sd_max_jobs }}
+  SDAddress = {{ bacula_sd_fqdn }}
+}
+
+#
+# List Directors who are permitted to contact Storage daemon
+#
+Director {
+  Name = {{ bacula_dir_name }}
+  Password = "{{ bacula_sd_password }}"
+}
+
+#
+# Restricted Director, used by tray-monitor to get the
+#   status of the storage daemon
+#
+Director {
+  Name = {{ bacula_mon_name }}
+  Password = "{{ bacula_mon_password }}"
+  Monitor = yes
+}
+
+
+Device {
+
+{% include bacula_sd_device_template %}
+
+}
+
+#
+# Send all messages to the Director,
+# mount messages also are sent to the email address
+#
+Messages {
+  Name = {{ bacula_sd_messages }}
+  director = {{ bacula_dir_name }} = all
+}

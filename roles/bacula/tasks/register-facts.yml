@@ -1,0 +1,92 @@
+---
+- name: Include OS specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags:
+    - bacula-fd
+    - bacula-sd
+    - bacula-dir
+    - bacula-console
+
+- name: Set DIR DB password
+  set_fact:
+    bacula_dir_dbpassword: "{{ lookup('password', '/dev/null length=30 chars=ascii_letters') }}"
+  no_log: True
+  when:
+  - (bacula_dir_dbpassword|length == 0) or (bacula_dir_dbpassword is not defined)
+  - bacula_dir_role|bool
+  tags:
+    - bacula-dir
+
+- name: Set Console password
+  set_fact:
+    bacula_console_password: "{{ lookup('password', '/dev/null length=45 chars=ascii_letters') }}"
+  no_log: True
+  when:
+  - (bacula_console_password|length == 0) or (bacula_console_password is not defined)
+  - bacula_dir_role|bool or bacula_console_role|bool
+  tags:
+    - bacula-console
+    - bacula-dir
+
+- name: Set MON password
+  set_fact:
+    bacula_mon_password: "{{ lookup('password', '/dev/null length=45 chars=ascii_letters') }}"
+  no_log: True
+  when:
+  - (bacula_mon_password|length == 0) or (bacula_mon_password is not defined)
+  - bacula_dir_role|bool
+  tags:
+    - bacula-dir
+
+- name: Set SD password
+  set_fact:
+    bacula_sd_password: "{{ lookup('password', '/dev/null length=45 chars=ascii_letters') }}"
+  no_log: True
+  when:
+  - (bacula_sd_password|length == 0) or (bacula_sd_password is not defined)
+  - bacula_sd_role|bool
+  tags:
+    - bacula-sd
+
+- name: FD AutoPSK | Check for existing PSK file
+  stat:
+    path: "{{ bacula_fd_auto_psk_file_filename }}"
+  register: bacula_fd_auto_psk_file_present
+  when:
+  - bacula_fd_auto_psk
+  - bacula_fd_auto_psk_file_filename is defined
+  - bacula_fd_auto_psk_file_filename|length > 0
+  tags:
+    - bacula-fd
+
+- name: FD AutoPSK | Get Content of existing PSK file
+  slurp:
+    src: "{{ bacula_fd_auto_psk_file_filename }}"
+  register: bacula_fd_auto_psk_filecontent
+  when:
+  - bacula_fd_auto_psk
+  - bacula_fd_auto_psk_file_present is defined
+  - bacula_fd_auto_psk_file_present.stat.exists
+  tags:
+    - bacula-fd
+
+- name: FD AutoPSK | Retain existing PSK secret
+  set_fact:
+    bacula_fd_password: "{{ bacula_fd_auto_psk_filecontent['content'] | b64decode | trim }}"
+  when:
+  - bacula_fd_auto_psk_file_present is defined
+  - bacula_fd_auto_psk_file_present.stat.exists
+  - bacula_fd_auto_psk_filecontent is defined
+  - bacula_fd_auto_psk
+  tags:
+    - bacula-fd
+
+- name: FD | generate password
+  set_fact:
+    bacula_fd_password: "{{ lookup('password', '/dev/null length=45 chars=ascii_letters') }}"
+  no_log: True
+  when:
+  - (bacula_fd_password|length == 0) or (bacula_fd_password is not defined)
+  - bacula_fd_role|bool
+  tags:
+    - bacula-fd

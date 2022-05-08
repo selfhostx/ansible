@@ -1,0 +1,81 @@
+# Backup of the catalog:
+FileSet {
+  Name = "Catalog"
+  Include {
+    Options {
+      signature = SHA1
+      compression = GZIP
+      verify = pins1
+    }
+    File = "{{ bacula_workingdirectory }}"
+    File = "{{ bacula_workingdirectory }}/bacula.sql"
+  }
+}
+
+# Backup everything:
+FileSet {
+  Name = "FullSet"
+  Include {
+    Options {
+      signature = {{ bacula_fd_fileset_signature }}
+      compression = {{ bacula_fd_fileset_compression }}
+      verify = {{ bacula_fd_fileset_verify }}
+      # yes: stay on the current filesystem:
+      onefs = yes
+    }
+
+    # All local mountpoints (ext3, ext4, ...)
+    File = "\\|bash -c \"grep btrfs /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep ext2 /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep ext3 /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep ext4 /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep reiserfs /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep xfs /proc/mounts | awk '{print \$2}'\""
+    File = "\\|bash -c \"grep zfs /proc/mounts | awk '{print \$2}'\""
+  }
+
+  # If you backup the root directory, the following excluded
+  # files can be useful
+  Exclude {
+    File = /dev
+    File = /proc
+    File = /tmp
+    File = /sys
+    File = /.journal
+    File = /.fsck
+  }
+}
+
+FileSet {
+  Name = "Standard"
+  Include {
+    Options {
+      signature = {{ bacula_fd_fileset_signature }}
+      compression = {{ bacula_fd_fileset_compression }}
+      verify = {{ bacula_fd_fileset_verify }}
+    }
+    File = "/etc"
+    File = "/home"
+    File = "/root"
+    File = "/var/log"
+  }
+}
+
+FileSet {
+  Name = "StandardPlusSrv"
+  Include {
+    Options {
+      signature = {{ bacula_fd_fileset_signature }}
+      compression = {{ bacula_fd_fileset_compression }}
+      verify = {{ bacula_fd_fileset_verify }}
+    }
+    File = "/etc"
+    File = "/home"
+    File = "/root"
+    File = "/var/log"
+  }
+}
+
+{% if bacula_dir_fileset_extra_template is defined %}
+{% include bacula_dir_fileset_extra_template %}
+{% endif %}

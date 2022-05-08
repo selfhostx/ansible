@@ -1,0 +1,193 @@
+---
+# defaults file for ansible-role-bacula
+
+# will be overriden later (see register-facts.yml):
+bacula_fd_fqdn: "{{ ansible_fqdn }}"
+bacula_sd_fqdn: "{{ ansible_fqdn }}"
+
+bacula_dir_name: "bacula-dir"
+bacula_mon_name: "bacula-mon"
+bacula_sd_name: "bacula-sd"
+bacula_fd_name: "{{ bacula_fd_fqdn }}-fd"
+bacula_fd_job_name: "{{ bacula_fd_fqdn }}-Backup"
+bacula_fd_jobdefs_name: "{{ bacula_fd_fqdn }}-Jobdef"
+
+bacula_dir_restore_path: "/var/bacula-restores"
+
+# you may override the values to a real@domain.tld address
+bacula_dir_email_admin: root
+bacula_dir_email_operator: root
+
+# decide what component is needed.
+# fd is default, override via host_vars
+bacula_fd_role: True
+bacula_dir_role: False
+bacula_sd_role: False
+bacula_console_role: False
+
+# passwords will be generated when empty
+bacula_console_password: ""
+bacula_mon_password: ""
+bacula_sd_password: ""
+bacula_fd_password: ""
+# keep FDpassword when not defined in vars:
+bacula_fd_auto_psk: True
+
+# Default DB engine (can be 'pgsql' or 'mysql'):
+bacula_dir_db_engine: mysql
+bacula_dir_dbname: "bacula"
+bacula_dir_dbaddress: "localhost"
+# login for DB creation only (optional, ansible is falling back to "config_file" "~/.my.cnf"):
+bacula_dir_db_adminuser: ""
+bacula_dir_db_adminpass: ""
+
+# standard ports - mysql: 3306, psql: 5432
+bacula_dir_dbport: "{{ '3306' if bacula_dir_db_engine == 'mysql' else '5432' }}"
+
+bacula_dir_dbuser: "bacula"
+bacula_dir_dbpassword: ""
+# do nothing DB-Related (Create DB, user, grant, import tables):
+bacula_ignore_database: False
+# activate no_log for sensitive data (turn off for debugging)
+bacula_debug_no_log: True
+
+# destroy database if present (all data is lost!)
+bacula_dir_db_destroy: False
+
+# maintenance_db might have another name (i.e. on digitalocean its "defaultdb"):
+bacula_dir_pgsql_maintenance_db_name: "postgres"
+# if not set, ansible might complain about different encodings (bacula needs SQL_ASCII, not UTF8)
+# bacula_dir_pgsql_template_db_name: "template0"
+bacula_dir_pgsql_db_name_unix_socket: "postgresql_unix_socket_directories[0]"
+
+bacula_catalog: "BaculaCatalog"
+# uid/group/mode of files we template out:
+bacula_console_user: root
+bacula_console_group: bacula
+bacula_console_filemode: '0640'
+bacula_fd_user: root
+bacula_fd_group: bacula
+bacula_fd_filemode: '0600'
+bacula_dir_user: bacula
+bacula_dir_group: root
+bacula_dir_filemode: '0640'
+bacula_sd_user: bacula
+bacula_sd_group: root
+bacula_sd_filemode: '0640'
+bacula_dir_messages: "Standard"
+bacula_sd_messages: "Standard"
+bacula_fd_max_jobs: 5
+bacula_dir_max_jobs: 10
+bacula_sd_max_jobs: 15
+bacula_sd_device_max_jobs: "{{ bacula_sd_max_jobs }}"
+
+# define which storage device-template we use:
+bacula_sd_device_template: "storage_device_include_ringbuffer.j2"
+
+# define port defaults in case they got overriden later:
+bacula_dir_port_default: 9101
+bacula_fd_port_default: 9102
+bacula_sd_port_default: 9103
+bacula_dir_port: "{{ bacula_dir_port_default }}"
+bacula_fd_port: "{{ bacula_fd_port_default }}"
+bacula_sd_port: "{{ bacula_sd_port_default }}"
+
+# must be the same:
+bacula_dir_storage_name: "{{ bacula_sd_device_name }}"
+
+# Storage Definitions
+bacula_sd_device_name: "RingBuffer"
+bacula_sd_media_type: "File"
+# where to storge the volumes:
+bacula_sd_archive_device: "/var/bacula-volumes"
+bacula_dir_pool_name: "Files"
+bacula_dir_pool_label_format: "Bacula-Vol-"
+bacula_dir_pool_recycle: "yes"
+# bacula will purge the oldest volume (regardless of rentention times),
+# useful for ringbuffer setups (no manual interventions!):
+bacula_dir_pool_purge_oldest_volume: "yes"
+# Default: 60 days
+bacula_dir_pool_file_retention: "60 days"
+# Default: 6 months
+bacula_dir_pool_job_retention: "6 months"
+# Prune expired Jobs/Files:
+bacula_dir_pool_autoprune: "yes"
+bacula_dir_pool_volume_rention: "365 days"
+bacula_dir_pool_max_volume_bytes: "10G"
+bacula_dir_pool_max_volumes: 100
+
+# timeout-settings (both defaulting to 30min):
+bacula_dir_fd_connect_time: "5 minutes"
+bacula_dir_sd_connect_time: "30 minutes"
+
+bacula_dir_allow_duplicate_jobs: "no"
+bacula_dir_cancel_running_duplicates: "yes"
+# when changing fileset (includes, excludes) bacula promotes level to Full
+# this settings avoids that behavior, not recommended but saves space when extending the fileset:
+bacula_fd_fileset_ignore_changes: False
+
+# Extend Options in resssources:
+# bacula_fd_extra_fileset_options: |+
+#    Option1 = Value1
+# bacula_fd_extra_jobdefs_options: |+
+#    Option1 = Value1
+# bacula_fd_extra_jobs_options: |+
+#    Option1 = Value1
+# bacula_fd_extra_client_options |+
+#    Option1 = Value1
+# bacula_dir_extra_director_options: |+
+#    Option1 = Value1
+
+# define extra systemwide filesets:
+# bacula_dir_fileset_extra_template: ""
+
+# define extra systemwide schedules:
+# bacula_dir_schedule_extra_template: ""
+
+# ADD more director/monitors (define variable bacula_extra_mon_password for this example):
+# bacula_fd_extra_directors_allowed: |+
+#Director {
+#  Name = ExtraMonitor
+#  Password = "{{ bacula_extra_mon_password }}"
+#  Monitor = yes
+#}
+
+# define extra message ressource for this dir/mon too:
+#bacula_fd_extra_messages: |+
+#Messages {
+#  Name = 2ndDir
+#  director = bacula_dir_no2 = all, !skipped, !restored
+#}
+
+
+# FD Fileset definitions:
+# Default fileset:
+bacula_fd_fileset_name: "Standard"
+# overrides:
+#bacula_fd_fileset_includes: |+
+#    File = "/etc"
+#    File = "/home"
+#    File = "/root"
+#    File = "/var/log"
+#bacula_fd_fileset_excludes: |+
+#    File = "/proc"
+
+# protect existing filesets?
+bacula_fd_fileset_overwrite: True
+bacula_fd_fileset_signature: "SHA1"
+bacula_fd_fileset_compression: "GZIP"
+bacula_fd_fileset_verify: "pins1"
+# stay on current filesystems (regardless of submounts?) yes (bacula-default) -> stay
+bacula_fd_fileset_onefs: "yes"
+bacula_fd_level: "Incremental"
+bacula_fd_messages: "Standard"
+# pool (on dir) our fd takes:
+bacula_fd_pool: "{{ bacula_dir_pool_name }}"
+bacula_fd_priority: 10
+bacula_fd_schedule: "WeeklyCycle"
+bacula_fd_storage: "{{ bacula_dir_storage_name }}"
+bacula_fd_type: "Backup"
+
+# set to False if handlers should not restart/reload DIR and SD services
+bacula_reload_services: True
+bacula_restart_services: True

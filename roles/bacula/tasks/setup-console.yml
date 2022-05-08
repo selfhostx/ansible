@@ -1,0 +1,12 @@
+# Install and configure Bacula-sd
+---
+- name: Setup Console | Install bacula-sd package
+  package: name="{{ bacula_console_packages }}" state=present
+
+- name: Setup Console | Manage configuration of bacula-console
+  template:
+    src: "{{ role_path }}/templates/bconsole.conf.j2"
+    dest: "{{ bacula_console_config }}"
+    owner: "{{ bacula_console_user }}"
+    group: "{{ bacula_console_group }}"
+    mode: "{{ bacula_console_filemode }}"

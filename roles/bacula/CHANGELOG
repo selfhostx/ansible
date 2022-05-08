@@ -1,0 +1,26 @@
+# Changelog
+
+
+## 1.2
+
+more linted vars 
+
+old vars: (fileSet -> fileset):
+bacula_fd_fileSet_compression
+bacula_fd_fileSet_ignore_changes
+bacula_fd_fileSet_name
+bacula_fd_fileSet_onefs
+bacula_fd_fileSet_overwrite
+bacula_fd_fileSet_signature
+bacula_fd_fileSet_verify
+
+bacula_pidDirectory
+bacula_pluginDirectory
+bacula_workingDirectory
+
+
+## 1.1
+
+linted vars (now just lowercase):
+
+## 1.0 initial release

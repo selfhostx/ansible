@@ -1,0 +1,68 @@
+# bacula config
+# {{ ansible_managed }}
+
+Client {
+  Name = {{ bacula_fd_name }}
+  Address = {{ bacula_fd_connect_address|default(bacula_fd_fqdn) }}
+  FDPort = {{ bacula_fd_port }}
+  Catalog = {{ bacula_catalog }}
+  Password = "{{ bacula_fd_password }}"    # password for FileDaemon
+  File Retention = {{ bacula_dir_pool_file_retention }}
+  Job Retention = {{ bacula_dir_pool_job_retention }}
+  AutoPrune = {{ bacula_dir_pool_autoprune }}  # Prune expired Jobs/Files
+  {% if bacula_fd_extra_client_options is defined and bacula_fd_extra_client_options|length > 0 %}
+  {{ bacula_fd_extra_client_options }}
+  {% endif %}
+
+}
+
+JobDefs {
+  Name = "{{ bacula_fd_jobdefs_name }}"
+  Type = {{ bacula_fd_type }}
+  Level = {{ bacula_fd_level }}
+  Client = {{ bacula_fd_name }}
+  FileSet = "{{ bacula_fd_fileset_name }}"
+  Schedule = "{{ bacula_fd_schedule }}"
+  Storage = {{ bacula_fd_storage }}
+  Messages = {{ bacula_fd_messages }}
+  Pool = {{ bacula_fd_pool }}
+  {% if bacula_fd_extra_jobdefs_options is defined and bacula_fd_extra_jobdefs_options|length > 0 %}
+  {{ bacula_fd_extra_jobdefs_options }}
+  {% endif %}
+
+}
+
+Job {
+  Name = {{ bacula_fd_job_name }}
+  JobDefs = {{ bacula_fd_jobdefs_name }}
+  Write Bootstrap = "{{ bacula_workingdirectory }}/{{ bacula_fd_name }}.bsr"
+  Priority = {{ bacula_fd_priority }}
+
+  Allow Duplicate Jobs = {{ bacula_dir_allow_duplicate_jobs }}
+  Cancel Running Duplicates = {{ bacula_dir_cancel_running_duplicates }}
+
+  # Before/after Jobs (if defined):
+  {% if bacula_fd_client_run_before_job is defined and bacula_fd_client_run_before_job|length > 0 %}
+  Client Run Before Job = "{{ bacula_fd_client_run_before_job }}"
+  {% endif %}
+  {% if bacula_fd_client_run_after_job is defined and bacula_fd_client_run_after_job|length > 0 %}
+  Client Run After Job = "{{ bacula_fd_client_run_after_job }}"
+  {% endif %}
+  {% if bacula_fd_run_before_job is defined and bacula_fd_run_before_job|length > 0 %}
+  Client Run Before Job = "{{ bacula_fd_run_before_job }}"
+  {% endif %}
+  {% if bacula_fd_run_before_job is defined and bacula_fd_run_before_job|length > 0 %}
+  Run Before Job = "{{ bacula_fd_run_before_job }}"
+  {% endif %}
+  {% if bacula_fd_run_after_job is defined and bacula_fd_run_after_job|length > 0 %}
+  Run After Job = "{{ bacula_fd_run_after_job }}"
+  {% endif %}
+  {% if bacula_fd_run_after_failed_job is defined and bacula_fd_run_after_failed_job|length > 0 %}
+  Run After Failed Job = "{{ bacula_fd_run_after_failed_job }}"
+  {% endif %}
+
+  {% if bacula_fd_extra_job_options is defined and bacula_fd_extra_job_options|length > 0 %}
+  {{ bacula_fd_extra_job_options }}
+  {% endif %}
+
+}

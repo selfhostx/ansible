@@ -1,0 +1,38 @@
+---
+- name: Include OS specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Setup facts
+  include_tasks: "register-facts.yml"
+
+- name: Change Bacula Definition (when Ports have changed)
+  include_tasks: "change_ports_in_service_file.yml"
+  when:
+  - bacula_fd_port != bacula_fd_port_default or bacula_dir_port != bacula_dir_port_default or bacula_sd_port != bacula_sd_port_default
+
+- name: Update package cache
+  include_tasks: "update-package-cache.yml"
+
+- name: Setup DIR
+  include_tasks: "setup-director.yml"
+  when: bacula_dir_role|bool
+  tags:
+    - bacula-dir
+
+- name: Setup Console
+  include_tasks: "setup-console.yml"
+  when: bacula_console_role|bool
+  tags:
+    - bacula-console
+
+- name: Setup SD
+  include_tasks: "setup-sd.yml"
+  when: bacula_sd_role|bool
+  tags:
+    - bacula-sd
+
+- name: Setup FD
+  include_tasks: "setup-fd.yml"
+  when: bacula_fd_role|bool
+  tags:
+    - bacula-fd

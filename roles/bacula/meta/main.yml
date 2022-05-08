@@ -1,0 +1,27 @@
+---
+galaxy_info:
+  role_name: bacula
+  author: stefanux
+  description: Manage bacula
+
+  license: license MIT
+
+  min_ansible_version: 2.4
+
+  platforms:
+    - name: Debian
+      versions:
+        - buster
+        - stretch
+    - name: Ubuntu
+      versions:
+        - focal
+        - bionic
+        - xenial
+
+  galaxy_tags:
+   - system
+   - packaging
+   - backup
+
+dependencies: []

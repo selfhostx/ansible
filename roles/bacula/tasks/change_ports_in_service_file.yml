@@ -1,0 +1,95 @@
+---
+# these are the default ports assigned by IANA.
+# when you use other ports, at least the fd takes these values to connect to sd
+# in every case local networking tools translate listening ports to these values
+#
+# bacula-dir  9101/tcp      # Bacula Director
+# bacula-dir  9101/udp
+# bacula-fd   9102/tcp      # Bacula File Daemon
+# bacula-fd   9102/udp
+# bacula-sd   9103/tcp      # Bacula Storage Daemon
+# bacula-sd   9103/udp
+
+- name: Warning when unsupported on Windows
+  fail: msg='Setting for Windows not supported at the moment'
+  ignore_errors: yes
+  when:
+  - ansible_os_family == "Windows"
+
+- name: Update dir port in services file (tcp)
+  lineinfile:
+    dest: "{{ bacula_system_service_file }}"
+    line: "{{ item.value }}"
+    regexp: "^{{ item.name }}"
+  with_items:
+    - name: "bacula-dir\t{{ bacula_dir_port_default }}/tcp"
+      value: "bacula-dir\t{{ bacula_dir_port }}/tcp\t\t\t# Bacula Director  (default is {{ bacula_dir_port_default }})"
+  notify: 'Restart bacula-dir'
+  when:
+  - bacula_dir_port != bacula_dir_port_default
+  - ansible_os_family != "Windows"
+
+- name: Update dir port in services file (udp)
+  lineinfile:
+    dest: "{{ bacula_system_service_file }}"
+    line: "{{ item.value }}"
+    regexp: "^{{ item.name }}"
+  with_items:
+    - name: "bacula-dir\t{{ bacula_dir_port_default }}/udp"
+      value: "bacula-dir\t{{ bacula_dir_port }}/udp"
+  notify: 'Restart bacula-dir'
+  when:
+  - bacula_dir_port != bacula_dir_port_default
+  - ansible_os_family != "Windows"
+
+- name: Update fd port in services file (tcp)
+  lineinfile:
+    dest: "{{ bacula_system_service_file }}"
+    line: "{{ item.value }}"
+    regexp: "^{{ item.name }}"
+  with_items:
+    - name: "bacula-fd\t{{ bacula_fd_port_default }}/tcp"
+      value: "bacula-fd\t{{ bacula_fd_port }}/tcp\t\t\t# Bacula File Daemon (default is {{ bacula_fd_port_default }})"
+  notify: 'Restart bacula-fd'
+  when:
+  - bacula_fd_port != bacula_fd_port_default
+  - ansible_os_family != "Windows"
+
+- name: Update fd port in services file (udp)
+  lineinfile:
+    dest: "{{ bacula_system_service_file }}"
+    line: "{{ item.value }}"
+    regexp: "^{{ item.name }}"
+  with_items:
+    - name: "bacula-fd\t{{ bacula_fd_port_default }}/udp"
+      value: "bacula-fd\t{{ bacula_fd_port }}/udp"
+  notify: 'Restart bacula-fd'
+  when:
+  - bacula_fd_port != bacula_fd_port_default
+  - ansible_os_family != "Windows"
+
+- name: Update sd port in services file (tcp)
+  lineinfile:
+    dest: "{{ bacula_system_service_file }}"
+    line: "{{ item.value }}"
+    regexp: "^{{ item.name }}"
+  with_items:
+    - name: "bacula-sd\t{{ bacula_sd_port_default }}/tcp"
+      value: "bacula-sd\t{{ bacula_sd_port }}/tcp\t\t\t# Bacula Storage Daemon (default is {{ bacula_sd_port_default }})"
+  notify: 'Restart bacula-sd'
+  when:
+  - bacula_sd_port != bacula_sd_port_default
+  - ansible_os_family != "Windows"
+
+- name: Update sd port in services file (udp)
+  lineinfile:
+    dest: "{{ bacula_system_service_file }}"
+    line: "{{ item.value }}"
+    regexp: "^{{ item.name }}"
+  with_items:
+    - name: "bacula-sd\t{{ bacula_sd_port_default }}/udp"
+      value: "bacula-sd\t{{ bacula_sd_port }}/udp"
+  notify: 'Restart bacula-sd'
+  when:
+  - bacula_sd_port != bacula_sd_port_default
+  - ansible_os_family != "Windows"

@@ -1,0 +1,311 @@
+# Install and configure databases
+# needs python-psycopg2 / python3-psycopg2 on target
+# task for pip:
+#    - pip:
+#        name: psycopg2-binary
+---
+
+
+
+
+- name: Setup pgsql | Destroy DB (pgsql via bacula_dir_db_adminuser)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: absent
+    login_host: "{{ bacula_dir_dbaddress  | default(omit) }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass | default(omit) }}"
+    login_user: "{{ bacula_dir_db_adminuser  | default(postgres) }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgres) }}"
+  register: bacula_database_pgsql_destroyed
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_destroy
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Setup pgsql | Destroy DB (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: absent
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgres) }}"
+#   login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket }}"
+  register: bacula_database_pgsql_destroyed
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_destroy
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+#- name: Setup pgsql | Create DB via SQL (pgsql)
+#  postgresql_query:
+#    query: "CREATE DATABASE {{ bacula_dir_dbname }} WITH OWNER {{ bacula_dir_dbuser }} ENCODING='SQL_ASCII' LC_COLLATE='C' LC_CTYPE='C' TEMPLATE {{ bacula_dir_pgsql_template_db_name | default('template0') }};"
+#    autocommit: yes
+#  register: bacula_database_pgsql_exists
+#  become: True
+#  become_user: postgres
+#  vars:
+#    ansible_ssh_pipelining: true
+#  when:
+#  - bacula_dir_db_engine == "pgsql"
+#  - bacula_database_pgsql_destroyed.changed
+#  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup pgsql | Create DB if not exists (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: present
+#      login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(omit) }}"
+    encoding: SQL_ASCII
+    lc_collate: "C"
+    lc_ctype: "C"
+#    owner: "{{ bacula_dir_db_adminuser }}"
+#    owner: "postgres"
+    template: "{{ bacula_dir_pgsql_template_db_name | default('template0') }}"
+  register: bacula_database_pgsql_exists
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+#  - bacula_database_pgsql_destroyed.changed
+#  - not bacula_database_pgsql_exists.changed
+  tags:
+  - db
+
+- name: Setup pgsql | Create DB if not exists (pgsql via bacula_dir_db_adminuser)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: present
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+#      login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(omit) }}"
+    encoding: SQL_ASCII
+    lc_collate: "C"
+    lc_ctype: "C"
+#    owner: "{{ bacula_dir_db_adminuser }}"
+#    owner: "postgres"
+    template: "{{ bacula_dir_pgsql_template_db_name | default('template0') }}"
+  register: bacula_database_pgsql_exists
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+#  - bacula_database_pgsql_destroyed.changed
+#  - not bacula_database_pgsql_exists.changed
+  tags:
+  - db
+
+- name: Setup pgsql | Create User (pgsql)
+  postgresql_user:
+    state: "present"
+    user: "{{ bacula_dir_dbuser }}"
+    password: "{{ bacula_dir_dbpassword }}"
+#    login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    expires: infinity
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  no_log: "{{ bacula_debug_no_log }}"
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup pgsql | Create User (pgsql via bacula_dir_db_adminuser)
+  postgresql_user:
+    db: "{{ bacula_dir_dbname }}"
+    user: "{{ bacula_dir_dbuser }}"
+    login_host: "{{ bacula_dir_dbaddress | default('localhost') }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass | default(omit) }}"
+    login_user: "{{ bacula_dir_db_adminuser | default(postgresql_user) }}"
+    password: "{{ bacula_dir_dbpassword }}"
+    state: "present"
+    expires: infinity
+  no_log: "{{ bacula_debug_no_log }}"
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Setup pgsql | Alter DB (pgsql)
+  postgresql_query:
+    db: "{{ bacula_dir_dbname }}"
+    query: ALTER DATABASE {{ bacula_dir_dbname }} SET datestyle TO 'ISO, YMD';
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup pgsql | Alter DB (pgsql via bacula_dir_db_adminuser)
+  postgresql_query:
+    db: "{{ bacula_dir_dbname }}"
+    query: ALTER DATABASE {{ bacula_dir_dbname }} SET datestyle TO 'ISO, YMD';
+    login_host: "{{ bacula_dir_dbaddress | default('localhost') }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass | default(omit) }}"
+    login_user: "{{ bacula_dir_db_adminuser | default(postgresql_user) }}"
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    target: "{{ bacula_dir_dbimport_pgsql_file }}"
+#    login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgresql_user) }}"
+    state: "restore"
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    target: "{{ bacula_dir_dbimport_pgsql_file }}"
+    login_host: "{{ bacula_dir_dbaddress | default('localhost') }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass | default(omit) }}"
+    login_user: "{{ bacula_dir_db_adminuser | default(postgresql_user) }}"
+#    login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgresql_user) }}"
+    state: "restore"
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+#- name: Reassign all objects in database (pgsql)
+#  postgresql_owner:
+#    db: "{{ bacula_dir_dbname }}"
+#    port: "{{ bacula_dir_dbport }}"
+#    new_owner: "{{ bacula_dir_dbuser }}"
+#    reassign_owned_by: "postgres"
+#  when:
+#  - bacula_dir_db_adminuser|length == 0
+#  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
+#  become: True
+#  become_user: postgres
+#  vars:
+#    ansible_ssh_pipelining: true
+
+- name: Reassign all objects in database (pgsql via bacula_dir_db_adminuser)
+  postgresql_owner:
+    db: "{{ bacula_dir_dbname }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    new_owner: "{{ bacula_dir_dbuser }}"
+    reassign_owned_by: "{{ bacula_dir_db_adminuser }}"
+  when:
+  - bacula_dir_db_adminuser|length > 0
+  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
+
+- name: Setup pgsql | Grant rights to tables (pgsql)
+  postgresql_privs:
+    state: present
+    grant_option: yes
+    database: "{{ bacula_dir_dbname }}"
+    role: "{{ bacula_dir_dbuser }}"
+    type: table
+    objs: ALL_IN_SCHEMA
+    priv: "ALL"
+#    port: "{{ bacula_dir_dbport }}"
+  when:
+  - bacula_dir_db_adminuser|length == 0
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Setup pgsql | Grant rights to tables (pgsql via bacula_dir_db_adminuser)
+  postgresql_privs:
+    state: present
+    grant_option: yes
+    database: "{{ bacula_dir_dbname }}"
+    role: "{{ bacula_dir_dbuser }}"
+    type: table
+    objs: ALL_IN_SCHEMA
+    priv: "ALL"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  when:
+  - bacula_dir_db_adminuser|length > 0
+
+- name: Setup pgsql | Grant rights to sequences on those tables (pgsql)
+  postgresql_privs:
+    state: present
+    grant_option: yes
+    database: "{{ bacula_dir_dbname }}"
+    role: "{{ bacula_dir_dbuser }}"
+    type: sequence
+    objs: ALL_IN_SCHEMA
+    priv: "SELECT,UPDATE"
+    port: "{{ bacula_dir_dbport }}"
+  when:
+  - bacula_dir_db_adminuser|length == 0
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Setup pgsql | Grant rights to sequences on those tables (pgsql via bacula_dir_db_adminuser)
+  postgresql_privs:
+    state: present
+    grant_option: yes
+    database: "{{ bacula_dir_dbname }}"
+    role: "{{ bacula_dir_dbuser }}"
+    type: sequence
+    objs: ALL_IN_SCHEMA
+    priv: "SELECT,UPDATE"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  when:
+  - bacula_dir_db_adminuser|length > 0
+

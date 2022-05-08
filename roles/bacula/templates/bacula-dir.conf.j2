@@ -1,0 +1,119 @@
+# bacula-config for {{ bacula_dir_name }}
+# {{ ansible_managed }}
+
+#
+# Bacula Director Configuration file
+#
+#  The only thing that MUST be changed is to add one or more
+#   file or directory names in the Include directive of the
+#   FileSet resource.
+#
+
+Director {                            # define myself
+  Name = {{ bacula_dir_name }}
+  DirAddress = {{ bacula_dir_fqdn }}            # bind to this address
+  DIRport = {{ bacula_dir_port }}               # where we listen for UA connections
+  QueryFile = "{{ bacula_dir_queryfile }}"
+  WorkingDirectory = "{{ bacula_workingdirectory }}"
+  PidDirectory = "{{ bacula_piddirectory }}"
+  Maximum Concurrent Jobs = {{ bacula_dir_max_jobs }}
+  Password = "{{ bacula_console_password }}"    # Console password
+  Messages = Daemon
+
+  FD Connect Timeout = {{ bacula_dir_fd_connect_time }}
+  SD Connect Timeout = {{ bacula_dir_sd_connect_time }}
+
+  {% if bacula_dir_extra_director_options is defined and bacula_dir_extra_director_options|length > 0 %}
+  {{ bacula_dir_extra_director_options }}
+  {% endif %}
+
+}
+
+Storage {
+  Name = {{ bacula_dir_storage_name }}
+  Address = {{ bacula_sd_fqdn }}               # N.B. Use a fully qualified name here,  Do not use "localhost" !!!
+  SDPort = {{ bacula_sd_port }} 
+  Password = "{{ bacula_sd_password }}"
+  Device = {{ bacula_sd_device_name }}       # Name of the storage-device in SD-config
+  Media Type = {{ bacula_sd_media_type }}
+  Maximum Concurrent Jobs = {{ bacula_sd_device_max_jobs }}
+}
+
+# Generic catalog service
+Catalog {
+  Name = {{ bacula_catalog }}
+  dbname = "{{ bacula_dir_dbname }}"; DB Address = "{{ bacula_dir_dbaddress }}"; DB Port= "{{ bacula_dir_dbport }}"; dbuser = "{{ bacula_dir_dbuser }}"; dbpassword = "{{ bacula_dir_dbpassword }}"
+}
+
+# Reasonable message delivery -- send most everything to email address
+#  and to the console
+Messages {
+  Name = {{ bacula_dir_messages }}
+  #
+  # NOTE! If you send to two email or more email addresses, you will need
+  #  to replace the %r in the from field (-f part) with a single valid
+  #  email address in both the mailcommand and the operatorcommand.
+  #  What this does is, it sets the email address that emails would display
+  #  in the FROM field, which is by default the same email as they're being
+  #  sent to.  However, if you send email to more than one address, then
+  #  you'll have to set the FROM address manually, to a single address.
+  #  for example, a 'no-reply@mydomain.com', is better since that tends to
+  #  tell (most) people that its coming from an automated source.
+  #
+  mailcommand = "/usr/sbin/bsmtp -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: %t %e of %c %l\" %r"
+  operatorcommand = "/usr/sbin/bsmtp -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: Intervention needed for %j\" %r"
+  mail = {{ bacula_dir_email_admin }} = all, !skipped
+  operator = {{ bacula_dir_email_operator }} = mount
+  console = all, !skipped, !saved
+  #
+  # WARNING! the following will create a file that you must cycle from
+  #          time to time as it will grow indefinitely. However, it will
+  #          also keep all your messages if they scroll off the console.
+  #
+  append = "{{ bacula_logfile }}" = all, !skipped
+  catalog = all
+}
+
+#
+# Message delivery for daemon messages (no job).
+#
+Messages {
+  Name = Daemon
+  mailcommand = "/usr/sbin/bsmtp -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula daemon message\" %r"
+  mail = root = all, !skipped
+  console = all, !skipped, !saved
+  append = "{{ bacula_logfile }}" = all, !skipped
+}
+
+# Pool defined by role
+Pool {
+  Name = {{ bacula_dir_pool_name }}
+  Pool Type = Backup
+  Recycle = {{ bacula_dir_pool_recycle }}                      # Bacula can automatically recycle Volumes
+  AutoPrune = {{ bacula_dir_pool_autoprune }}                     # Prune expired volumes
+  {% if bacula_dir_pool_purge_oldest_volume is defined and bacula_dir_pool_purge_oldest_volume|length > 0 %}
+  Purge Oldest Volume = {{ bacula_dir_pool_purge_oldest_volume }}           # force the use of the oldest volume (regardless of retention times!) when empty volume is needed
+  {% endif %}
+  Volume Retention = {{ bacula_dir_pool_volume_rention }}         # default: one year
+  Maximum Volume Bytes = {{ bacula_dir_pool_max_volume_bytes }}          # Limit Volume size to something reasonable
+  Maximum Volumes = {{ bacula_dir_pool_max_volumes }}               # Limit number of Volumes in Pool
+  Label Format = "{{ bacula_dir_pool_label_format }}"               # Auto label
+}
+
+# Scratch pool definition
+Pool {
+  Name = Scratch
+  Pool Type = Backup
+}
+
+#
+# Restricted console used by tray-monitor to get the status of the director
+#
+Console {
+  Name = {{ bacula_dir_name }}
+  Password = "{{ bacula_mon_password }}"
+  CommandACL = status, .status
+}
+
+# source everything under "/etc/bacula/conf.d"
+@|"sh -c 'for f in {{ bacula_dir_include_config_dir }}/*.conf ; do echo @${f} ; done'"

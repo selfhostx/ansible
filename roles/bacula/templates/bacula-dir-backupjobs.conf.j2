@@ -1,0 +1,58 @@
+# bacula-additional config for {{ bacula_dir_name }}
+# {{ ansible_managed }}
+
+#
+# Define the main nightly save backup job
+#   By default, this job will back up to disk in /nonexistant/path/to/file/archive/dir
+
+# Backup the catalog database (after the nightly save)
+Job {
+  Name = "BackupCatalog"
+  JobDefs = "BackupCatalogJobDef"
+  Level = Full
+  FileSet = "Catalog"
+  Schedule = "WeeklyCycleAfterBackup"
+  # This creates an ASCII copy of the catalog
+  # Arguments to make_catalog_backup.pl are:
+  #  make_catalog_backup.pl <catalog-name>
+  RunBeforeJob = "/etc/bacula/scripts/make_catalog_backup.pl {{ bacula_catalog }}"
+  # This deletes the copy of the catalog
+  # RunAfterJob  = "/etc/bacula/scripts/delete_catalog_backup"
+  Write Bootstrap = "{{ bacula_workingdirectory }}/%n.bsr"
+  Priority = 11                   # run after main backup
+}
+
+#
+# Standard Restore template, to be changed by Console program
+#  Only one such job is needed for all Jobs/Clients/Storage ...
+#
+Job {
+  Name = "RestoreFiles"
+  Type = Restore
+  Client = {{ bacula_fd_name }}
+  Storage = {{ bacula_dir_storage_name }}
+  # The FileSet and Pool directives are not used by Restore Jobs
+  # but must not be removed
+  FileSet = "FullSet"
+  Pool = {{ bacula_dir_pool_name }}
+  Messages = {{ bacula_dir_messages }}
+  Where = {{ bacula_dir_restore_path }}
+
+  Allow Duplicate Jobs = {{ bacula_dir_allow_duplicate_jobs }}
+  Cancel Running Duplicates = {{ bacula_dir_cancel_running_duplicates }}
+}
+
+JobDefs {
+  Name = "BackupCatalogJobDef"
+  Type = Backup
+  Level = Incremental
+  Client = {{ bacula_fd_name }}
+  FileSet = "Catalog"
+  Schedule = "WeeklyCycle"
+  Storage = {{ bacula_dir_storage_name }}
+  Messages = {{ bacula_dir_messages }}
+  Pool = {{ bacula_dir_pool_name }}
+  SpoolAttributes = yes
+  Priority = 10
+  Write Bootstrap = "{{ bacula_workingdirectory }}/%c.bsr"
+}

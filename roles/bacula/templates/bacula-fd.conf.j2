@@ -1,0 +1,47 @@
+# bacula-config for {{ bacula_dir_name }}
+# {{ ansible_managed }}
+
+# List Directors who are permitted to contact this File daemon:
+Director {
+  Name = {{ bacula_dir_name }}
+  Password = "{{ bacula_fd_password }}"
+}
+
+Director {
+  Name = {{ bacula_mon_name }}
+  Password = "{{ bacula_mon_password }}"
+  # monitoring only:
+  Monitor = yes
+}
+
+{% if bacula_fd_extra_directors_allowed is defined and bacula_fd_extra_directors_allowed|length > 0 %}
+{{ bacula_fd_extra_directors_allowed }}
+{% endif %}
+
+# backup agent (=file-daemon):
+FileDaemon {
+  Name = {{ bacula_fd_name }}
+{% if bacula_fd_connect_listen_addresses is defined and bacula_fd_connect_listen_addresses|length > 0 %}
+  FDAddresses  = {
+  {{ bacula_fd_connect_listen_addresses }}
+  }
+{% else %}
+  FDAddress = {{ bacula_fd_connect_address|default(bacula_fd_fqdn) }}
+  FDport = {{ bacula_fd_port }}
+{% endif %}
+{% if bacula_fd_source_address is defined and bacula_fd_source_address|length > 0 %}
+  FDSourceAddress = {{ bacula_fd_source_address }}
+{% endif %}
+  WorkingDirectory = {{ bacula_workingdirectory }}
+  Pid Directory = {{ bacula_piddirectory }}
+  Maximum Concurrent Jobs = {{ bacula_fd_max_jobs }}
+}
+
+Messages {
+  Name = {{ bacula_dir_messages }}
+  director = {{ bacula_dir_name }} = all, !skipped, !restored
+}
+
+{% if bacula_fd_extra_messages is defined and bacula_fd_extra_messages|length > 0 %}
+{{ bacula_fd_extra_messages }}
+{% endif %}

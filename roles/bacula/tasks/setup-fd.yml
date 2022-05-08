@@ -1,0 +1,102 @@
+# Install and configure Bacula-sd
+---
+- name: Setup FD | Install bacula-fd package
+  package:
+    name: "{{ bacula_fd_package_name }}"
+    state: present
+  when: ansible_os_family != "Windows"
+  tags:
+  - packages
+
+- name: Setup FD | Install bacula-fd package (Windows)
+  win_chocolatey:
+    name: "{{ bacula_fd_package_name }}"
+    state: present
+  when: ansible_os_family == "Windows"
+  tags:
+  - packages
+
+- name: FD AutoPSK | Template new PSK into file
+  copy:
+    dest: "{{ bacula_fd_auto_psk_file_filename }}"
+    content: "{{ bacula_fd_password }}"
+    owner: "{{ bacula_fd_user }}"
+    group: "{{ bacula_fd_group }}"
+    mode: "{{ bacula_fd_filemode }}"
+  when:
+    - bacula_fd_auto_psk
+    - bacula_fd_auto_psk_file_filename is defined
+    - bacula_fd_auto_psk_file_filename|length > 0
+  tags:
+    - bacula-fd
+
+- name: Setup FD | Check if Fileset Config exists on director
+  stat:
+    path: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  register: bacula_fd_fileset_exists
+
+- name: Setup FD | Register Fileset Config for FD on director
+  template:
+    src: "{{ role_path }}/templates/bacula-dir-fileset.conf.j2"
+    dest: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
+    owner: "{{ bacula_dir_user }}"
+    group: "{{ bacula_dir_group }}"
+    mode: "{{ bacula_dir_filemode }}"
+  notify: 'Reload bacula-dir'
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  when:
+  - bacula_fd_fileset_includes is defined
+  - bacula_fd_fileset_includes|length > 0
+  - not bacula_fd_fileset_exists.stat.exists|bool or (bacula_fd_fileset_exists.stat.exists|bool and bacula_fd_fileset_overwrite|bool)
+
+- name: Setup FD | Manage configuration of bacula-fd file
+  template:
+    src: "{{ role_path }}/templates/bacula-fd.conf.j2"
+    dest: "{{ bacula_config_dir }}/bacula-fd.conf"
+    owner: "{{ bacula_fd_user }}"
+    group: "{{ bacula_fd_group }}"
+    mode: "{{ bacula_fd_filemode }}"
+    validate: "{{ bacula_fd_binary }} -t -c %s"
+  notify: 'Restart bacula-fd'
+  when: ansible_os_family != "Windows"
+
+- name: Setup FD | Manage configuration of bacula-fd file (Windows)
+  win_template:
+    src: "{{ role_path }}/templates/bacula-fd.conf.j2"
+    dest: "{{ bacula_conf_dir }}/bacula-fd.conf"
+    #owner: "{{ bacula_fd_user }}"
+    #group: "{{ bacula_fd_group }}"
+    # not supported :-(
+    # mode: "{{ bacula_filemode }}"
+    validate: "{{ bacula_fd_binary }} -t -c %s"
+  notify: 'Restart bacula-fd (Windows)'
+  when: ansible_os_family == "Windows"
+
+- name: Setup FD | Register FD Config on director
+  template:
+    src: "{{ role_path }}/templates/bacula-dir-clientconfig.conf.j2"
+    dest: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    owner: "{{ bacula_dir_user }}"
+    group: "{{ bacula_dir_group }}"
+    mode: "{{ bacula_dir_filemode }}"
+  notify: 'Reload bacula-dir'
+  delegate_to: "{{ bacula_dir_fqdn }}"
+
+- name: Setup FD | Enable bacula-fd service
+  service:
+    name: "{{ bacula_fd_service_name }}"
+    enabled: yes
+  when: ansible_os_family != "Windows"
+  notify: 'Start bacula-fd'
+  tags:
+  - packages
+
+- name: Setup FD | Enable bacula-fd service (Windows)
+  win_service:
+    name: "{{ bacula_fd_service_name }}"
+    start_mode: auto
+  when: ansible_os_family == "Windows"
+  notify: 'Start bacula-fd (Windows)'
+  tags:
+  - packages

@@ -1,0 +1,33 @@
+# Install and configure Bacula-sd
+---
+- name: Setup SD | Install bacula-sd package
+  package: name="{{ bacula_sd_packages }}" state=present
+  tags:
+  - packages
+
+- name: Setup SD | Manage configuration of bacula-sd file
+  template:
+    src: "{{ role_path }}/templates/bacula-sd.conf.j2"
+    dest: "{{ bacula_sd_config }}"
+    owner: "{{ bacula_sd_user }}"
+    group: "{{ bacula_sd_group }}"
+    mode: "{{ bacula_sd_filemode }}"
+    validate: "{{ bacula_sd_binary }} -t -c %s"
+  notify: 'Restart bacula-sd'
+
+- name: Setup SD | Create archive device for SD
+  file:
+    dest: "{{ bacula_sd_archive_device }}"
+    owner: "{{ bacula_sd_user }}"
+    group: "{{ bacula_sd_group }}"
+    state: directory
+    mode: 0750
+  when: bacula_sd_media_type == "File"
+
+- name: Setup SD | Enable bacula-sd service
+  service:
+    name: "{{ bacula_sd_service_name }}"
+    enabled: yes
+  notify: 'Start bacula-sd'
+  tags:
+  - packages

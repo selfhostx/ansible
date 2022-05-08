@@ -1,0 +1,9 @@
+  Name = {{ bacula_sd_device_name }}
+  Media Type = File
+  Archive Device = {{ bacula_sd_archive_device }}
+  LabelMedia = yes;                   # lets Bacula label unlabeled media
+  Random Access = Yes;
+  AutomaticMount = yes;               # when device opened, read it
+  RemovableMedia = no;
+  AlwaysOpen = no;
+  Maximum Concurrent Jobs = {{ bacula_sd_device_max_jobs }}

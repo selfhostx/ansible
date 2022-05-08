@@ -1,0 +1,31 @@
+# Install and configure Bacula-fd (needed for initial config-validation)
+---
+- name: Setup FD on director | Install bacula-fd package
+  package: name="{{ bacula_fd_package_name }}" state=present
+
+- name: Setup FD on director | Manage configuration of bacula-fd file (*nix)
+  template:
+    src: "{{ role_path }}/templates/bacula-fd.conf.j2"
+    dest: "{{ bacula_config_dir }}/bacula-fd.conf"
+    owner: "{{ bacula_fd_user }}"
+    group: "{{ bacula_fd_group }}"
+    mode: "{{ bacula_fd_filemode }}"
+    validate: "{{ bacula_fd_binary }} -t -c %s"
+  notify: 'Restart bacula-fd'
+
+- name: Setup FD on director | Register FD Config on director
+  template:
+    src: "{{ role_path }}/templates/bacula-dir-clientconfig.conf.j2"
+    dest: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    owner: "{{ bacula_dir_user }}"
+    group: "{{ bacula_dir_group }}"
+    mode: "{{ bacula_dir_filemode }}"
+  when:
+  - bacula_fd_fileset_includes is defined
+  - bacula_fd_fileset_includes|length > 0
+
+- name: Setup FD on director | Manage bacula-fd service
+  service:
+    name: "{{ bacula_fd_service_name }}"
+    state: started
+    enabled: yes

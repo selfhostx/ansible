@@ -1,0 +1,140 @@
+# Install and configure databases
+# needs python-psycopg2 / python3-psycopg2 on target
+# task for pip:
+#    - pip:
+#        name: psycopg2-binary
+---
+
+- name: Setup pgsql | Create DB if not exists (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: present
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name }}"
+    encoding: SQL_ASCII
+    lc_collate: C
+    lc_ctype: C
+    owner: "{{ bacula_dir_dbuser }}"
+    template: "{{ bacula_dir_pgsql_template_db_name }}"
+    login_unix_socket: "{{ item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+  become: yes
+  become_user: postgres
+  register: bacula_database_pgsql_exists
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsqld"
+  tags:
+  - db
+
+- name: Setup pgsql | Alter DB (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    target: "{{ bacula_dir_dbimport_pgsql_dbsettings }}"
+    login_host: "{{ bacula_dir_dbaddress | default(omit) }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass | default(omit) }}"
+    login_user: "{{ bacula_dir_db_adminuser | default(omit) }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name }}"
+    state: "restore"
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_database_pgsql_exists.changed
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    target: "{{ bacula_dir_dbimport_pgsql_file }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name }}"
+    state: "restore"
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_database_pgsql_exists.changed
+  tags:
+  - db
+
+- name: Setup pgsql | Create User (pgsql)
+  postgresql_user:
+#    db: "{{ bacula_dir_dbname }}"
+    user: "{{ bacula_dir_dbuser }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+#    login_password: "{{ bacula_dir_db_adminpass }}"
+#    login_user: "{{ bacula_dir_db_adminuser }}"
+#    password: "{{ bacula_dir_dbpassword }}"
+    state: "present"
+    expires: infinity
+  become: yes
+  become_user: postgres
+#  no_log: True
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup pgsql | Create User (pgsql via bacula_dir_db_adminuser)
+  postgresql_user:
+    db: "{{ bacula_dir_dbname }}"
+    user: "{{ bacula_dir_dbuser }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    password: "{{ bacula_dir_dbpassword }}"
+    state: "present"
+    expires: infinity
+#  no_log: True
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Reassign all object in database to bacula_dir_dbuser
+  postgresql_owner:
+    db: "{{ bacula_dir_dbname }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    new_owner: "{{ bacula_dir_dbuser }}"
+    reassign_owned_by: "{{ bacula_dir_db_adminuser }}"
+
+- name: Setup pgsql | Grant rights to tables (pgsql)
+  postgresql_privs:
+    state: present
+    grant_option: yes
+    database: "{{ bacula_dir_dbname }}"
+    role: "{{ bacula_dir_dbuser }}"
+    type: table
+    objs: ALL_IN_SCHEMA
+    priv: "ALL"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+
+- name: Setup pgsql | Grant rights to sequences on those tables (pgsql)
+  postgresql_privs:
+    state: present
+    grant_option: yes
+    database: "{{ bacula_dir_dbname }}"
+    role: "{{ bacula_dir_dbuser }}"
+    type: sequence
+    objs: ALL_IN_SCHEMA
+    priv: "SELECT,UPDATE"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+

@@ -1,0 +1,99 @@
+# Install and configure databases
+# needs python-mysqldb or python3-mysqldb
+#  - name: Install MySQL-Python  module
+#    pip: name=MySQL-python
+---
+- name: Setup mysql | Create DB if not exists (mysql)
+  mysql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: present
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_mysql_exists
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Setup mysql | Create DB if not exists (mysql, via .my.cnf)
+  # needs python-mysqldb or python3-mysqldb
+  mysql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: present
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+  register: bacula_database_mysql_exists
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup mysql | Create Tables in DB (mysql)
+  mysql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: import
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    target: "{{ bacula_dir_dbimport_mysql_file }}"
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_database_mysql_exists.changed
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Setup mysql | Create Tables in DB (mysql, via .my.cnf)
+  mysql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: import
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    target: "{{ bacula_dir_dbimport_mysql_file }}"
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_database_mysql_exists.changed
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
+
+- name: Setup mysql | Create User and grant usage (mysql)
+  mysql_user:
+    name: "{{ bacula_dir_dbuser }}"
+    # host: "%"
+    host: "{{ bacula_dir_dbaddress }}"
+    password: "{{ bacula_dir_dbpassword }}"
+    priv: "{{ bacula_dir_dbname }}.*:ALL"
+    state: "present"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  no_log: "{{ bacula_debug_no_log }}"
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length > 0
+  tags:
+  - db
+
+- name: Setup mysql | Create User and grant usage (mysql, via .my.cnf)
+  mysql_user:
+    name: "{{ bacula_dir_dbuser }}"
+    # host: "%"
+    host: "{{ bacula_dir_dbaddress }}"
+    password: "{{ bacula_dir_dbpassword }}"
+    priv: "{{ bacula_dir_dbname }}.*:ALL"
+    state: "present"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+  no_log: "{{ bacula_debug_no_log }}"
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length == 0
+  tags:
+  - db
