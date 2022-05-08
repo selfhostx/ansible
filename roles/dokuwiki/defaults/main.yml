@@ -1,0 +1,42 @@
+---
+# defaults file for PeterMosmans.dokuwiki
+
+dokuwiki_base: /var/www/html
+dokuwiki_group: www-data
+dokuwiki_name: dokuwiki
+dokuwiki_plugins_remove:
+  - name: authad
+  - name: authldap
+  - name: authmysql
+  - name: authpdo
+  - name: authpgsql
+  - name: info
+  - name: popularity
+dokuwiki_provision: false
+dokuwiki_savedir: /var/www/html/data
+dokuwiki_source: https://download.dokuwiki.org/src/dokuwiki/dokuwiki-stable.tgz
+dokuwiki_user: root
+
+# Template parameters (will only be used when dokuwiki_provision is true)
+dokuwiki_acl_all: 0
+dokuwiki_acl_user: 8
+dokuwiki_local:
+  - name: "['gzip_output']"
+    value: '1'
+  - name: "['passcrypt']"
+    value: 'bcrypt'
+
+# if set to True add "userewrite" with value 2 in dokuwiki_local:
+# see https://www.dokuwiki.org/config:userewrite for more information
+dokuwiki_rewrite_htaccess: False
+# enable Options in .htaccess (my lead to 500-error if webserver does not allow override!)
+dokuwiki_rewrite_htaccess_options_enable: False
+dokuwiki_rewrite_htaccess_xmlrpc_https_only: True
+
+dokuwiki_title: "default Dokuwiki site"
+dokuwiki_language: en
+dokuwiki_license: cc-by-sa
+
+# create symlink from root to ./data/cache/sitemap.xml.gz when wiki is the whole page and ['sitemap'] '1':
+dokuwiki_symlink_sitemap: False
+

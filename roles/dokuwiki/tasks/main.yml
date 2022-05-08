@@ -1,0 +1,223 @@
+---
+# tasks file for PeterMosmans.dokuwiki
+
+# Variable setup.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include: setup-Archlinux.yml
+  when: ansible_os_family == 'Archlinux'
+
+- name: Apply permissions for configuration files
+  file:
+    path: "{{ item }}"
+    # state: directory
+    mode: "0770"
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    recurse: yes
+  with_items:
+    - "{{ dokuwiki_base }}/conf"
+    - "{{ dokuwiki_savedir }}"
+  when: ansible_os_family == 'Debian'
+  tags:
+    - permission
+
+- block:
+  - name: Apply and deploy configuration templates
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ dokuwiki_base }}/conf/{{ item.dest }}"
+      mode: "0770"
+      group: "{{ dokuwiki_group }}"
+      owner: "{{ dokuwiki_user }}"
+    with_items:
+      - src: acl.auth.php.j2
+        dest: acl.auth.php
+      - src: local.php.j2
+        dest: local.php
+      - src: plugins.local.php.j2
+        dest: plugins.local.php
+    tags:
+      - provision
+
+  - name: Apply and deploy configuration for users
+    template:
+      src: users.auth.php.j2
+      dest: "{{ dokuwiki_base }}/conf/users.auth.php"
+      mode: "0770"
+      group: "{{ dokuwiki_group }}"
+      owner: "{{ dokuwiki_user }}"
+    when: dokuwiki_users is defined
+    tags:
+      - provision
+
+  - name: Install cron job
+    template:
+      src: cleanup.sh.j2
+      dest: "/etc/cron.daily/dokuwiki-cleanup-{{ dokuwiki_name }}"
+      mode: "0755"
+      group: root
+      owner: root
+    when: ansible_os_family == 'Debian'
+    tags:
+      - provision
+
+  - name: Secure configuration
+    file:
+      path: "{{ dokuwiki_base }}/install.php"
+      state: absent
+    tags:
+      - provision
+  when: dokuwiki_provision
+
+- name: Symlink Sitemap to htdocs-root
+  file:
+    src: "./data/cache/sitemap.xml.gz"
+    dest: "{{ dokuwiki_base }}/sitemap.xml.gz"
+    state: link
+  tags:
+    - provision
+  when:
+  - dokuwiki_provision
+  - dokuwiki_symlink_sitemap
+
+- name: Create .htaccess for rewrite
+  template:
+    src: "htaccess.j2"
+    dest: "{{ dokuwiki_base }}/.htaccess"
+    mode: "0660"
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+  tags:
+    - provision
+  when:
+  - dokuwiki_provision
+  - dokuwiki_rewrite_htaccess
+
+- name: Remove (previous versions of) plugins
+  file:
+    path: "{{ dokuwiki_base }}/lib/plugins/{{ item.name }}"
+    state: absent
+  with_flattened:
+    - "{{ dokuwiki_plugins|default([]) }}"
+    - "{{ dokuwiki_plugins_remove|default([]) }}"
+  tags:
+    - plugins
+    - upgrade
+
+- name: Recreate directory for each plugin
+  file:
+    path: "{{ dokuwiki_base }}/lib/plugins/{{ item.name }}"
+    state: directory
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+  with_items: "{{ dokuwiki_plugins|default([]) }}"
+  tags:
+    - plugins
+    - upgrade
+
+- name: Download and install latest version of plugins
+  unarchive:
+    src: "{{ item.src }}"
+    dest: "{{ dokuwiki_base }}/lib/plugins/{{ item.name }}"
+    remote_src: true
+    extra_opts:
+      - '{% if not item.direct|default(false) %}--strip-components=1{% else %}-o{% endif %}'
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    mode: "0770"
+  with_items: "{{ dokuwiki_plugins|default([]) }}"
+  tags:
+    - plugins
+    - upgrade
+
+- name: Remove previous versions of templates
+  file:
+    path: "{{ dokuwiki_base }}/lib/tpl/{{ item.name }}"
+    state: absent
+  with_items: "{{ dokuwiki_templates|default([]) }}"
+  tags:
+    - templates
+    - upgrade
+
+- name: Recreate directory for each template (workaround for Ansible bug)
+  file:
+    path: "{{ dokuwiki_base }}/lib/tpl/{{ item.name }}"
+    state: directory
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+  with_items: "{{ dokuwiki_templates|default([]) }}"
+  tags:
+    - templates
+    - upgrade
+
+- name: Download and install latest version of templates
+  unarchive:
+    src: "{{ item.src }}"
+    dest: "{{ dokuwiki_base }}/lib/tpl/{{ item.name }}"
+    remote_src: true
+    extra_opts: ['--strip-components=1']
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    mode: "0770"
+  with_items: "{{ dokuwiki_templates|default([]) }}"
+  tags:
+    - templates
+    - upgrade
+
+- name: Customize template using online files
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ dokuwiki_base }}/{{ item.dest }}"
+    remote_src: true
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    mode: "{{ item.mode }}"
+  with_items: "{{ dokuwiki_overrides|default([]) }}"
+
+- name: Set Dokuwiki page permissions
+  file:
+    path: "{{ dokuwiki_savedir }}/{{ item }}"
+    # state: directory
+    mode: "0770"
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    recurse: yes
+  with_items:
+    - attic
+    - cache
+    - index
+    - locks
+    - media
+    - media_attic
+    - media_meta
+    - meta
+    - pages
+    - tmp
+  tags:
+    - permission
+    - upgrade
+
+- name: Set Dokuwiki configuration permissions
+  file:
+    path: "{{ dokuwiki_base }}/{{ item }}"
+    # state: directory
+    mode: "0770"
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    recurse: yes
+  with_items:
+    - lib/plugins/
+    - lib/tpl
+  when: ansible_os_family == 'Debian'
+  tags:
+    - permission
+    - upgrade
+
+- include: setup-Archlinux.yml
+  when: ansible_os_family == 'Archlinux'
+

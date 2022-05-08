@@ -1,0 +1,6 @@
+---
+- name: Ensure Dokuwiki is installed.
+  package:
+    name: "{{ dokuwiki_package_name }}"
+    state: installed
+

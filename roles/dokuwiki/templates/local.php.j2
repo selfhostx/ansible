@@ -1,0 +1,25 @@
+<?php
+/**
+ * Dokuwiki's Main Configuration File - Local Settings
+ */
+$conf['title'] = '{{ dokuwiki_title }}';
+{% if dokuwiki_template is defined %}
+$conf['template'] = '{{ dokuwiki_template }}';
+{% endif %}
+$conf['lang'] = '{{ dokuwiki_language }}';
+$conf['license'] = '{{ dokuwiki_license }}';
+$conf['useacl'] = 1;
+$conf['superuser'] = '@admin';
+{% if dokuwiki_disableactions is defined %}
+$conf['disableactions'] = '{{ dokuwiki_disableactions }}';
+{% endif %}
+{% if dokuwiki_local is defined %}
+{%   for conf in dokuwiki_local %}
+$conf{{ conf.name }} = '{{ conf.value }}';
+{%   endfor %}
+{% endif %}
+{% if dokuwiki_template is defined and dokuwiki_template_local is defined %}
+{%   for conf in dokuwiki_template_local %}
+$conf['tpl']['{{ dokuwiki_template }}']{{ conf.name }} = '{{ conf.value }}';
+{%   endfor %}
+{% endif %}

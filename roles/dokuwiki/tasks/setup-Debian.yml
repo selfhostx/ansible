@@ -1,0 +1,27 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - ca-certificates
+      - openssl
+      - tar
+      - unzip
+      - zip
+    state: present
+
+- name: Make sure Dokuwiki base directory exists (workaround for Ansible bug)
+  file:
+    path: "{{ dokuwiki_base }}"
+    state: directory
+
+- name: Download and extract latest version of Dokuwiki
+  unarchive:
+    src: "{{ dokuwiki_source }}"
+    dest: "{{ dokuwiki_base }}"
+    remote_src: true
+    extra_opts: ['--strip-components=1']
+    group: "{{ dokuwiki_group }}"
+    owner: "{{ dokuwiki_user }}"
+    mode: "0750"
+  tags:
+    - upgrade

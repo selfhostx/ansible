@@ -1,0 +1,18 @@
+- name: Apply and deploy Apache configuration for Dokuwiki
+  template:
+    src: dokuwiki.conf.j2
+    dest: "/etc/apache2/sites-available/{{ dokuwiki_name }}.conf"
+    owner: root
+    group: root
+    mode: "0640"
+  tags:
+    - templates
+  notify:
+    - restart apache2
+
+- name: Enable the site
+  command:
+    a2ensite {{ dokuwiki_name }}.conf
+  notify:
+    - restart apache2
+
