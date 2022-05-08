@@ -1,0 +1,48 @@
+---
+samba_user_default_shell: "/bin/bash"
+samba_create_users: True
+samba_config_file: "/etc/samba/smb.conf"
+samba_template: "samba_standalone.j2"
+
+samba_disable_netbios_nmbd: False
+
+# if groups is empty: removes all groups except primary group!
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html
+
+samba_min_protocol: SMB3
+samba_client_max_protocol: SMB3
+
+# win7 does not support mandatory for samba_server_signing and samb_smb_encrypt!
+samba_server_signing: "mandatory"
+samba_smb_encrypt: "mandatory"
+
+#samba_userlist:
+#  - username: alice
+#    password: $6$alice_hash
+#    groups: optional_group 
+#    shell: /bin/bash
+#  - username: bob
+#    password: $6$bob_hash
+#    shell: /bin/sh
+#    groups:
+
+samba_test_created_users: True
+
+# enable the special sahre for /home-dir?
+samba_home_share_enable: False
+samba_home_share_config: |+
+  [homes]
+  browseable = No
+  Comment = Home Directories
+  create mask = 0700
+  directory mask = 0700
+  valid users = %S
+
+# Example Share:
+#samba_share_config: |+
+#  [my_share]
+#  create mask = 0700
+#  directory mask = 0700
+#  path = /path/to/share
+#  read only = No
+#  valid users = my_user, my_user2

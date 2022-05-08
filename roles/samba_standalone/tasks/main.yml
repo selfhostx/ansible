@@ -1,0 +1,96 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Ensure Samba-related packages are installed (RedHat).
+  package:
+    name:
+      - samba
+      - samba-client
+      - samba-common
+      - cifs-utils
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Ensure Samba-related packages are installed (Debian).
+  apt:
+    name:
+      - samba
+      - smbclient
+      - samba-common
+    state: present
+  when: ansible_os_family == 'Debian'
+
+
+- name: Disable Netbios nmbd daemon
+  service:
+    name: "{{ samba_daemon }}"
+    state:  stopped
+    enabled: disabled
+  when: samba_disable_netbios_nmbd
+
+- name: Ensure Samba is running and set to start on boot.
+  service:
+    name: "{{ samba_daemon }}"
+    state: started
+    enabled: true
+
+- name: Ensure Samba is running and set to start on boot.
+  service:
+    name: "{{ samba_daemon }}"
+    state: started
+    enabled: true
+
+- name: Template Samba config
+  template:
+    backup: yes
+    dest: '{{ samba_config_file }}'
+    mode: '0660'
+    src: '{{ samba_template }}'
+    validate: 'testparm --suppress-prompt %s'
+  notify:
+    - 'restart samba'
+
+- name: Create Users on system from dictionary
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    shell: "{{ item.shell | default(samba_user_default_shell) }}"
+    password: "{{ item.password | password_hash('sha512') }}"
+    groups: "{{ item.groups | default('') }}"
+    # update_password: on_create
+    append: yes
+    create_home: yes
+  when:
+  - samba_create_users
+  - samba_userlist is defined
+  - samba_userlist|length > 0
+  with_items: "{{ samba_userlist }}"
+
+# idea from: https://stackoverflow.com/questions/44762488/non-interactive-samba-user-creation-via-ansible
+- name: Create Samba users with smbpasswd
+  shell: >
+    set -e -o pipefail
+    && (pdbedit --user={{ item.username }} 2>&1 > /dev/null)
+    || (echo '{{ item.password }}'; echo '{{ item.password }}')
+    | smbpasswd -s -a {{ item.username }}
+  args:
+    executable: /bin/bash
+  register: samba_create_users
+  changed_when: "'Added user' in samba_create_users.stdout"
+  with_items: "{{ samba_userlist }}"
+  # loop: "{{ samba_users }}"
+  no_log: true
+
+- name: shell - set samba passwords correctly
+  shell: >
+    set -e -o pipefail
+    && (smbclient -U {{ item.username }}%{{ item.password }} -L 127.0.0.1 2>&1 > /dev/null)
+    || (echo '{{ item.password }}'; echo '{{ item.password }}')
+    | smbpasswd {{ item.username }}
+  args:
+    executable: /bin/bash
+  register: samba_verify_users
+  when: samba_test_created_users
+  changed_when: "'New SMB password' in samba_verify_users.stdout"
+  with_items: "{{ samba_userlist }}"
+  # no_log: true
