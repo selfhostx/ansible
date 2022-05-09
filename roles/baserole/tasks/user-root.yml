@@ -49,22 +49,22 @@
       - ssh
       - userlocal
 
-    - name: Template SSH private key for root
-      ansible.builtin.copy:
-        content: "{{ baserole_root_ssh_key_file_content }}"
-        dest: "/root/{{ baserole_root_ssh_key_file_name }}"
-        owner: "root"
-        group: "root"
-        mode: '0600'
-      no_log: true
-      when:
-        - baserole_root_ssh_key_file_content is defined
-        - baserole_root_ssh_key_file_content|length > 0
-        - baserole_root_ssh_key_file_name is defined
-        - baserole_root_ssh_key_file_name|length > 0
-      tags:
-        - pubkey
-        - ssh
+  - name: Template SSH private key for root
+    ansible.builtin.copy:
+      content: "{{ baserole_root_ssh_key_file_content }}"
+      dest: "/root/{{ baserole_root_ssh_key_file_name }}"
+      owner: "root"
+      group: "root"
+      mode: '0600'
+    no_log: true
+    when:
+      - baserole_root_ssh_key_file_content is defined
+      - baserole_root_ssh_key_file_content|length > 0
+      - baserole_root_ssh_key_file_name is defined
+      - baserole_root_ssh_key_file_name|length > 0
+    tags:
+      - pubkey
+      - ssh
 
   - name: Copy pubkeys to authorized_keys for root
     ansible.builtin.copy:
