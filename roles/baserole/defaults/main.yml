@@ -280,7 +280,7 @@ baserole_users_remove_userdata_when_state_absent: False
 # ssh_key_file_name: specify the filename for SSH private key (defaults to ".ssh/id_rsa" but ".ssh/id_ed25519" or any other value is possible). hint: generate pubkey from private key with (rsa): ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub )
 # ssh_key_passphrase: string
 # ssh_key_type: rsa (default)|ed25519 specify type of SSH-Key (to generate it)
-# sudofilename: optional filename for sudoers-file
+# sudofilename: optional filename for sudoers-file (defaults to username)
 # sudo_pass: False  # False|True when sudo group is not wanted
 # sudo_nopass: True|False (default)
 # sudo_commands: "optional/sudo/command/allowed/for/sudo"
@@ -312,7 +312,7 @@ baserole_groupcreate_local: True
 # state: absent|present (default)
 # non_unique: no (default)|yes
 # system: "no" (GID below 1000; default) or "yes" (GID > 1000)
-# sudofilename: optional filename for sudoers-file
+# sudofilename: optional filename for sudoers-file (defaults to groupname)
 # sudo_pass: False  # False|True when sudo group is not wanted
 # sudo_nopass: True|False (default)
 
