@@ -24,6 +24,9 @@ postfix_fail_if_domainname_is_missing: True
 # if system has no FQDN, take name from inventory:
 postfix_take_ansible_name_as_myorigin: False
 
+# some destinations do not like a high number of concurrent connections (default: 20):
+# postfix_default_destination_concurrency_limit: 3
+
 # format $domain :transport_optional
 # examples:
 # $domain :[my_mailserver_by_a_record]
