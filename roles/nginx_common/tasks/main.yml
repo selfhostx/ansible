@@ -1,0 +1,33 @@
+---
+# tasks file
+  - name: Install nginx package
+    ansible.builtin.package:
+      name: "nginx"
+      state: present
+
+  - name: Nginx TLS hardening
+    ansible.builtin.template:
+      src: templates/nginx-tls-hardening.j2
+      dest: "/etc/nginx/snippets/tls-hardening.conf"
+      mode: "0600"
+
+#  - name: Check if DH file exists
+#    ansible.builtin.stat:
+#      path: "{{ nginx_dh_filename }}"
+#    register: nginx_dh_file
+
+#  - name: Generate DH Parameters
+#    ansible.builtin.command: openssl dhparam -outform PEM -out {{ nginx_dh_filename }} {{ nginx_dh_size }}
+#    when: not nginx_dh_file.stat.exists
+
+  - name: Generate DH Parameters (will take a while!)
+    community.crypto.openssl_dhparam:
+      path: "{{ nginx_dh_filename }}"
+      size: "{{ nginx_dh_size }}"
+
+  - name: Generate DH Parameters
+    ansible.builtin.file:
+      path: "{{ nginx_dh_filename }}"
+      owner: root
+      group: root
+      mode: "0600"
