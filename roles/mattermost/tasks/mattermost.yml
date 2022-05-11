@@ -1,0 +1,151 @@
+---
+- name: Create group mattermost
+  ansible.builtin.group:
+    name: "{{ mattermost_group }}"
+    state: present
+    system: yes
+
+- name: Create user mattermost and add user mattermost to group
+  ansible.builtin.user:
+    name: "{{ mattermost_user }}"
+    group: "{{ mattermost_group }}"
+    system: yes
+    state: present
+
+- name: Create download directory
+  ansible.builtin.file:
+    mode: '0775'
+    path: '{{ mattermost_download_path }}'
+    state: directory
+
+- name: Download and extract mattermost-archive from releases.mattermost.com
+  ansible.builtin.unarchive:
+    remote_src: yes
+    src: 'https://releases.mattermost.com/{{ mattermost_version }}/mattermost-{{ mattermost_version }}-linux-amd64.tar.gz'
+    dest: '{{ mattermost_download_path }}'
+    # mode: '0770'
+    mode: 'u=rwX,g=rwX,o='
+    owner: "{{ mattermost_user }}"
+    group: "{{ mattermost_group }}"
+    #exclude:
+    #  - 'mattermost/config/config.json'
+  when: not mattermost_skip_download
+  notify:
+    - restart mattermost
+
+- name: Cleanup downloaded folder (directories linked to datadir)
+  ansible.builtin.file:
+    path: '{{ mattermost_download_path }}/mattermost/{{ item }}'
+    state: absent
+  loop: "{{ mattermost_linked_data_folders }}"
+  when: not mattermost_skip_download
+
+- name: Create mattermost data directory
+  ansible.builtin.file:
+    mode: '0770'
+    path: '{{ mattermost_datadir_path }}'
+    state: directory
+
+#- name: Check if folder from mattermost_linked_folder is a link
+#  ansible.builtin.stat:
+#    path: '{{ mattermost_app_path }}/{{ item }}'
+#  register: mattermost_folder_link_{{ item }}
+
+#- name: Rename folder when not a link (most likely default folder from package)
+#  command:
+#    path: 'mv {{ mattermost_app_path }}/{{ item }} {{ mattermost_app_path }}/{{ item }}-old'
+#  when:
+#  - mattermost_folder_link_{{ item }}.stat.islnk
+#  - mattermost_folder_link_{{ item }}.stat.islnk == False
+#  loop: "{{ mattermost_linked_data_folders }}"
+
+- name: Link mattermost binary to current version
+  ansible.builtin.file:
+    src: '{{ mattermost_download_path }}/mattermost'
+    dest: '{{ mattermost_app_path }}'
+    state: link
+
+- name: Create folders in data dir (if they do not exist)
+  ansible.builtin.file:
+    path: '{{ mattermost_datadir_path }}/{{ item }}'
+    state: directory
+    mode: 'u=rwx,g=rwx,o='
+  loop: "{{ mattermost_linked_data_folders }}"
+
+- name: Link folders to datadir
+  ansible.builtin.file:
+    src: '{{ mattermost_datadir_path }}/{{ item }}'
+    dest: '{{ mattermost_download_path }}/mattermost/{{ item }}'
+    state: link
+  loop: "{{ mattermost_linked_data_folders }}"
+
+- name: Template mattermost config config.json
+  template:
+    backup: yes
+    dest: '{{ mattermost_datadir_path }}/config/config.json'
+    mode: '0660'
+    src: '{{ mattermost_config_json_template }}'
+  when: mattermost_managed_config
+  notify:
+    - 'restart mattermost'
+
+- name: Ensure correct permissions on app path
+  ansible.builtin.file:
+    path: '{{ mattermost_app_path }}'
+    state: directory
+    owner: "{{ mattermost_user }}"
+    group: "{{ mattermost_group }}"
+    mode: 'g+w'
+    recurse: yes
+
+- name: Ensure correct permissions on data directory
+  ansible.builtin.file:
+    path: '{{ mattermost_datadir_path }}'
+    state: directory
+    owner: "{{ mattermost_user }}"
+    group: "{{ mattermost_group }}"
+    mode: 'u=rwX,g=rwX,o='
+    recurse: yes
+
+- name: Ensure correct permissions on mattermost binary
+  ansible.builtin.file:
+    path: '{{ mattermost_app_binary }}'
+    state: 'file'
+    owner: "{{ mattermost_user }}"
+    group: "{{ mattermost_group }}"
+    mode: 'u=rwx,g=rwx,o='
+
+- name: Ensure sufficient capabilities on mattermost binary
+  community.general.capabilities:
+    path: '{{ mattermost_app_binary }}'
+    capability: cap_net_bind_service=+ep
+    state: present
+
+- name: Ensure mattermost unit file exists
+  ansible.builtin.template:
+    backup: yes
+    dest: '/etc/systemd/system/{{ mattermost_unit_name }}'
+    mode: '0644'
+    src: 'templates/etc/systemd/system/mattermost.service.j2'
+  register: mattermost_unitfile_changed
+  notify: 'restart mattermost'
+
+- name: Reload unitfile with systemctl daemon-reload
+  # make sure daemon_reload happens before other handlers like restart
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: mattermost_unitfile_changed is defined
+
+- name: Enable unitfile
+  ansible.builtin.systemd:
+    name: "{{ mattermost_unit_name }}"
+    enabled: yes
+
+- name: force handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure mattermost service is started
+  ansible.builtin.service:
+    name: 'mattermost'
+    enabled: yes
+    state: started

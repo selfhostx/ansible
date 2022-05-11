@@ -1,0 +1,10 @@
+---
+# tasks file for mattermost
+
+- name: Fail when mattermost_version is not defined
+  ansible.builtin.fail:
+    msg: mattermost_version is not defined (when in doubt choose latest LTS version)
+  when: mattermost_version is not defined
+
+- include_tasks: nginx.yml
+- include_tasks: mattermost.yml

@@ -1,0 +1,12 @@
+---
+# handlers file for mattermost
+
+- name: restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+
+- name: restart mattermost
+  ansible.builtin.service:
+    name: mattermost
+    state: restarted

@@ -1,0 +1,137 @@
+---
+# defaults file for mattermost
+
+# more information about mattermost config at https://about.mattermost.com/default-config-docs
+
+# required ===========
+# set at least the following variables (execution will fail when not set)
+
+# mattermost_hostname: 
+
+# use any valid version here:
+# mattermost_version: "6.3.6"
+
+# recommended ======
+
+# 32-character salt for public links, current behaviour is to generate a new salt every time mattermost is restarted until it is set
+# https://docs.mattermost.com/configure/configuration-settings.html#public-link-salt :
+# mattermost_publiclinksalt: "32 character Salt"
+
+# 32-character key for encrypting and decrypting sensitive fields in the database (setting most likely not used but is is re-generated if empty and config changes) 
+# https://docs.mattermost.com/configure/configuration-settings.html#at-rest-encrypt-key https://forum.mattermost.com/t/solved-at-rest-encryption/2960
+# mattermost_atrestencryptkey: "32 character Salt"
+
+# generation tool-examples:
+# cat /dev/urandom | tr -dc "a-z0-9" | fold -w ${1:-32} | head -n 1
+# pwgen -s 32 --no-capitalize
+
+mattermost_sitename: "mattermost"
+# possible values: mysql/postgres
+mattermost_db_type: "postgres"
+# mysql examples for mattermost_db_server:
+# unix(/run/mysqld/mysqld.sock)
+# tcp(127.0.0.1:3306)
+mattermost_db_server: "localhost:5432"
+mattermost_db_mysql_collation: "utf8mb4_general_ci"
+mattermost_db_user: "mattermost"
+mattermost_db_password: ""
+mattermost_db_database: "mattermost"
+# enable user invites etc: https://docs.mattermost.com/configure/configuration-settings.html#enable-account-creation
+mattermost_enableusercreation: True
+
+
+mattermost_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ mattermost_hostname }}/fullchain.pem"
+mattermost_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ mattermost_hostname }}/privkey.pem"
+
+# comma-seperated list of domains exmaple: "domain1t.tld, domain2.tld"
+mattermost_restrictcreationtodomains: ""
+mattermost_enforcemultifactorauthentication_users: false
+mattermost_enforcemultifactorauthentication_guests: false
+mattermost_passwordsettings_minimumlength: 10
+mattermost_passwordsettings_lowercase: true
+mattermost_passwordsettings_number: true
+mattermost_passwordsettings_uppercase: true
+mattermost_passwordsettings_symbol: true
+
+mattermost_enablecustombrand: false
+mattermost_custombrandtext: ""
+mattermost_customdescriptiontext: ""
+
+mattermost_enablesignupwithemail: true
+mattermost_enablesigninwithemail: true
+mattermost_enablesigninwithusername: true
+mattermost_requireemailverification: false
+
+# customize e-mails:
+mattermost_feedbackname: ""
+mattermost_feedbackemail: ""
+mattermost_replytoaddress: ""
+mattermost_feedbackorganization: ""
+mattermost_sendemailnotifications: false
+mattermost_enablesmtpauth: false
+mattermost_smtpusername: ""
+mattermost_smtppassword: ""
+mattermost_smtpserver: "localhost"
+mattermost_smtpport: 25
+# Default: "" other options: TLS|STARTTLS
+mattermost_email_connectionsecurity: ""
+# https://docs.mattermost.com/configure/configuration-settings.html#email-notification-contents
+# full|generic in old E20
+mattermost_emailnotificationcontentstype: "full"
+# https://docs.mattermost.com/configure/configuration-settings.html#push-notification-contents
+# generic_no_channel|generic|full|id_loaded
+mattermost_sendpushnotifications_enable: true
+mattermost_sendpushnotifications_content: "full"
+
+# optional vars ====
+# should ansible manage config/config.json?
+# recommended is True (uor override template with var "mattermost_config_json_template"):
+mattermost_managed_config: True
+
+mattermost_userstatusawaytimeout: 300
+
+mattermost_user: "mattermost"
+mattermost_group: "mattermost"
+
+# paths:
+# - where to store download version:
+mattermost_download_path: "/opt/mattermost/version-available/mattermost-{{ mattermost_version }}"
+# - link pointing to running version (makes version switching easy)
+mattermost_app_path: /opt/mattermost/version-running
+mattermost_app_binary: "{{ mattermost_app_path }}/bin/mattermost"
+# - mattermost data
+mattermost_datadir_path: /opt/mattermost/mattermost-data
+
+
+nginx_ssl_protocols: "TLSv1.2 TLSv1.3"
+# TLS on appserver
+mattermost_tlsminver: "1.2"
+mattermost_tlscertfile: ""
+mattermost_tlskeyfile: ""
+mattermost_listenport: 8065
+# upstream default: mattermost_dataListenAddress: ":8065"
+mattermost_datalistenaddress: "127.0.0.1:{{ mattermost_listenport }}"
+mattermost_maxusersperteam: 50
+
+# override templates
+
+# example: mattermost_plugin_section_snippet: "./templates/opt/mattermost/config/plugins-section-snippet.j2
+# mattermost_plugin_section_snippet: "./templates/opt/mattermost/config/plugins-section-snippet.j2"
+mattermost_plugin_section_snippet: "./plugins-section-snippet.j2"
+mattermost_nginx_template: "templates/etc/nginx/sites-available/mattermost.j2"
+mattermost_config_json_template: "templates/opt/mattermost/config/config.json.j2"
+mattermost_linked_data_folders:
+- config
+- data
+- logs
+- plugins
+
+# if service is upgraded, mattermost gets shutdown too (but not restarted):
+mattermost_unit_timeoutstartsec: 60
+mattermost_unit_name: "mattermost.service"
+mattermost_db_unit_required: False
+mattermost_db_unit_postgres: "postgresql.service"
+mattermost_db_unit_mysql: "mysql.service"
+
+# skip download for testing:
+mattermost_skip_download: False

@@ -1,0 +1,30 @@
+# {{ ansible_managed }}
+[Unit]
+Description=mattermost
+After=network.target
+{% if mattermost_db_type == "postgres" %}
+After=postgresql.service
+{% if mattermost_db_unit_required %}
+Requires=postgresql.service
+{% endif %}
+{% endif %}
+{% if mattermost_db_type == "mysql" %}
+After=mysql.service
+{% if mattermost_db_unit_required %}
+Requires=mysql.service
+{% endif %}
+{% endif %}
+
+[Service]
+Type=notify
+ExecStart={{ mattermost_app_binary }}
+TimeoutStartSec={{ mattermost_unit_timeoutstartsec }}
+Restart=always
+RestartSec=10
+WorkingDirectory={{ mattermost_app_path }}
+User={{ mattermost_user }}
+Group={{ mattermost_group }}
+LimitNOFILE=49152
+
+[Install]
+WantedBy=multi-user.target

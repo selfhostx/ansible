@@ -1,0 +1,37 @@
+galaxy_info:
+  author: mattermost
+  description: mattermost role
+
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+
+  # Choose a valid license ID from https://spdx.org - some suggested licenses:
+  # - BSD-3-Clause (default)
+  # - MIT
+  # - GPL-2.0-or-later
+  # - GPL-3.0-only
+  # - Apache-2.0
+  # - CC-BY-4.0
+  license: GPL-3.0-only
+
+  min_ansible_version: 2.10
+
+  # If this a Container Enabled role, provide the minimum Ansible Container version.
+  # min_ansible_container_version:
+
+  platforms:
+  - name: Debian
+    versions:
+    - 10
+    - 11
+  - name: Ubuntu
+    versions:
+    - 18.04
+    - 20.04
+    - 22.04
+
+  galaxy_tags: []
+
+dependencies:
+  - role: selfhostx.ansible.nginx_common
