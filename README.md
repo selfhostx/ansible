@@ -67,6 +67,7 @@ A: Shellscript have full flexibility ... but you`ll need to implement everything
 - re-implement code stuff that is already available today (ansible galaxy has tons of code)
 - validate config for services that offer it (i.e. prevent broken sudo configs ...)
 - automated/unattended run (installations are not always done interactivly done by a humans!)
+- check-mode (-C) has the ability to show what changes would have been applied
 - error-handling: try to trap errors with pipefail ... that blows up code massively. Example for error-handling in bash (how many of your scripts does implement something similar?):
 ~~~
 set -eo pipefail

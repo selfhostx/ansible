@@ -73,7 +73,7 @@ Roadmap
 
 **TLS-cert + CA-management**
   - letsencrypt
-    - certbot https://github.com/stefanux/ansible-role-certbot
+    - certbot https://github.com/stefanux/ansible-role-certbot or https://github.com/geerlingguy/ansible-role-certbot ?
     - helper-scripte -> deploy_hook
   - certificate distribution
     - own certs (individual, wildcards) -> Code available -> role
@@ -214,7 +214,7 @@ Roadmap
     - jitsi via docker (but usage discouraged due to limitations, over-complex architecture and bad documentation)
   - Wiki
     - dokuwiki https://github.com/stefanux/ansible-role-dokuwiki
-    - wiki.js? (2Do: maintainer needed)
+    - wiki.js? (2Do: maintainer needed; -> https://github.com/supertarto/ansible-wikijs ?)
     - bookstack (2Do: maintainer needed)
     - mediawiki (2Do: maintainer needed)
   - Netbox (IPAM/IT Asset Management)
