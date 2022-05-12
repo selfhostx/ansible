@@ -203,7 +203,12 @@ baserole_openssh_use_template: True
 baserole_openssh_include_pattern: "/etc/ssh/sshd_config.d/*.conf"
 
 # baserole_openssh_port: 22
+
+# enable ssh_key generation in general:
 baserole_openssh_gen_keys: False
+# force regeneration of host_keys (this is usually done on openssh-install), useful for cloned systems (needs "baserole_openssh_gen_keys: True" too!) yes|no:
+baserole_openssh_force_gen_keys: no
+
 baserole_openssh_host_key:
 - /etc/ssh/ssh_host_rsa_key
 - /etc/ssh/ssh_host_ecdsa_key
@@ -212,8 +217,6 @@ baserole_openssh_key_types:
 - rsa
 - ecdsa
 - ed25519
-# gen keys but not if already present:
-# baserole_openssh_gen_keys: True
 
 baserole_openssh_template: "sshd_template.j2"
 baserole_openssh_skip_include: False
