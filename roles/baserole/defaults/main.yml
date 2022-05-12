@@ -340,3 +340,10 @@ baserole_nanorc_template: "nanorc.j2"
 
 baserole_htoprc_configure: True
 baserole_htoprc_template: "htoprc.j2"
+
+# generate a random machine-id (useful for cloned systems):
+# attention: changing the machine-id can have unwanted consequences, examples:
+# https://wiki.debian.org/MachineId
+# https://unix.stackexchange.com/questions/191313/why-is-my-systemd-journal-not-persistent-across-reboots
+baserole_machine_id_regenerate: False
+baserole_machine_id_filename: "/etc/machine-id"

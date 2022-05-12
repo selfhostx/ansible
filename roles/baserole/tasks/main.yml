@@ -148,3 +148,13 @@
         - ssh
   tags: ssh
   when: baserole_sshd_conf_enable
+
+- name: Regenerate machine-id (if enabled)
+  ansible.builtin.copy:
+    content: "{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=32') }}\n"
+    dest: "{{ baserole_machine_id_filename }}"
+    owner: "root"
+    group: "root"
+    mode: '0644'
+  tags: uuidgen
+  when: baserole_machine_id_regenerate
