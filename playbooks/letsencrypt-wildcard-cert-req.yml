@@ -1,0 +1,230 @@
+---
+# this playbook gets a letsencrypt wildcard-certificate via DNS-challenge
+# - DNS-provider sets DNS-challenge (via TXT-Record)
+#   -> you need to substitute your provider and API-key here and/or implement record-insertion into your authoritative dns-server
+# - files are distributed to specified location
+# - symlink to certs are set (optional)
+# - services are restarted (optional)
+# 
+# source: https://dickingwithdocker.com/2018/08/wildcard-letsencrypt-renewal-with-ansible-and-memset/
+
+- hosts: letsencrypt
+  gather_facts: no
+
+  vars:
+    cert_wildcard_zone: "domain.tld"
+    cert_wildcard_domain: "domain.tld"
+    # *. is for wildcard:
+    cert_wildcard_common_name: "*.{{ cert_wildcard_domain }}"
+    # mail for expire-warnings:
+    cert_wildcard_email: webmaster@domain.tld
+    cert_wildcard_country_name: XY
+    cert_wildcard_ou: IT
+
+    # API-key for DNS-Entries:
+    # hetzner_api_key_dns_mgmt: -> vault
+    # implemented providers are: inwx, hetzner
+    cert_wildcard_dns_provider_name: hetzner
+    cert_wildcard_reload_wait_time: 3
+    # get new cert when cert when value is equal or below n days:
+    cert_wildcard_remaining_days: 60
+
+    # PROD (ratelimits apply):
+    cert_wildcard_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    # TESTING (use when testing):
+    # cert_wildcard_acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    # no trailing slash here:
+    cert_wildcard_tmpdir: "/tmp/le/{{ cert_wildcard_zone }}"
+    cert_wildcard_account_key: "le-{{ cert_wildcard_domain }}.pem"
+    cert_wildcard_keyname: "star-{{ cert_wildcard_domain }}-key.pem"
+    cert_wildcard_csrname: "star-{{ cert_wildcard_domain }}.csr"
+    cert_wildcard_certname: "star-{{ cert_wildcard_domain }}.pem"
+    cert_wildcard_fullchain: "star-{{ cert_wildcard_domain }}-fullchain.pem"
+    # distribution:
+    # restart service after key-distribution (i.e. webservers like nginx)
+    cert_wildcard_restart_service: ""
+    cert_wildcard_destination: /etc/ssl
+    # enable copy to another place
+    cert_wildcard_copy_enable: True
+    # enable symlinking on target?
+    cert_wildcard_symlink_enable: False
+    # link file to this folder:
+    cert_wildcard_symlink_folder: /etc/apache2
+    cert_wildcard_owner: "root"
+    cert_wildcard_group: "root"
+
+  vars_files:
+    - vault-stefanux.yml
+
+  handlers:
+    - name: restart cert_wildcard_restart_service
+      service: name={{ cert_wildcard_restart_service }} state=restarted
+      when:
+        - cert_wildcard_restart_service is defined
+        - cert_wildcard_restart_service|length>0
+
+  tasks:
+  
+  - name: Local tasks
+    run_once: true
+    delegate_to: localhost
+    connection: local
+    block:
+
+    - name: localhost | create temp dir
+      ansible.builtin.file:
+        path: "{{ cert_wildcard_tmpdir }}"
+        state: directory
+
+    - name: localhost | create temp account key
+      community.crypto.openssl_privatekey:
+        path: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_account_key }}"
+
+    - name: localhost | create private key
+      community.crypto.openssl_privatekey:
+        path: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_keyname }}"
+
+    - name: localhost | create CSR
+      community.crypto.openssl_csr:
+        path: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_csrname }}"
+        privatekey_path: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_keyname }}"
+        common_name: "{{ cert_wildcard_common_name }}"
+        country_name: "{{ cert_wildcard_country_name }}"
+        organization_name: "{{ cert_wildcard_ou }}"
+        email_address: "{{ cert_wildcard_email }}"
+
+    - name: LetsEncrypt | submit request
+      community.crypto.acme_certificate:
+        account_key_src: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_account_key }}"
+        account_email: "{{ cert_wildcard_email }}"
+        src: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_csrname }}"
+        fullchain_dest: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_certname }}"
+        challenge: dns-01
+        acme_directory: "{{ cert_wildcard_acme_directory }}"
+        acme_version: 2
+        terms_agreed: yes
+        remaining_days: "{{ cert_wildcard_remaining_days }}"
+      register: challenge
+
+    - name: Print Submit request
+      ansible.builtin.debug:
+        var: challenge
+
+    - name: Set TXT Record on Hetzner DNS
+      community.dns.hetzner_dns_record:
+        state: present
+        zone: "{{ cert_wildcard_zone }}"
+        type: TXT
+        ttl: 300
+        record: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['record'] }}"
+        value: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
+        hetzner_token: "{{ hetzner_api_key_dns_mgmt }}"
+      when: cert_wildcard_dns_provider_name == "hetzner"
+
+    - name: Set TXT Record on Inwx DNS
+      inwx.collection.dns:
+        domain: "{{ cert_wildcard_zone }}"
+        type: TXT
+        record: "{{ inwx_record_name }}"
+        value: "{{ inwx_record_value }}"
+        solo: yes
+        username: "{{ inwx_dns_user }}"
+        password: "{{ inwx_dns_password }}"
+      when: cert_wildcard_dns_provider_name == "inwx"
+
+    - name: Optional Sleep time for DNS-Reload
+      ansible.builtin.wait_for:
+        delay: "{{ cert_wildcard_reload_wait_time }}"
+        timeout: 0
+
+    - name: LetsEncrypt | retrieve cert
+      community.crypto.acme_certificate:
+        account_key_src: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_account_key }}"
+        account_email: "{{ cert_wildcard_email }}"
+        src: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_csrname }}"
+        dest: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_certname }}"
+        fullchain_dest: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_fullchain }}"
+        challenge: dns-01
+        acme_directory: "{{ cert_wildcard_acme_directory }}"
+        acme_version: 2
+        terms_agreed: yes
+        remaining_days: "{{ cert_wildcard_remaining_days }}"
+        data: "{{ challenge }}"
+      register: cert_retrieval
+
+    - name: Remove TXT Record on Hetzner DNS
+      community.dns.hetzner_dns_record:
+        state: absent
+        zone: "{{ cert_wildcard_zone }}"
+        type: TXT
+        ttl: 300
+        record: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['record'] }}"
+        value: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
+        hetzner_token: "{{ hetzner_api_key_dns_mgmt }}"
+      when: cert_wildcard_dns_provider_name == "hetzner"
+
+    - name: Remove TXT Record on Inwx DNS
+      inwx.collection.dns:
+        state: absent
+        domain: "{{ cert_wildcard_zone }}"
+        type: TXT
+        record: "{{ inwx_record_name }}"
+        value: "{{ inwx_record_value }}"
+        solo: yes
+        username: "{{ inwx_dns_user }}"
+        password: "{{ inwx_dns_password }}"
+      when: cert_wildcard_dns_provider_name == "inwx"
+
+    - name: localhost | remove the account key
+      ansible.builtin.file:
+        path: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_account_key }}"
+        state: absent
+      when: cert_retrieval is changed
+
+  - name: Distribution tasks
+    when: inventory_hostname != "localhost"
+    block:
+
+    # distribution:
+    - name: Copy public certs
+      ansible.builtin.copy:
+        src: "{{ cert_wildcard_tmpdir }}/{{ item }}"
+        dest: "{{ cert_wildcard_destination }}"
+        owner: "{{ cert_wildcard_owner }}"
+        group: "{{ cert_wildcard_group }}"
+        mode: 0644
+        backup: yes
+      with_items:
+        - "{{ cert_wildcard_certname }}"
+        - "{{ cert_wildcard_fullchain }}"
+      notify:
+      - restart cert_wildcard_restart_service
+      when: cert_wildcard_copy_enable
+
+    - name: Copy private cert
+      ansible.builtin.copy:
+        src: "{{ cert_wildcard_tmpdir }}/{{ cert_wildcard_keyname }}"
+        dest: "{{ cert_wildcard_destination }}"
+        owner: "{{ cert_wildcard_owner }}"
+        group: "{{ cert_wildcard_group }}"
+        mode: '0600'
+        backup: yes
+      notify:
+        - restart cert_wildcard_restart_service
+      when: cert_wildcard_copy_enable
+
+    - name: Create symbolic links for public certs
+      ansible.builtin.file:
+        src: "{{ cert_wildcard_destination }}/{{ item }}"
+        dest: "{{ cert_wildcard_symlink_folder }}/{{ item }}"
+        owner: "{{ cert_wildcard_owner }}"
+        group: "{{ cert_wildcard_group }}"
+        state: link
+      with_items:
+        - "{{ cert_wildcard_certname }}"
+        - "{{ cert_wildcard_fullchain }}"
+        - "{{ cert_wildcard_keyname }}"
+      when:
+        - cert_wildcard_copy_enable
+        - cert_wildcard_symlink_enable
+        - cert_wildcard_destination != cert_wildcard_symlink_folder
