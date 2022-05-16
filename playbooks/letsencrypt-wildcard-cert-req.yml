@@ -25,7 +25,6 @@
     # hetzner_api_key_dns_mgmt: -> vault
     # implemented providers are: inwx, hetzner
     cert_wildcard_dns_provider_name: hetzner
-    cert_wildcard_reload_wait_time: 3
     # get new cert when cert when value is equal or below n days:
     cert_wildcard_remaining_days: 60
 
@@ -132,10 +131,12 @@
         password: "{{ inwx_dns_password }}"
       when: cert_wildcard_dns_provider_name == "inwx"
 
-    - name: Optional Sleep time for DNS-Reload
-      ansible.builtin.wait_for:
-        delay: "{{ cert_wildcard_reload_wait_time }}"
-        timeout: 0
+    - name: Wait for DNS-Record to show up
+      community.dns.wait_for_txt:
+        records:
+        - name: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['record'] }}"
+          values: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
+          mode: equals
 
     - name: LetsEncrypt | retrieve cert
       community.crypto.acme_certificate:
