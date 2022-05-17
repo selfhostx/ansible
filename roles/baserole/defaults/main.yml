@@ -347,3 +347,7 @@ baserole_htoprc_template: "htoprc.j2"
 # https://unix.stackexchange.com/questions/191313/why-is-my-systemd-journal-not-persistent-across-reboots
 baserole_machine_id_regenerate: False
 baserole_machine_id_filename: "/etc/machine-id"
+
+# default value for max size of journald logs
+journald_SystemMaxUse: 500M
+
