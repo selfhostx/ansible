@@ -158,3 +158,14 @@
     mode: '0644'
   tags: uuidgen
   when: baserole_machine_id_regenerate
+  
+  
+- name: Include journald.yml
+  include_tasks: 
+    file: "journald.yml"
+    apply:
+      tags:
+        - journald
+  tags: 
+    - journald
+  when: baserole_journald_configure
