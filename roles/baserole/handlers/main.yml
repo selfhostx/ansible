@@ -36,7 +36,7 @@
   ansible.builtin.command: update-grub
   
 
-- name: restart journald
+- name: Restart journald
   systemd: 
     name: systemd-journald 
     state: restarted

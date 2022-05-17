@@ -1,12 +1,10 @@
 ---
 
-- name: set /etc/systemd/journald.conf
+- name: Set /etc/systemd/journald.conf
   template:
-    src: ../templates/journald.conf.j2
+    src: "{{ baserole_journald_template }}"
     dest: /etc/systemd/journald.conf
     owner: root
     group: root
     mode: 0644
-  notify: restart journald
-  
- 
+  notify: Restart journald

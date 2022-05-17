@@ -348,6 +348,37 @@ baserole_htoprc_template: "htoprc.j2"
 baserole_machine_id_regenerate: False
 baserole_machine_id_filename: "/etc/machine-id"
 
-# default value for max size of journald logs
-journald_SystemMaxUse: 500M
+# Journald =================
 
+baserole_journald_configure: True
+baserole_journald_template: "journald.j2"
+# see journald.conf(5) for details or https://www.freedesktop.org/software/systemd/man/journald.conf.html
+#baserole_journald_storage: auto
+#baserole_journald_compress: yes
+#baserole_journald_seal: yes
+#baserole_journald_splitMode: uid
+#baserole_journald_syncintervalsec: 5m
+#baserole_journald_ratelimitintervalsec: 30s
+#baserole_journald_ratelimitburst: 10000
+#baserole_journald_systemmaxuse: 
+#baserole_journald_systemkeepfree:
+#baserole_journald_systemmaxfilesize:
+#baserole_journald_systemmaxfiles: 100
+#baserole_journald_runtimemaxuse:
+#baserole_journald_runtimekeepfree:
+#baserole_journald_runtimemaxfileSize:
+#baserole_journald_runtimemaxfiles: 100
+#baserole_journald_maxretentionsec:
+#baserole_journald_maxfilesec: 1month
+#baserole_journald_forwardtosyslog: yes
+#baserole_journald_forwardtokmsg: no
+#baserole_journald_forwardtoconsole: no
+#baserole_journald_forwardtowall: yes
+#baserole_journald_ttypath: /dev/console
+#baserole_journald_maxlevelstore: debug
+#baserole_journald_maxlevelsyslog: debug
+#baserole_journald_maxlevelkmsg: notice
+#baserole_journald_maxlevelconsole: info
+#baserole_journald_maxlevelwall: emerg
+#baserole_journald_linemax: 48K
+#baserole_journald_readkmsg: yes

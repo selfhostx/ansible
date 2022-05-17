@@ -168,4 +168,4 @@
         - journald
   tags: 
     - journald
-    
+  when: baserole_journald_configure
