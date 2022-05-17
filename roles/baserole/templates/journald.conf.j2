@@ -13,148 +13,153 @@
 # See journald.conf(5) for details.
 
 [Journal]
-{% baserole_journald_storage is defined %}
+{% if baserole_journald_storage is defined %}
 Storage={{ baserole_journald_storage }}
 {% else %}
 #Storage=auto
 {% endif %}
-{% baserole_journald_compress is defined %}
+{% if baserole_journald_compress is defined %}
 Compress={{ baserole_journald_compress|lower }}
 {% else %}
 #Compress=yes
 {% endif %}
-{% baserole_journald_seal is defined %}
+{% if baserole_journald_seal is defined %}
 Seal={{ baserole_journald_seal|lower }}
 {% else %}
 #Seal=yes
 {% endif %}
-{% baserole_journald_splitMode is defined %}
+{% if baserole_journald_splitMode is defined %}
 SplitMode={{ baserole_journald_splitMode }}
 {% else %}
 #SplitMode=uid
 {% endif %}
-{% baserole_journald_syncintervalsec is defined %}
+{% if baserole_journald_syncintervalsec is defined %}
 SyncIntervalSec={{ baserole_journald_syncintervalsec }}
 {% else %}
 #SyncIntervalSec=5m
 {% endif %}
-{% baserole_journald_ratelimitintervalsec is defined %}
+{% if baserole_journald_ratelimitintervalsec is defined %}
 RateLimitIntervalSec={{ baserole_journald_ratelimitintervalsec }}
 {% else %}
 #RateLimitIntervalSec=30s
 {% endif %}
-{% baserole_journald_ratelimitburst is defined %}
+{% if baserole_journald_ratelimitburst is defined %}
 RateLimitBurst={{ baserole_journald_ratelimitburst }}
 {% else %}
-RateLimitBurst=10000
+#RateLimitBurst=10000
 {% endif %}
-{% baserole_journald_systemmaxuse is defined %}
+{% if baserole_journald_systemmaxuse is defined %}
 SystemMaxUse={{ baserole_journald_systemmaxuse }}
 {% else %}
-# SystemMaxUse=
+#SystemMaxUse=
 {% endif %}
-{% baserole_journald_systemkeepfree is defined %}
+{% if baserole_journald_systemkeepfree is defined %}
 SystemKeepFree={{ baserole_journald_systemkeepfree }}
 {% else %}
 #SystemKeepFree=
 {% endif %}
-{% baserole_journald_systemmaxfilesize is defined %}
+{% if baserole_journald_systemmaxfilesize is defined %}
 SystemMaxFileSize={{ baserole_journald_systemmaxfilesize }}
 {% else %}
 #SystemMaxFileSize=
 {% endif %}
-{% baserole_journald_systemmaxfiles is defined %}
+{% if baserole_journald_systemmaxfiles is defined %}
 SystemMaxFiles={{ baserole_journald_systemmaxfiles }}
 {% else %}
 #SystemMaxFiles=100
 {% endif %}
-{% baserole_journald_runtimemaxuse is defined %}
+{% if baserole_journald_runtimemaxuse is defined %}
 RuntimeMaxUse={{ baserole_journald_runtimemaxuse }}
 {% else %}
 #RuntimeMaxUse=
 {% endif %}
-{% baserole_journald_runtimekeepfree is defined %}
+{% if baserole_journald_runtimekeepfree is defined %}
 RuntimeKeepFree={{ baserole_journald_runtimekeepfree }}
 {% else %}
 #RuntimeKeepFree=
 {% endif %}
-{% baserole_journald_runtimemaxfileSize is defined %}
+{% if baserole_journald_runtimemaxfileSize is defined %}
 RuntimeMaxFileSize={{ baserole_journald_runtimemaxfileSize }}
 {% else %}
 #RuntimeMaxFileSize=
 {% endif %}
-{% baserole_journald_runtimemaxfiles is defined %}
+{% if baserole_journald_runtimemaxfiles is defined %}
 RuntimeMaxFiles={{ baserole_journald_runtimemaxfiles }}
 {% else %}
 #RuntimeMaxFiles=100
 {% endif %}
-{% baserole_journald_maxretentionsec is defined %}
+{% if baserole_journald_maxretentionsec is defined %}
 MaxRetentionSec={{ baserole_journald_maxretentionsec }}
 {% else %}
 #MaxRetentionSec=
 {% endif %}
-{% baserole_journald_maxfilesec is defined %}
+{% if baserole_journald_maxfilesec is defined %}
 MaxFileSec={{ baserole_journald_maxfilesec }}
 {% else %}
 #MaxFileSec=1month
 {% endif %}
-{% baserole_journald_forwardtosyslog is defined %}
+{% if baserole_journald_forwardtosyslog is defined %}
 ForwardToSyslog={{ baserole_journald_forwardtosyslog|lower }}
 {% else %}
 #ForwardToSyslog=yes
 {% endif %}
-{% baserole_journald_forwardtokmsg is defined %}
+{% if baserole_journald_forwardtokmsg is defined %}
 ForwardToKMsg={{ baserole_journald_forwardtokmsg|lower }}
 {% else %}
 #ForwardToKMsg=no
 {% endif %}
-{% baserole_journald_forwardtoconsole is defined %}
+{% if baserole_journald_forwardtoconsole is defined %}
 ForwardToConsole={{ baserole_journald_forwardtoconsole|lower }}
 {% else %}
 #ForwardToConsole=no
 {% endif %}
-{% baserole_journald_forwardtowall is defined %}
+{% if baserole_journald_forwardtowall is defined %}
 ForwardToWall={{ baserole_journald_forwardtowall|lower }}
 {% else %}
 #ForwardToWall=yes
 {% endif %}
-{% baserole_journald_ttypath is defined %}
+{% if baserole_journald_ttypath is defined %}
 TTYPath={{ baserole_journald_ttypath }}
 {% else %}
 #TTYPath=/dev/console
 {% endif %}
-{% baserole_journald_maxlevelstore is defined %}
+{% if baserole_journald_maxlevelstore is defined %}
 MaxLevelStore={{ baserole_journald_maxlevelstore }}
 {% else %}
 #MaxLevelStore=debug
 {% endif %}
-{% baserole_journald_maxlevelsyslog is defined %}
+{% if baserole_journald_maxlevelsyslog is defined %}
 MaxLevelSyslog={{ baserole_journald_maxlevelsyslog }}
 {% else %}
 #MaxLevelSyslog=debug
 {% endif %}
-{% baserole_journald_maxlevelkmsg is defined %}
+{% if baserole_journald_maxlevelkmsg is defined %}
 MaxLevelKMsg={{ baserole_journald_maxlevelkmsg }}
 {% else %}
 #MaxLevelKMsg=notice
 {% endif %}
-{% baserole_journald_maxlevelconsole is defined %}
+{% if baserole_journald_maxlevelconsole is defined %}
 MaxLevelConsole={{ baserole_journald_maxlevelconsole }}
 {% else %}
 #MaxLevelConsole=info
 {% endif %}
-{% baserole_journald_maxlevelwall is defined %}
-MaxLevelWall{{ baserole_journald_maxlevelwall }}
+{% if baserole_journald_maxlevelwall is defined %}
+MaxLevelWall={{ baserole_journald_maxlevelwall }}
 {% else %}
 #MaxLevelWall=emerg
 {% endif %}
-{% baserole_journald_linemax is defined %}
+{% if baserole_journald_linemax is defined %}
 LineMax={{ baserole_journald_linemax }}
 {% else %}
 #LineMax=48K
 {% endif %}
-{% baserole_journald_readkmsg is defined %}
-ReadKMsg=={{ baserole_journald_readkmsg|lower }}
+{% if baserole_journald_readkmsg is defined %}
+ReadKMsg={{ baserole_journald_readkmsg|lower }}
 {% else %}
 #ReadKMsg=yes
+{% endif %}
+{% if baserole_journald_audit is defined %}
+Audit={{ baserole_journald_audit|lower }}
+{% else %}
+#Audit=no
 {% endif %}
