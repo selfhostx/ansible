@@ -12,7 +12,7 @@ append_dot_mydomain = no
 readme_directory = no
 
 compatibility_level = 2
-{% if postfix_default_destination_concurrency_limit is defined and postfix_default_destination_concurrency_limit|length>0 %}
+{% if postfix_default_destination_concurrency_limit is defined and postfix_default_destination_concurrency_limit| type_debug == "int" %}
 default_destination_concurrency_limit = {{ postfix_default_destination_concurrency_limit }}
 {% endif %}
 
