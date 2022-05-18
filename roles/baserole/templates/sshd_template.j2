@@ -40,7 +40,11 @@ Port {{ baserole_openssh_port }}
 # Authentication:
 
 #LoginGraceTime 2m
+{% if baserole_openssh_permitrootlogin is defined %}
 PermitRootLogin {{ baserole_openssh_permitrootlogin|lower }}
+{% else %}
+#PermitRootLogin without-password
+{% endif %}
 #StrictModes yes
 #MaxAuthTries 6
 #MaxSessions 10

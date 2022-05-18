@@ -221,6 +221,8 @@ baserole_openssh_key_types:
 baserole_openssh_template: "sshd_template.j2"
 baserole_openssh_skip_include: False
 
+# baserole_openssh_permitrootlogin: yes|no|prohibit-password|forced-commands-only (default: not set)
+
 baserole_openssh_tcpkeepalive: yes
 # recommending the following two lines (ClientAliveInterval is more stable and secure than "TCPKeepAlive yes"):
 #   baserole_openssh_tcpkeepalive: no
