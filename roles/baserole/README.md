@@ -19,6 +19,8 @@ Baserole features
   - vim
 - groupmanagement
 - sysctl settings
+- systemd-journald settings
+- machine-id regen (cloned systems)
 - NTP systemd-timesyncd
 
 2DO
