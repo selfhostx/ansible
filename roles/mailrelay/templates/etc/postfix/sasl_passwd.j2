@@ -1,6 +1,10 @@
 # {{ ansible_managed }}
 {% if postfix_relayhost is defined and postfix_relayhost != '' %}
+{% if postfix_relay_role == "master" %}
+{{ postfix_relayhost }} {{ postfix_sasl_user }}:{{ postfix_sasl_mailrelay_password | default(postfix_sasl_password) }}
+{% else %}
 {{ postfix_relayhost }} {{ postfix_sasl_user }}:{{ postfix_sasl_password }}
+{% endif %}
 {% else %}
 {{ postfix_sasl_user }}:{{ postfix_sasl_password }}
 {% endif %}

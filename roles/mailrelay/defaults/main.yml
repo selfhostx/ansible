@@ -82,6 +82,9 @@ postfix_sasl_user: relayuser
 # some random password (as fallback) if not set anywhere else:
 postfix_sasl_password: gcoZqM9vmmzVsDWJPqQX
 
+# only used on master (reason: cannot distinguish vars for hosts (like host_vars would do) in vault (and var_files wins over host_vars):
+# postfix_sasl_mailrelay_password: "External_password_on_upstream_server"
+
 # SASL-Auth Serverside (2DO)
 # postfix_smtpd_sasl_auth_enable: false
 #    postfix-config server-side:
