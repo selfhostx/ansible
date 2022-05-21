@@ -86,6 +86,32 @@
     when:
       - not skip_this_user
 
+
+  - name: Remove sudoers file (with password)
+    ansible.builtin.file:
+      path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
+      state: absent
+    when:
+      - item.sudo_pass is defined
+      - item.sudo_pass
+      - not item.sudo_nopass
+      - item.state is defined
+      - item.state == "absent"
+    tags:
+      - sudo
+
+  - name: Remove sudoers file (without password)
+    ansible.builtin.file:
+      path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
+      state: absent
+    when:
+      - item.sudo_nopass is defined
+      - item.sudo_nopass
+      - item.state is defined
+      - item.state == "absent"
+    tags:
+      - sudo
+
   - name: Set Skip if state (of user) is absent
     ansible.builtin.set_fact:
       skip_this_user: True
@@ -229,39 +255,3 @@
         - baserole_users_optional_tasks_enable
         - baserole_users_optional_tasks_template is defined
         - baserole_users_optional_tasks_template|length>0
-
-  - name: User Remove block
-    when:
-      - skip_this_user
-      - baserole_users_remove_userdata_when_state_absent
-    block:
-
-    - name: Remove Home-directory
-      ansible.builtin.file:
-        path: '{{ item.home | default("/home/" + item.user) }}'
-        state: absent
-
-    - name: Remove sudoers file (with password)
-      ansible.builtin.file:
-        path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
-        state: absent
-      when:
-        - item.sudo_pass is defined
-        - item.sudo_pass
-        - not item.sudo_nopass
-        - item.state is defined
-        - item.state == "absent"
-      tags:
-        - sudo
-
-    - name: Remove sudoers file (without password)
-      ansible.builtin.file:
-        path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
-        state: absent
-      when:
-        - item.sudo_nopass is defined
-        - item.sudo_nopass
-        - item.state is defined
-        - item.state == "absent"
-      tags:
-        - sudo
