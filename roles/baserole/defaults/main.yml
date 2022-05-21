@@ -4,9 +4,6 @@
 # print additional debug output:
 baserole_debug_mode_enable: False
 
-# enable/disable Parts of baserole: ===========
-baserole_package_upgrade_enable: True
-
 # SYSCTL Config ===
 baserole_sysctl_config: True
 # ansible sysctl module: https://docs.ansible.com/ansible/latest/collections/ansible/posix/sysctl_module.html
@@ -29,7 +26,7 @@ baserole_sysctl_config: True
 #    value: 1
 
 # optional vars:
-# baserole_sysctl_path: "/etc/sysctl.d/99-my-settings" -> set a path for the config (default is: /etc/sysctl.conf)
+# baserole_sysctl_path: "/etc/sysctl.d/99-my-settings" -> set a path for the config (module default is: /etc/sysctl.conf)
 # baserole_sysctl_ignoreerrors: yes|no (default: no) -> use this option to ignore errors about unknown keys.
 
 # GRUB ===
@@ -46,7 +43,6 @@ baserole_dns_nameservers:
 - 8.8.4.4
 - 9.9.9.9
 - 2001:4860:4860::8888
-- 2a01:4f8:0:a102::add:9999
 # systemd_resolved only:
 baserole_dns_nameservers_fallback:
 - 1.1.1.1
@@ -151,10 +147,10 @@ baserole_package_defaults_debian:
   - unzip
 
 baserole_package_defaults_redhat:
-  - epel-release
   - bind-utils
   - bzip2
   - curl
+  - epel-release
   - ethtool
   - gpg
   - iotop
@@ -192,6 +188,8 @@ baserole_package_unwanted_packages_remove_enabled: False
 baserole_package_unwanted_packages_debian: []
 baserole_package_unwanted_packages_redhat: []
 
+# Packageupgrades ===
+baserole_package_upgrade_enable: True
 
 # SSHD =================
 baserole_sshd_conf_enable: True
@@ -231,11 +229,10 @@ baserole_openssh_tcpkeepalive: yes
 baserole_openssh_permituserenvironment: False
 baserole_openssh_sshrc_enable: False
 baserole_openssh_sshrc_template: "sshrc.j2"
+# enables logging which pubkey was used, see "sshrc.j2" for more information.
+baserole_openssh_pubkey_used_logging: False
 baserole_openssh_send_mail_on_login: False
 baserole_openssh_send_mail_to: root
-
-# Packageupgrade ===
-baserole_package_upgrade_disabled: False
 
 # USER root ================================
 # define file-path with pubkeys for user root (optional):
@@ -250,11 +247,8 @@ baserole_package_upgrade_disabled: False
 #  -----END OPENSSH PRIVATE KEY-----
 
 
-# USER Creation ===========================
+# USER management ===========================
 baserole_usercreate_local: True
-
-# remove user-data (home-dir etc.) when state is set to "absent"
-baserole_users_remove_userdata_when_state_absent: False
 
 # see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html
 
@@ -308,6 +302,24 @@ baserole_users_remove_userdata_when_state_absent: False
 #    shell: /bin/bash
 
 
+baserole_default_editor: vim
+
+baserole_users_optional_tasks_enable: False
+baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
+
+baserole_bashrc_configure: True
+baserole_bashrc_template: "bashrc.j2"
+
+baserole_vimrc_configure: True
+baserole_vimrc_template: "vimrc.j2"
+
+baserole_nanorc_configure: True
+baserole_nanorc_template: "nanorc.j2"
+
+baserole_htoprc_configure: True
+baserole_htoprc_template: "htoprc.j2"
+
+
 # GROUP Creation =================
 baserole_groupcreate_local: True
 
@@ -326,23 +338,8 @@ baserole_groupcreate_local: True
 #- groupname: admins
 #  sudo_nopass: True
 
-baserole_default_editor: vim
 
-baserole_users_optional_tasks_enable: False
-baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
-
-baserole_bashrc_configure: True
-baserole_bashrc_template: "bashrc.j2"
-
-baserole_vimrc_configure: True
-baserole_vimrc_template: "vimrc.j2"
-
-baserole_nanorc_configure: True
-baserole_nanorc_template: "nanorc.j2"
-
-baserole_htoprc_configure: True
-baserole_htoprc_template: "htoprc.j2"
-
+# Machine-id ===============
 # generate a random machine-id (useful for cloned systems):
 # attention: changing the machine-id can have unwanted consequences, examples:
 # https://wiki.debian.org/MachineId
