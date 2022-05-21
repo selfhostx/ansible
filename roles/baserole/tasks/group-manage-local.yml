@@ -8,7 +8,7 @@
       non_unique:         '{{ item.non_unique  | d(omit) }}'
       system:             '{{ item.system      | d(omit) }}'
 
-  - name: Grant Group sudo with password (when enabled)
+  - name: Grant group sudo with password (when enabled)
     ansible.builtin.copy:
       content: '{{ item.groupname }} ALL=(ALL:ALL) {{ item.sudo_commands | default("ALL") }}'
       dest: /etc/sudoers.d/{{ item.sudofilename | default(item.groupname) }}
@@ -24,7 +24,7 @@
     tags:
       - sudo
 
-  - name: Grant Group sudo without password (when enabled)
+  - name: Grant group sudo without password (when enabled)
     ansible.builtin.copy:
         content: '%{{ item.groupname }} ALL=(ALL:ALL) NOPASSWD:{{ item.sudo_commands | default("ALL") }}'
         dest: /etc/sudoers.d/{{ item.sudofilename | default(item.groupname) }}
