@@ -12,7 +12,7 @@ if [ -z "$SSH_USER" ]; then
   SSH_USER="unknown"
 fi
 
-{% if baserole_openssh_permituserenvironment %}
+{% if baserole_openssh_pubkey_used_logging %}
 # log the login:
 if [ "$USER" != "{{ ansible_user_id }}" ]; then
     logger -pauth.info "Login by $SSH_USER as $USER. IP: $IP"
