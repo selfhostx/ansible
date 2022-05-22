@@ -34,7 +34,7 @@
       tags:
         - grub
   tags: grub
-  when: baserole_grub_config_enable
+  when: baserole_grub_config_enable|bool
 
 - name: Include dns-config.yml
   ansible.builtin.include_tasks:
@@ -43,7 +43,7 @@
       tags:
         - dns
   tags: dns
-  when: baserole_dns_config_enable
+  when: baserole_dns_config_enable|bool
 
 - name: Include ntp-config.yml
   ansible.builtin.include_tasks:
@@ -52,7 +52,7 @@
       tags:
         - ntp
   tags: ntp
-  when: baserole_ntp_config_enable
+  when: baserole_ntp_config_enable|bool
 
 - name: Include package-sources.yml
   ansible.builtin.include_tasks:
@@ -63,7 +63,7 @@
   tags: packages
   loop: "{{ baserole_packagesources }}"
   when:
-    - baserole_package_source_enable
+    - baserole_package_source_enable|bool
     - baserole_packagesources is defined
     - baserole_packagesources|length>0
 
@@ -82,7 +82,7 @@
       tags:
         - packages
   tags: packages
-  when: baserole_package_install_default_enable
+  when: baserole_package_install_default_enable|bool
 
 - name: Include package-upgrade.yml
   ansible.builtin.include_tasks:
@@ -91,7 +91,7 @@
       tags:
         - packages
   tags: packages
-  when: baserole_package_upgrade_enable
+  when: baserole_package_upgrade_enable|bool
 
 - name: Include user-root.yml
   ansible.builtin.include_tasks:
@@ -110,7 +110,7 @@
         - userlocal
   loop: "{{ baserole_userlist_local }}"
   when:
-    - baserole_usercreate_local
+    - baserole_usercreate_local|bool
     - baserole_userlist_local is defined
     - baserole_userlist_local|length>0
   # ssh-private-keys could be shown:
@@ -133,7 +133,7 @@
         - grouplocal
   loop: "{{ baserole_grouplist_local }}"
   when:
-    - baserole_groupcreate_local
+    - baserole_groupcreate_local|bool
     - baserole_grouplist_local is defined
     - baserole_grouplist_local|length>0
   tags:
@@ -147,7 +147,7 @@
       tags:
         - ssh
   tags: ssh
-  when: baserole_sshd_conf_enable
+  when: baserole_sshd_conf_enable|bool
 
 - name: Regenerate machine-id (if enabled)
   ansible.builtin.copy:
@@ -157,7 +157,7 @@
     group: "root"
     mode: '0644'
   tags: uuidgen
-  when: baserole_machine_id_regenerate
+  when: baserole_machine_id_regenerate|bool
   
   
 - name: Include journald.yml
@@ -168,4 +168,4 @@
         - journald
   tags: 
     - journald
-  when: baserole_journald_configure
+  when: baserole_journald_configure|bool

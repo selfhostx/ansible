@@ -18,8 +18,8 @@
       validate: 'visudo -cf %s'
     when:
       - item.sudo_pass is defined
-      - item.sudo_pass
-      - not item.sudo_nopass
+      - item.sudo_pass|bool
+      - not item.sudo_nopass|bool
       - item.state is undefined or (item.state is defined and not item.state == "absent")
     tags:
       - sudo
@@ -34,7 +34,7 @@
         validate: 'visudo -cf %s'
     when:
       - item.sudo_nopass is defined
-      - item.sudo_nopass
+      - item.sudo_nopass|bool
       - tem.state is undefined or (item.state is defined and not item.state == "absent")
     tags:
       - sudo
