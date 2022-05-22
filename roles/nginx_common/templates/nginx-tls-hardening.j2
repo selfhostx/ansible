@@ -24,7 +24,7 @@
     # DH param size should match RSA key size, so if you use RSA 4096 make sure you use 4096 bit DH params, too! (Some legacy clients will choke on 4096 bit DH though.)
     ssl_dhparam "{{ nginx_dh_filename }}";
 
-{% if nginx_tls_hsts_enable %}
+{% if nginx_tls_hsts_enable|bool %}
     # HSTS (ngx_http_headers_module is required) (63072000 seconds: 1 year)
     add_header Strict-Transport-Security "max-age={{ nginx_tls_hsts_time }}";
 {% endif %}
@@ -38,13 +38,13 @@
     ssl_stapling on;
     ssl_stapling_verify on;
 
-{% if nginx_ssl_trusted_certificate_enabled and nginx_ssl_trusted_certificate_file is defined and ssl_trusted_certificate_file|length>0 %}
+{% if nginx_ssl_trusted_certificate_enabled|bool and nginx_ssl_trusted_certificate_file is defined and ssl_trusted_certificate_file|length>0 %}
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
-    ssl_trusted_certificate nginx_ssl_trusted_certificate {{ nginx_ssl_trusted_certificate_file }};
+    ssl_trusted_certificate nginx_ssl_trusted_certificate {{ nginx_ssl_trusted_certificate_filename }};
 {% endif %}
 
     # For a resolution of the OCSP responder hostname, the resolver directive should also be specified.
-{% if nginx_ocsp_resolver_enabled %}
+{% if nginx_ocsp_resolver_enabled|bool %}
     resolver {{ nginx_ocsp_resolver_list }};
 {% else %}
     # resolver {{ nginx_ocsp_resolver_list }};
