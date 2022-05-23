@@ -73,10 +73,10 @@ Roadmap
 
 **TLS-cert + CA-management**
   - letsencrypt
-    - certbot https://github.com/stefanux/ansible-role-certbot or https://github.com/geerlingguy/ansible-role-certbot ?
+    - certbot -> https://github.com/selfhostx/ansible-role-certbot
     - helper-scripte -> deploy_hook
   - certificate distribution
-    - own certs (individual, wildcards) -> Code available -> role
+    - own certs (individual, wildcards) -> Code available
     - vaulted files via sops https://github.com/mozilla/sops ? 2DO)
   - internal CA (creates certs for hosts) -> 2DO
 
@@ -99,6 +99,8 @@ Roadmap
 **VPN**
   - openvpn
   - wireguard
+    - p2p ( githubixx.ansible_role_wireguard https://github.com/githubixx/ansible-role-wireguard ? )
+    - server/client
   - ipsec strongswan (2DO, but low prio because usually this is done on firewalls and wireguard is simpler)
   - (stunnel -> needed?)
 
@@ -183,7 +185,7 @@ Roadmap
   - keepalived
   - Filesync:
     - csync2
-    - zookeeper
+    - unison (?)
 
 **Reverse-Proxy/Loadbalancer**
   self-hosted:
@@ -196,9 +198,9 @@ Roadmap
     - ...?
 
 **package management**
-  - build: fpm (effing package manager)
+  - build: fpm (effing package manager) -> Link playbook
   - host repository: 
-    - deb: FIXME
+    - deb: aptly? FIXME
     - rpm: FIXME
 
 **Log-aggregation**
@@ -242,3 +244,8 @@ Roadmap
   - wekan? / focalboard?
   - whiteboard https://github.com/cracker0dks/whiteboard (could be replaced by videoconferencing-tool like bbb)
   - wordpress
+  - distributed key/value stores
+    - zookeeper
+    - etcd
+    - redis
+
