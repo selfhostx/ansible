@@ -29,6 +29,8 @@
 - networkconfig (template)
 - remove netplan? -> playbook
 - ntp -> chrony?
+- logrotate (existing role seems good: https://github.com/robertdebock/ansible-role-logrotate with https://github.com/robertdebock/ansible-role-logrotate/pull/8 )
+
 
 # Requirements
 
@@ -44,8 +46,8 @@ None.
 ## global
 
 |Variable|Description|possible values|required|default|
-|---|---|---|---|
-| baserole_debug_mode_enable | print additional debug output | True, False | no | False |
+|---|---|---|---|---|
+| baserole_debug_mode_enable | Print additional debug output | boolean (True, False) | no | False |
 
 
 ## sysctl
