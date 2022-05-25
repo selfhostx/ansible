@@ -1,14 +1,12 @@
-ansible Installation
-====================
+# ansible Installation
 
-important links
+## important links
 ===============
 
 - https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#ansible-variable-precedence
 
 
-concepts
-========
+## concepts
 
 - inventory: list of hosts ansible can manage (YAML or ini-style)
 - playbook: YAML file contains vars, tasks, handlers, role/collection-definition: the starting point of most ansible runs
@@ -23,7 +21,7 @@ concepts
 - tags: specific keywords on tasks (allowing run only needed tasks)
 - vault: encrypted files for secrets
 
-commands:
+## commands:
 - ansible-playbook: run playbook
 - ansible-vault: managed vaults
 - ansible-lint: syntax-check (will not catch logic errors like trying to use undefined variables or typos in var-names): `ansible-lint my-playbook.yml`
@@ -31,8 +29,7 @@ commands:
 german version: https://www.stefanux.de/wiki/doku.php/software/ansible#begriffe
 
 
-Install
-=======
+## Install
 
 ensure you are able to switch ansible versions independently from distribution. pip (or specific pip3 since python2 is deprecated) is a good solution:
 
@@ -52,8 +49,26 @@ ansible-galaxy collection install -r requirements-selfhostx.yml
 ```
 
 
-ansible.cfg
-===========
+## editor setup
+
+set your editor to convert tabs into 2 spaces.
+
+vim
+```
+set tabstop=2
+set shiftwidth=2
+set expandtab
+# autocmd Filetype yml setlocal tabstop=2
+```
+
+
+nano:
+```
+set tabsize 2
+set tabstospaces
+```
+
+## ansible.cfg
 
 see https://docs.ansible.com/ansible/latest/installation_guide/intro_configuration.html for more information
 
@@ -83,8 +98,7 @@ become_method=sudo
 ```
 
 
-ansible execution
-=================
+# ansible execution
 
 
 ansible-playbook my-playbook.yml
