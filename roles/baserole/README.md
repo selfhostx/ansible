@@ -24,6 +24,9 @@
 - machine-id regen (cloned systems)
 - NTP systemd-timesyncd
 
+
+If you cloned a system, make sure ssh-keys and machine-id are regenerated (run this host with extra-vars: -e "baserole_machine_id_regenerate=True baserole_openssh_gen_keys=True baserole_openssh_force_gen_keys=True"
+
 # 2DO
 
 - networkconfig (template)

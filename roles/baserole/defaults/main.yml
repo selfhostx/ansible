@@ -359,7 +359,7 @@ baserole_journald_template: "journald.conf.j2"
 #baserole_journald_syncintervalsec: 5m
 #baserole_journald_ratelimitintervalsec: 30s
 #baserole_journald_ratelimitburst: 10000
-#baserole_journald_systemmaxuse: 
+#baserole_journald_systemmaxuse:
 #baserole_journald_systemkeepfree:
 #baserole_journald_systemmaxfilesize:
 #baserole_journald_systemmaxfiles: 100

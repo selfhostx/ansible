@@ -34,10 +34,8 @@
 
 - name: Update Grub Config
   ansible.builtin.command: update-grub
-  
 
 - name: Restart journald
   systemd: 
     name: systemd-journald 
     state: restarted
-      
