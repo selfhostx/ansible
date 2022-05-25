@@ -33,13 +33,19 @@ Roadmap
   - ceph (?)
   - glusterfs (?)
 
-**Docker**
-  - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker Vergleich: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
-  - registry
-    - ...?
-  - optional management tools:
-    - portainer
-    - traefik
+**Virtualization**
+  - proxmox (including cloud-init)
+    - lxc?
+  - libvirt/KVM (including cloud-init)
+  - ovirt?
+  - k8s
+  - **Docker**
+    - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker Vergleich: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
+    - registry
+      - ...?
+    - optional management tools:
+      - portainer
+      - traefik
 
 **Instant messenger**
   - mattermost (Code ready)
@@ -81,9 +87,12 @@ Roadmap
   - internal CA (creates certs for hosts) -> 2DO
 
 **E-Mail**
-  - mailserver (dovecot + postfix)
-   - stand-alone
-   - backends like LDAP
+  - mailserver
+    - dovecot + postfix)
+      - stand-alone
+      - backends like LDAP
+    - mailcow
+    - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
   - groupware
     - kopano -> sysops.tv?
     - ...?
@@ -241,11 +250,10 @@ Roadmap
   - nodebb
   - peertube
   - teakspeak / mumble
-  - wekan? / focalboard?
+  - kanban-board: wekan? focalboard? planka?
   - whiteboard https://github.com/cracker0dks/whiteboard (could be replaced by videoconferencing-tool like bbb)
   - wordpress
   - distributed key/value stores
     - zookeeper
     - etcd
     - redis
-
