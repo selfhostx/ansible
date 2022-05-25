@@ -205,7 +205,7 @@ baserole_openssh_include_pattern: "/etc/ssh/sshd_config.d/*.conf"
 # enable ssh_key generation in general:
 baserole_openssh_gen_keys: False
 # force regeneration of host_keys (this is usually done on openssh-install), useful for cloned systems (needs "baserole_openssh_gen_keys: True" too!) yes|no:
-baserole_openssh_force_gen_keys: no
+baserole_openssh_force_gen_keys: False
 
 baserole_openssh_host_key:
 - /etc/ssh/ssh_host_rsa_key

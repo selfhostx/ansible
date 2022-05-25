@@ -244,7 +244,7 @@ baserole_package_defaults_debian:
 | baserole_openssh_include_pattern | Specify Include-Pattern | text | yes | "/etc/ssh/sshd_config.d/*.conf" |
 | baserole_openssh_port | TCP-Portnumber of SSH | integer (valid ports are 1-65535) | yes | 22 |
 | baserole_openssh_gen_keys | Enable ssh_key generation in general | boolean (True, False) | yes | False (leave generated keys, usually when sshd-server is installed) |
-| baserole_openssh_force_gen_keys | Force regeneration of host_keys, useful for cloned systems (needs "baserole_openssh_gen_keys: True" too!) | boolean (yes, no) | no |
+| baserole_openssh_force_gen_keys | Force regeneration of host_keys, useful for cloned systems (needs "baserole_openssh_gen_keys: True" too!) | boolean (True, False) | False |
 | baserole_openssh_host_key | List of hostkeys (see example below) | list | yes | /etc/ssh/ssh_host_rsa_key, /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key |
 | baserole_openssh_key_types | List of keytypes (see example below) | list | yes | rsa, ecdsa, ed25519 |
 | baserole_openssh_template | Override template | text | yes | sshd_template.j2 |
