@@ -86,7 +86,7 @@ ansible_managed = Ansible managed: {file}
 
 ansible_python_interpreter: /usr/bin/python3
 
-inventory=hosts
+inventory=inventory_SAMPLE
 
 # ssh-config:
 # ansible_port=22
