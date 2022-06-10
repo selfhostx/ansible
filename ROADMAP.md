@@ -34,9 +34,10 @@ Roadmap
   - glusterfs (?)
 
 **Virtualization**
-  - proxmox (including cloud-init)
+  - proxmox (including cloud-init) -> Code committen
+    - VM management: https://github.com/mikaelflora/ansible-role-proxmox-vm
     - lxc?
-  - libvirt/KVM (including cloud-init)
+  - libvirt/KVM (including cloud-init) -> Code committen
   - ovirt?
   - k8s
   - **Docker**
@@ -75,7 +76,7 @@ Roadmap
       - php-fpm
   - All-in-one-packages
     - froxlor  (Code ready)
-    - ispconfig -> sysops.tv?
+    - ispconfig (maintainer needed)
 
 **TLS-cert + CA-management**
   - letsencrypt
@@ -94,12 +95,12 @@ Roadmap
     - mailcow
     - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
   - groupware
-    - kopano -> sysops.tv?
+    - kopano (maintainer needed)
     - ...?
   - local mailrelay ("satellite")-setup for cron etc.
     - postfix https://github.com/stefanux/ansible-postfix-mailrelay -> can use any SMTP-accounts (2DO include examples for microsoft365, google, a few common providers)
   - archiving
-    - (mail-)piler -> sysops.tv
+    - (mail-)piler (maintainer needed)
   - spamfiltering
     - rspamd (need redis)
     - spamassassin/policy-weightd/postgrey
@@ -125,7 +126,7 @@ Roadmap
     - DoT (DNS over TLS)
       - powerdns
       - bind? -> 2DO: maintainer needed
-    - DoH / dnscrypt (not supported atm, only if maintainer is found)
+    - DoH / dnscrypt (maintainer needed)
     - adfiltering
       - powerdns with filtering (lua-based) - unreleased solution available
       - pihole ?
@@ -151,9 +152,7 @@ Roadmap
     - phpPgAdmin
 
 **Monitoring**
-  - check_mk -> sysops.tv
-    - including checks/templates (2DO extend List)
-  - icinga(2) -> need maintainers
+  - icinga(2) (maintainer needed)
   - zabbix ( community.zabbix )
     - including checks/templates:
       - bacula
@@ -257,3 +256,6 @@ Roadmap
     - zookeeper
     - etcd
     - redis
+
+**removed from list**
+  - check_mk (freemium-model is ok in general, but currently no maintainer)
