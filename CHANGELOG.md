@@ -1,5 +1,15 @@
 # CHANGELOG
 
+
+## Version 0.0.7 (2022-05-22)
+- 
+- 
+
+## Version 0.0.6 (2022-05-18)
+- 
+- 
+
+
 ## Version 0.0.5 (2022-05-11)
 - 0.0.5 mattermost and nginx_common roles
 - minor fixes
