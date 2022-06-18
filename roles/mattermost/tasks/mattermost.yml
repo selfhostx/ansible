@@ -12,12 +12,6 @@
     system: yes
     state: present
 
-- name: Create download directory
-  ansible.builtin.file:
-    mode: '0775'
-    path: '{{ mattermost_download_path }}'
-    state: directory
-
 - name: check if version are already installed
   ansible.builtin.stat:
     path: "{{ mattermost_download_path }}"
@@ -25,8 +19,13 @@
 
 - name: set fact if version already installed
   ansible.builtin.set_fact:
-    mm_already_installed: true
-  when: mm_folder.stat.exists and mm_folder.stat.isdir
+    mm_already_installed: "{{ true if mm_folder.stat.exists and mm_folder.stat.isdir else false }}"
+
+- name: Create download directory
+  ansible.builtin.file:
+    mode: '0775'
+    path: '{{ mattermost_download_path }}'
+    state: directory
 
 - name: Download and extract mattermost-archive from releases.mattermost.com
   ansible.builtin.unarchive:
