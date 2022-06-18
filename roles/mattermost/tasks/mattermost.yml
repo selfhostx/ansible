@@ -18,6 +18,16 @@
     path: '{{ mattermost_download_path }}'
     state: directory
 
+- name: check if version are already installed
+  ansible.builtin.stat:
+    path: "{{ mattermost_download_path }}"
+  register: mm_folder
+
+- name: set fact if version already installed
+  ansible.builtin.set_fact:
+    mm_already_installed: true
+  when: mm_folder.stat.exists and mm_folder.stat.isdir
+
 - name: Download and extract mattermost-archive from releases.mattermost.com
   ansible.builtin.unarchive:
     remote_src: yes
@@ -27,9 +37,11 @@
     mode: 'u=rwX,g=rwX,o='
     owner: "{{ mattermost_user }}"
     group: "{{ mattermost_group }}"
-    #exclude:
+    # exclude:
     #  - 'mattermost/config/config.json'
-  when: not mattermost_skip_download
+  when:
+    - not mattermost_skip_download
+    - not mm_already_installed
   notify:
     - restart mattermost
 
@@ -38,7 +50,9 @@
     path: '{{ mattermost_download_path }}/mattermost/{{ item }}'
     state: absent
   loop: "{{ mattermost_linked_data_folders }}"
-  when: not mattermost_skip_download
+  when:
+    - not mattermost_skip_download
+    - not mm_already_installed
 
 - name: Create mattermost data directory
   ansible.builtin.file:
@@ -46,12 +60,12 @@
     path: '{{ mattermost_datadir_path }}'
     state: directory
 
-#- name: Check if folder from mattermost_linked_folder is a link
+# - name: Check if folder from mattermost_linked_folder is a link
 #  ansible.builtin.stat:
 #    path: '{{ mattermost_app_path }}/{{ item }}'
 #  register: mattermost_folder_link_{{ item }}
 
-#- name: Rename folder when not a link (most likely default folder from package)
+# - name: Rename folder when not a link (most likely default folder from package)
 #  command:
 #    path: 'mv {{ mattermost_app_path }}/{{ item }} {{ mattermost_app_path }}/{{ item }}-old'
 #  when:
