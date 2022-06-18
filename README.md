@@ -8,7 +8,7 @@ We do not re-invent the wheel, if there is a good role or collection somewhere e
 supported distributions:
   - Debian (all supported versions)
   - Ubuntu (supported LTS-Versions)
-  - Redhat-based distribution (if maintainer is found)
+  - Redhat-based distribution (permanent - if maintainer is found - or best-effort-basis)
 
 2DO in general:
   - CI (travis, gitlab runner, ...?)

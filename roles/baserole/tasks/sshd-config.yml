@@ -24,10 +24,12 @@
       - baserole_openssh_sshd_opts is defined
       - baserole_openssh_sshd_opts|length>0
 
-  - name: Generate SSH host keys
-    ansible.builtin.command: "/usr/bin/ssh-keygen -q -t {{ item }} -f /etc/ssh/ssh_host_{{ item }}_key -C '' -N ''"
-    args:
-      creates: "/etc/ssh/ssh_host_{{ item }}_key"
+  # needs community.crypto:
+  - name: Generate SSH host keys (when enabled and/or forced)
+    community.crypto.openssh_keypair:
+      path: "/etc/ssh/ssh_host_{{ item }}_key"
+      type: "{{ item }}"
+      force: "{{ baserole_openssh_force_gen_keys|bool }}"
     with_items:
       - "{{ baserole_openssh_key_types }}"
     when:

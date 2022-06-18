@@ -4,9 +4,6 @@
 # print additional debug output:
 baserole_debug_mode_enable: False
 
-# enable/disable Parts of baserole: ===========
-baserole_package_upgrade_enable: True
-
 # SYSCTL Config ===
 baserole_sysctl_config: True
 # ansible sysctl module: https://docs.ansible.com/ansible/latest/collections/ansible/posix/sysctl_module.html
@@ -29,7 +26,7 @@ baserole_sysctl_config: True
 #    value: 1
 
 # optional vars:
-# baserole_sysctl_path: "/etc/sysctl.d/99-my-settings" -> set a path for the config (default is: /etc/sysctl.conf)
+# baserole_sysctl_path: "/etc/sysctl.d/99-my-settings" -> set a path for the config (module default is: /etc/sysctl.conf)
 # baserole_sysctl_ignoreerrors: yes|no (default: no) -> use this option to ignore errors about unknown keys.
 
 # GRUB ===
@@ -46,7 +43,6 @@ baserole_dns_nameservers:
 - 8.8.4.4
 - 9.9.9.9
 - 2001:4860:4860::8888
-- 2a01:4f8:0:a102::add:9999
 # systemd_resolved only:
 baserole_dns_nameservers_fallback:
 - 1.1.1.1
@@ -151,10 +147,10 @@ baserole_package_defaults_debian:
   - unzip
 
 baserole_package_defaults_redhat:
-  - epel-release
   - bind-utils
   - bzip2
   - curl
+  - epel-release
   - ethtool
   - gpg
   - iotop
@@ -192,6 +188,8 @@ baserole_package_unwanted_packages_remove_enabled: False
 baserole_package_unwanted_packages_debian: []
 baserole_package_unwanted_packages_redhat: []
 
+# Packageupgrades ===
+baserole_package_upgrade_enable: True
 
 # SSHD =================
 baserole_sshd_conf_enable: True
@@ -203,7 +201,12 @@ baserole_openssh_use_template: True
 baserole_openssh_include_pattern: "/etc/ssh/sshd_config.d/*.conf"
 
 # baserole_openssh_port: 22
+
+# enable ssh_key generation in general:
 baserole_openssh_gen_keys: False
+# force regeneration of host_keys (this is usually done on openssh-install), useful for cloned systems (needs "baserole_openssh_gen_keys: True" too!) yes|no:
+baserole_openssh_force_gen_keys: False
+
 baserole_openssh_host_key:
 - /etc/ssh/ssh_host_rsa_key
 - /etc/ssh/ssh_host_ecdsa_key
@@ -212,11 +215,11 @@ baserole_openssh_key_types:
 - rsa
 - ecdsa
 - ed25519
-# gen keys but not if already present:
-# baserole_openssh_gen_keys: True
 
 baserole_openssh_template: "sshd_template.j2"
 baserole_openssh_skip_include: False
+
+# baserole_openssh_permitrootlogin: yes|no|prohibit-password|forced-commands-only (default: not set)
 
 baserole_openssh_tcpkeepalive: yes
 # recommending the following two lines (ClientAliveInterval is more stable and secure than "TCPKeepAlive yes"):
@@ -226,11 +229,10 @@ baserole_openssh_tcpkeepalive: yes
 baserole_openssh_permituserenvironment: False
 baserole_openssh_sshrc_enable: False
 baserole_openssh_sshrc_template: "sshrc.j2"
+# enables logging which pubkey was used, see "sshrc.j2" for more information.
+baserole_openssh_pubkey_used_logging: False
 baserole_openssh_send_mail_on_login: False
 baserole_openssh_send_mail_to: root
-
-# Packageupgrade ===
-baserole_package_upgrade_disabled: False
 
 # USER root ================================
 # define file-path with pubkeys for user root (optional):
@@ -245,11 +247,8 @@ baserole_package_upgrade_disabled: False
 #  -----END OPENSSH PRIVATE KEY-----
 
 
-# USER Creation ===========================
+# USER management ===========================
 baserole_usercreate_local: True
-
-# remove user-data (home-dir etc.) when state is set to "absent"
-baserole_users_remove_userdata_when_state_absent: False
 
 # see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html
 
@@ -303,6 +302,24 @@ baserole_users_remove_userdata_when_state_absent: False
 #    shell: /bin/bash
 
 
+baserole_default_editor: vim
+
+baserole_users_optional_tasks_enable: False
+baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
+
+baserole_bashrc_configure: True
+baserole_bashrc_template: "bashrc.j2"
+
+baserole_vimrc_configure: True
+baserole_vimrc_template: "vimrc.j2"
+
+baserole_nanorc_configure: True
+baserole_nanorc_template: "nanorc.j2"
+
+baserole_htoprc_configure: True
+baserole_htoprc_template: "htoprc.j2"
+
+
 # GROUP Creation =================
 baserole_groupcreate_local: True
 
@@ -321,19 +338,47 @@ baserole_groupcreate_local: True
 #- groupname: admins
 #  sudo_nopass: True
 
-baserole_default_editor: vim
 
-baserole_users_optional_tasks_enable: False
-baserole_users_optional_tasks_template: "optional-tasks-for-users.yml"
+# Machine-id ===============
+# generate a random machine-id (useful for cloned systems):
+# attention: changing the machine-id can have unwanted consequences, examples:
+# https://wiki.debian.org/MachineId
+# https://unix.stackexchange.com/questions/191313/why-is-my-systemd-journal-not-persistent-across-reboots
+baserole_machine_id_regenerate: False
+baserole_machine_id_filename: "/etc/machine-id"
 
-baserole_bashrc_configure: True
-baserole_bashrc_template: "bashrc.j2"
+# Journald =================
 
-baserole_vimrc_configure: True
-baserole_vimrc_template: "vimrc.j2"
-
-baserole_nanorc_configure: True
-baserole_nanorc_template: "nanorc.j2"
-
-baserole_htoprc_configure: True
-baserole_htoprc_template: "htoprc.j2"
+baserole_journald_configure: True
+baserole_journald_template: "journald.conf.j2"
+# see journald.conf(5) for details or https://www.freedesktop.org/software/systemd/man/journald.conf.html
+#baserole_journald_storage: auto
+#baserole_journald_compress: yes
+#baserole_journald_seal: yes
+#baserole_journald_splitMode: uid
+#baserole_journald_syncintervalsec: 5m
+#baserole_journald_ratelimitintervalsec: 30s
+#baserole_journald_ratelimitburst: 10000
+#baserole_journald_systemmaxuse:
+#baserole_journald_systemkeepfree:
+#baserole_journald_systemmaxfilesize:
+#baserole_journald_systemmaxfiles: 100
+#baserole_journald_runtimemaxuse:
+#baserole_journald_runtimekeepfree:
+#baserole_journald_runtimemaxfileSize:
+#baserole_journald_runtimemaxfiles: 100
+#baserole_journald_maxretentionsec:
+#baserole_journald_maxfilesec: 1month
+#baserole_journald_forwardtosyslog: yes
+#baserole_journald_forwardtokmsg: no
+#baserole_journald_forwardtoconsole: no
+#baserole_journald_forwardtowall: yes
+#baserole_journald_ttypath: /dev/console
+#baserole_journald_maxlevelstore: debug
+#baserole_journald_maxlevelsyslog: debug
+#baserole_journald_maxlevelkmsg: notice
+#baserole_journald_maxlevelconsole: info
+#baserole_journald_maxlevelwall: emerg
+#baserole_journald_linemax: 48K
+#baserole_journald_readkmsg: yes
+#baserole_journald_audit: no

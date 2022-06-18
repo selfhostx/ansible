@@ -5,10 +5,38 @@
       name: "nginx"
       state: present
 
+  - name: Set nginx_user for nginx (Debian)
+    set_fact:
+      nginx_user: "www-data"
+    when:
+    - ansible_os_family == "Debian"
+
+  - name: Set nginx_group for nginx (Debian)
+    set_fact:
+      nginx_group: "www-data"
+    when:
+    - ansible_os_family == "Debian"
+
+  - name: Ensure ssl private directory exists
+    ansible.builtin.file:
+      path: "{{ nginx_ssl_private_directory }}"
+      state: directory
+      owner: root
+      group: root
+      mode: "0700"
+
+  - name: Ensure snippet directory exists
+    ansible.builtin.file:
+      path: "{{ nginx_snippet_directory }}"
+      state: directory
+      owner: "{{ nginx_user }}"
+      group: "{{ nginx_group }}"
+      mode: "0750"
+
   - name: Nginx TLS hardening
     ansible.builtin.template:
-      src: templates/nginx-tls-hardening.j2
-      dest: "/etc/nginx/snippets/tls-hardening.conf"
+      src: "{{ nginx_tls_hardening_template }}"
+      dest: "{{ nginx_tls_hardening_snippet }}"
       mode: "0600"
 
 #  - name: Check if DH file exists
