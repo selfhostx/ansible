@@ -145,7 +145,7 @@ Roadmap
   - mysql (limited distribution-support or use packages from oracle?; community.mysql )
   - mariadb
     - standalone
-    - galera (2DO)
+    - galera ( -> mrlesmithjr.mariadb_galera_cluster - tested, good, active maintenance )
   - PostgreSQL ( -> geerlingguy.postgresql )
   - management-tools:
     - phpmyadmin
