@@ -28,8 +28,9 @@ Roadmap
     - special-usecases:
       - Proxmox https://github.com/bashclub/proxmox-zfs-postinstall
       - Samba shadow-copies "Zamba" https://github.com/bashclub/zamba-lxc-toolbox/
-    - snapshot house-keeping: zfs-keep-and-clean https://github.com/bashclub/zfs-housekeeping
     - ZFS autosnapshot
+      - snapshot house-keeping: zfs-keep-and-clean https://github.com/bashclub/zfs-housekeeping
+      - monitoring like check-zfs-replication https://github.com/bashclub/check-zfs-replication
   - ceph (?)
   - glusterfs (?)
 
