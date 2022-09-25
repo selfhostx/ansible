@@ -51,7 +51,8 @@ None.
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
 | baserole_debug_mode_enable | Print additional debug output | boolean (True, False) | no | False |
-
+| baserole_ipv4_enable | Enable IPv4 | boolean (True, False) | no | True |
+| baserole_ipv6_enable | Enable IPv6 | boolean (True, False) | no | True |
 
 ## sysctl
 
@@ -86,6 +87,29 @@ grub (boot-loader) configuration.
 | baserole_grub_config_enable | Enable grub-config (otherwise skip) | boolean (True, False) |no | False|
 | baserole_grub_commandline | define grub-parameters (Example: switch network-interface to old eth0 scheme (kvm has ens3) "net.ifnames=0 biosdevname=0". important: Centos needs full line, so you`ll need to include all options (not just your added options like on debian-family) | text | no, but if not defined module will do nothing | not defined |
 | baserole_grub_default_file | path for grub-config | text | yes | "/etc/default/grub" |
+
+Tags:
+- fqdn (just make reverse-checks)
+- hostsfile (just manage /etc/hosts)
+- network (both)
+
+## Hostname configuration
+
+|Variable|Description|possible values|required|default|
+|---|---|---|---|---|
+| baserole_manage_hosts_file | Enable managing of /etc/hosts (otherwise skip) | boolean (True, False) |no | False|
+| baserole_manage_hosts_template | Override template | text | no | hosts.j2 |
+| baserole_manage_hostname | Enable managing of hostname (otherwise skip) | boolean (True, False) |no | True|
+| baserole_manage_hosts_extra_entries | extend the hosts-File with custom entries | text (multiline, see example below) |no | not defined|
+| baserole_check_reverserecord | Enable checking of reverse-record (otherwise skip) | boolean (True, False) |no | True|
+
+example of extending the hosts-File with custom entries:
+```
+baserole_manage_hosts_extra_entries: |+
+  1.2.3.4 internal_hostname1.domain.tld internal_hostname1
+  5.6.7.8 internal_hostname2.domain.tld internal_hostname2
+```
+
 
 ## DNS
 

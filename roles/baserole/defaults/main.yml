@@ -1,6 +1,10 @@
 ---
 # Defaults für baserole
 
+# enable v4 or v6-support:
+baserole_ipv4_enable: True
+baserole_ipv6_enable: True
+
 # print additional debug output:
 baserole_debug_mode_enable: False
 
@@ -35,6 +39,17 @@ baserole_grub_config_enable: False
 # baserole_grub_commandline: "net.ifnames=0 biosdevname=0"
 # ! Centos needs full line, so you`ll need to include all options (not just your added options like on debian-family)
 baserole_grub_default_file: "/etc/default/grub"
+
+# hosts ===
+baserole_manage_hosts_file: False
+baserole_manage_hostname: True
+baserole_check_reverserecord: True
+
+
+# override hosts-template (if needed):
+baserole_manage_hosts_template: "hosts.j2"
+
+
 
 # DNS ===
 baserole_dns_config_enable: True

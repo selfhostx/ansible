@@ -48,6 +48,7 @@
       skip_this_user: False
     when:
       - lookup('vars', item.conditional_var_name_exists) is defined
+    changed_when: False
     ignore_errors: True
     tags:
       - htop

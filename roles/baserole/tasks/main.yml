@@ -36,6 +36,14 @@
   tags: grub
   when: baserole_grub_config_enable|bool
 
+- name: Include fqdn-hosts.yml
+  ansible.builtin.include_tasks:
+    file: "fqdn-hosts.yml"
+  tags:
+  - hostsfile
+  - fqdn
+  - network
+
 - name: Include dns-config.yml
   ansible.builtin.include_tasks:
     file: "dns-config.yml"

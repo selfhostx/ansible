@@ -1,0 +1,135 @@
+---
+# tasks from mrlesmithjr.etc-hosts (License: MIT) START
+# https://github.com/mrlesmithjr/ansible-etc-hosts/blob/master/tasks/main.yml
+# 
+
+- name: Manage hosts file
+  when: baserole_manage_hosts_file|bool
+  tags:
+    - hostsfile
+    - network
+
+  block:
+  - name: pre-reqs (RedHat)
+    yum:
+      name: ["libselinux-python"]
+      state: present
+    register: result
+    until: result is successful
+    when: >
+      ansible_os_family == "RedHat" and
+      ansible_distribution != "Fedora"
+
+  - name: pre-reqs (RedHat)
+    dnf:
+      name: ["libselinux-python"]
+      state: present
+    register: result
+    until: result is successful
+    when: >
+      ansible_os_family == "RedHat" and
+      ansible_distribution == "Fedora"
+
+  - name: main | updating /etc/hosts (localhost)
+    template:
+      src: "{{ baserole_manage_hosts_template }}"
+      dest: /etc/hosts
+      owner: root
+      group: root
+      mode: 0644
+# tasks from mrlesmithjr.etc-hosts END
+
+- name: Manage hostname file
+  when: baserole_manage_hostname|bool
+  tags:
+    - fqdn
+    - network
+  block:
+
+  # requires dnspython on master: pip install dnspython / pip3 install dnspython
+  - name: Set Hostname from inventory
+    copy:
+      content: "{{ inventory_hostname_short }}"
+      dest: /etc/hostname
+      mode: '0644'
+    register: hostname_file
+
+  - name: change hostname on running system
+    command: hostname -F /etc/hostname
+    when: hostname_file.changed
+
+
+- name: Tests for reverse record
+  when: baserole_check_reverserecord|bool
+  tags:
+    - fqdn
+    - network
+  block:
+
+  - name: Gather facts a second time
+    setup:
+
+  - name: Gather A-Record
+    set_fact:
+      hostname_a_record: "{{ lookup('community.general.dig', '{{ inventory_hostname }}', 'qtype=A') }}"
+
+  - name: Gather AAAA-Record
+    set_fact:
+      hostname_aaaa_record: "{{ lookup('community.general.dig', '{{ inventory_hostname }}', 'qtype=AAAA') }}"
+
+  - name: Gather Reverse-Record (v4)
+    set_fact:
+      hostname_reverse_record_v4: "{{ lookup('community.general.dig', '{{ ansible_default_ipv4.address }}') }}"
+    ignore_errors: yes
+
+  - name: Gather Reverse-Record (v6)
+    set_fact:
+      hostname_reverse_record_v6: "{{ lookup('community.general.dig', '{{ ansible_default_ipv6.address }}') }}"
+    ignore_errors: yes
+
+  - name: Warn if domainname has no A-Record
+    fail: msg='Warning - A-Record for does not exist for {{ inventory_hostname }}'
+    when:
+    - hostname_a_record == "NXDOMAIN"
+    ignore_errors: yes
+
+  - name: Warn if domainname has different A-Record than default IPv4-Address
+    fail: msg='A-Record for {{ inventory_hostname }} is set to {{ hostname_a_record }}'
+    when:
+    - hostname_a_record != ansible_default_ipv4.address
+    - not hostname_a_record == "NXDOMAIN"
+
+  - name: Warn if host has no Reverse-Record (v4)
+    fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v4 }}"'
+    when:
+    - hostname_reverse_record_v4 == "NXDOMAIN"
+    ignore_errors: yes
+
+  - name: Warn if host has no Reverse-Record (v6)
+    fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v6 }}"'
+    when:
+    - hostname_reverse_record_v6 == "NXDOMAIN"
+    ignore_errors: yes
+
+  - name: Warn if host has different Reverse-Record (v4)
+    fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v4 }}"'
+    when:
+    - hostname_reverse_record_v4 != inventory_hostname
+    - not hostname_reverse_record_v4 == "NXDOMAIN"
+    ignore_errors: yes
+
+  - name: Warn if host has different Reverse-Record (v6)
+    fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v6 }}"'
+    when:
+    - hostname_reverse_record_v6 != inventory_hostname
+    - not hostname_reverse_record == "NXDOMAIN"
+    ignore_errors: yes
+
+  - name: Fail if FQDN is not inventory_hostname
+    fail: msg='Failing - FQDN is not set up properly'
+    when:
+    - ansible_hostname is not defined
+    - ansible_hostname | length = 0
+    - ansible_hostname == none
+    - ansible_hostname != inventory_hostname
+    ignore_errors: yes
