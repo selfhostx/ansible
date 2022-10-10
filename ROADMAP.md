@@ -40,14 +40,16 @@ Roadmap
     - lxc?
   - libvirt/KVM (including cloud-init) -> Code committen
   - ovirt?
-  - k8s
-  - **Docker**
-    - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker Vergleich: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
-    - registry
-      - ...?
-    - optional management tools:
-      - portainer
-      - traefik
+  - Container
+    - k38
+    - k8s
+    - docker (swarm)
+      - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker Vergleich: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
+      - registry
+        - ...?
+      - optional management tools:
+        - portainer
+        - traefik
 
 **Instant messenger**
   - mattermost (Code ready)
@@ -69,7 +71,8 @@ Roadmap
 **Webserver**
   - nginx
     - reverse-proxy
-  - Apache ( -> geerlingguy.apache )
+  - caddy
+  - apache ( -> geerlingguy.apache )
     - apache only (simple static sites)
     - redirector
     - LAMP  (-> geerlingguy.php geerlingguy.php-versions )
