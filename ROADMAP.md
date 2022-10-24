@@ -119,7 +119,7 @@ Roadmap
   - (stunnel -> needed?)
 
 **DNS**
-  - **self-hosted:*
+  - **self-hosted:**
     - recursive
       - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync von Zertifikaten wenn letsencrypt, nginx-reverse-proxy für Statusseite)
       - bind (2DO -> maintainer needed)
@@ -194,7 +194,7 @@ Roadmap
     - ufw
 
 **Clustering**
-  - keepalived
+  - keepalived -> evrardjp.keepalived
   - Filesync:
     - csync2
     - unison (?)
