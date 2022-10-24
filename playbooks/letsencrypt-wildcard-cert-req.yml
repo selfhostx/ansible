@@ -124,8 +124,8 @@
       inwx.collection.dns:
         domain: "{{ cert_wildcard_zone }}"
         type: TXT
-        record: "{{ inwx_record_name }}"
-        value: "{{ inwx_record_value }}"
+        record: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource'] }}"
+        value: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
         solo: yes
         username: "{{ inwx_dns_user }}"
         password: "{{ inwx_dns_password }}"
@@ -169,8 +169,8 @@
         state: absent
         domain: "{{ cert_wildcard_zone }}"
         type: TXT
-        record: "{{ inwx_record_name }}"
-        value: "{{ inwx_record_value }}"
+        record: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource'] }}"
+        value: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
         solo: yes
         username: "{{ inwx_dns_user }}"
         password: "{{ inwx_dns_password }}"
