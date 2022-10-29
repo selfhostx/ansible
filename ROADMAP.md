@@ -182,12 +182,12 @@ Roadmap
     - Samba
     - 389dir
     - UCS univention
-    - SSSD integratin on system
+    - SSSD integration on system
   - keycloak?
   - ...?
 
 **Firewall**
-  - opensense
+  - opnsense
   - pfsense
   - hostfirewall
     - iptables/nftables geerlingguy.firewall (maybe iptables-persistent ?)
@@ -199,13 +199,13 @@ Roadmap
     - csync2
     - unison (?)
 
-**Reverse-Proxy/Loadbalancer**
-  self-hosted:
+**Reverse-Proxy/Loadbalancer**:
+  - self-hosted:
     - haproxy
     - nginx proxy manager GUI (needs docker)
     - nginx reverse proxy (vanilla)
     - apache mod_proxy (maintainer needed)
-  managed (via API):
+  - managed (via API):
     - hetzner LB
     - ...?
 
@@ -252,7 +252,7 @@ Roadmap
   - mastodon (twitter-alternative)
   - nodebb
   - peertube
-  - teakspeak / mumble
+  - teamspeak / mumble
   - kanban-board: wekan? focalboard? planka?
   - whiteboard https://github.com/cracker0dks/whiteboard (could be replaced by videoconferencing-tool like bbb)
   - wordpress
