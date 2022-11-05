@@ -96,6 +96,10 @@
   - name: Warn if domainname has different A-Record than default IPv4-Address
     fail: msg='A-Record for {{ inventory_hostname }} is set to {{ hostname_a_record }}'
     when:
+    - hostname_a_record is defined
+    - hostname_a_record | length>0
+    - ansible_default_ipv4.address is defined
+    - ansible_default_ipv4.address | length>0
     - hostname_a_record != ansible_default_ipv4.address
     - not hostname_a_record == "NXDOMAIN"
 
