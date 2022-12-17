@@ -167,6 +167,16 @@ see https://www.freedesktop.org/software/systemd/man/timesyncd.conf.html for inf
 | baserole_ntp_systemd_timesyncd_pollintervalminsec | The minimum poll interval for NTP messages | integer | no | 32 |
 | baserole_ntp_systemd_timesyncd_pollintervalmaxsec | The maximum poll interval for NTP messages  | integer | no | 2048 |
 
+## Proxy (system-level)
+
+|Variable|Description|possible values|required|default|
+|---|---|---|---|---|
+| baserole_proxy_http_server | Define proxy for HTTP | string, example: http://user:pass@1.2.3.4:8080/ | no | empty (skip) |
+| baserole_proxy_https_server | Define proxy for HTTPS | string, example: http://user:pass@1.2.3.4:8080/ | no | empty (skip) |
+| baserole_proxy_ftp_server | Define proxy for FTP | string, example: http://user:pass@1.2.3.4:8080/ | no | empty (skip) |
+| baserole_no_proxy | Define a list of server that will not retrived via proxy. warning: format is not standardized, see https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/ for more information | string | no | empty (skip) |
+| baserole_proxy_config | Set path for config-file | path to config-file | yes | /etc/environment |
+
 
 ## APT preferences (Debian only)
 
