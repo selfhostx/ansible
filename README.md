@@ -104,3 +104,7 @@ similiar projects
 appstores
 - cloudron: https://www.cloudron.io/store/index.html
 - yunohost: https://yunohost.org/en/apps
+
+app-installer:
+- bitnami (aquired by vmware)
+- turnkey (worth a look)
