@@ -1,0 +1,26 @@
+---
+# Roles or collections we use in playbooks:
+#
+# ansible-galaxy install -r requirements-stefanux.yml --ignore-errors
+# ansible-galaxy collection install -r requirements-stefanux.yml
+#
+# (needs recent version of ansible-galaxy ... 4.3+?)!
+
+roles:
+  - src: geerlingguy.mysql
+  - name: stefanux.mysqlbackup
+    src: https://github.com/stefanux/ansible-mysqlbackup.git
+    scm: git
+# optional:
+#  - src: geerlingguy.ntp
+#  - src: oefenweb.fail2ban
+#  - src: jnv.unattended-upgrades
+#  - name: selfhostx.certbot
+#    src: https://github.com/selfhostx/ansible-role-certbot.git
+#    scm: git
+
+collections:
+  - name: https://github.com/selfhostx/ansible.git
+    type: git
+  - name: community.crypto
+  - name: community.mysql
