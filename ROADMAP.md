@@ -3,14 +3,15 @@ Roadmap
 
 **Backup**
   - bacula https://github.com/stefanux/ansible-role-bacula
-  - bareos (2DO Coding)
-  - Borg+Borgmatic (2DO Port Code)
-  - restic (2DO Coding, maintainer needed)
+  - bareos (veselahouba.bareos)
+  - Borg+Borgmatic (if maintainer is found)
+  - restic (if maintainer is found)
   - mysql/mariadb (-> geerlingguy.mysql )
     - fulldump (SQL commands):
       - mysqlbackup https://github.com/stefanux/ansible-mysqlbackup
     - other methods:
       - FIXME
+  - proxmox backup server (2DO ?)
   - pfsense config (2DO https://github.com/pfsensible/core ?)
   - opensense config (2DO https://github.com/naturalis/ansible-opnsense ?)
   - etckeeper (2DO)
@@ -23,7 +24,7 @@ Roadmap
 
 **Filesystems**
   - ZFS
-    - vanilla install (2DO)
+    - vanilla install (2DO, planned)
     - Pool management (create, by-id-devices via vars)
     - special-usecases:
       - Proxmox https://github.com/bashclub/proxmox-zfs-postinstall
@@ -52,9 +53,9 @@ Roadmap
         - traefik
 
 **Instant messenger**
-  - mattermost (Code ready)
-  - matrix-synapse / element-web
-  - ...?
+  - mattermost (Code working, see sample playbook)
+  - matrix-synapse / element-web (2DO)
+  - rocket.chat (2DO?)
 
 **Filesharing**
   - samba
@@ -69,15 +70,15 @@ Roadmap
   - OpenMediaVault / TrueNAS Core?
 
 **Webserver**
-  - nginx
-    - reverse-proxy
-  - caddy
+  - nginx (nginx_common)
+    - reverse-proxy (2DO?)
+  - caddy (2DO)
   - apache ( -> geerlingguy.apache )
     - apache only (simple static sites)
     - redirector
     - LAMP  (-> geerlingguy.php geerlingguy.php-versions )
       - mod_php
-      - php-fpm
+      - php-fpm (2DO)
   - All-in-one-packages
     - froxlor  (Code ready)
     - ispconfig (maintainer needed)
@@ -89,14 +90,16 @@ Roadmap
   - certificate distribution
     - own certs (individual, wildcards) -> Code available
     - vaulted files via sops https://github.com/mozilla/sops ? 2DO)
-  - internal CA (creates certs for hosts) -> 2DO
+  - internal CAs:
+    - creates certs for hosts) -> 2DO
+    - distribute CAs (will be implemented in baserole)
 
 **E-Mail**
   - mailserver
-    - dovecot + postfix)
+    - dovecot + postfix (2DO)
       - stand-alone
       - backends like LDAP
-    - mailcow
+    - mailcow (Code ready, publish)
     - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
   - groupware
     - kopano (maintainer needed)
@@ -132,7 +135,7 @@ Roadmap
       - bind? -> 2DO: maintainer needed
     - DoH / dnscrypt (maintainer needed)
     - adfiltering
-      - powerdns with filtering (lua-based) - unreleased solution available
+      - powerdns with filtering (lua-based) -> release Code
       - pihole ?
       - adguard home?
   - **DNS (external service)**:
@@ -171,7 +174,7 @@ Roadmap
       - opnsense (2DO)
         - wireguard/openvpn/ipsec
       - strongswan (ipsec)
-      - wireguard
+      - wireguard ( githubixx.ansible_role_wireguard )
       - ZFS https://github.com/stefanux/zabbix_zfs-on-linux
       - ... (2DO extend List)
   - Uptime Kuma (for SoHo or extra monitoring - include simple statuspage)
@@ -224,6 +227,7 @@ Roadmap
 
 **Apps**
   - Videoconference
+    - opentalk (still beta)
     - bbb ( https://github.com/juanluisbaptiste/ansible-bigbluebutton )
     - jitsi via docker (but usage discouraged due to limitations, over-complex architecture and bad documentation)
   - Wiki
@@ -233,7 +237,7 @@ Roadmap
     - mediawiki (2Do: maintainer needed)
   - Netbox (IPAM/IT Asset Management)
   - Piwik (2DO)
-  - passwortmanager
+  - passwordmanager
     - vaultwarden (done)
     - hashicorp vault (2DO maintainer needed)?
     - privacyIDEA (2DO maintainer needed)
@@ -241,7 +245,7 @@ Roadmap
   - Ticketsystems
     - Zammad
   - kimai2 (timetracking)
-  - joplin (note taking application)
+  - joplin (note taking application; 2DO maintainer needed)
 
 **candidates**
   - Guacamole (remote desktop gateway)
@@ -253,7 +257,7 @@ Roadmap
   - nodebb
   - peertube
   - teamspeak / mumble
-  - kanban-board: wekan? focalboard? planka?
+  - kanban-boards (trello style): wekan? focalboard? planka?
   - whiteboard https://github.com/cracker0dks/whiteboard (could be replaced by videoconferencing-tool like bbb)
   - wordpress
   - distributed key/value stores
