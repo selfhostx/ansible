@@ -1,44 +1,4 @@
 ---
-# tasks from mrlesmithjr.etc-hosts (License: MIT) START
-# https://github.com/mrlesmithjr/ansible-etc-hosts/blob/master/tasks/main.yml
-# 
-
-- name: Manage hosts file
-  when: baserole_manage_hosts_file|bool
-  tags:
-    - hostsfile
-    - network
-
-  block:
-  - name: pre-reqs (RedHat)
-    yum:
-      name: ["libselinux-python"]
-      state: present
-    register: result
-    until: result is successful
-    when: >
-      ansible_os_family == "RedHat" and
-      ansible_distribution != "Fedora"
-
-  - name: pre-reqs (RedHat)
-    dnf:
-      name: ["libselinux-python"]
-      state: present
-    register: result
-    until: result is successful
-    when: >
-      ansible_os_family == "RedHat" and
-      ansible_distribution == "Fedora"
-
-  - name: main | updating /etc/hosts (localhost)
-    template:
-      src: "{{ baserole_manage_hosts_template }}"
-      dest: /etc/hosts
-      owner: root
-      group: root
-      mode: 0644
-# tasks from mrlesmithjr.etc-hosts END
-
 - name: Manage hostname file
   when: baserole_manage_hostname|bool
   tags:
@@ -63,6 +23,7 @@
   when: baserole_check_reverserecord|bool
   tags:
     - fqdn
+    - hostsfile
     - network
   block:
 
@@ -137,3 +98,42 @@
     - ansible_hostname == none
     - ansible_hostname != inventory_hostname
     ignore_errors: yes
+
+# tasks from mrlesmithjr.etc-hosts (License: MIT) START
+# https://github.com/mrlesmithjr/ansible-etc-hosts/blob/master/tasks/main.yml
+#
+- name: Manage hosts file
+  when: baserole_manage_hosts_file|bool
+  tags:
+    - hostsfile
+    - network
+
+  block:
+  - name: pre-reqs (RedHat)
+    yum:
+      name: ["libselinux-python"]
+      state: present
+    register: result
+    until: result is successful
+    when: >
+      ansible_os_family == "RedHat" and
+      ansible_distribution != "Fedora"
+
+  - name: pre-reqs (RedHat)
+    dnf:
+      name: ["libselinux-python"]
+      state: present
+    register: result
+    until: result is successful
+    when: >
+      ansible_os_family == "RedHat" and
+      ansible_distribution == "Fedora"
+
+  - name: main | updating /etc/hosts (localhost)
+    template:
+      src: "{{ baserole_manage_hosts_template }}"
+      dest: /etc/hosts
+      owner: root
+      group: root
+      mode: 0644
+# tasks from mrlesmithjr.etc-hosts END
