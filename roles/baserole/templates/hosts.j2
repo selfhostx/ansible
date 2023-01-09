@@ -1,0 +1,27 @@
+# {{ ansible_managed }}
+{% if baserole_ipv4_enable %}
+127.0.0.1 localhost.localdomain localhost
+
+{% if hostname_a_record is defined and hostname_a_record|length>0 or ansible_default_ipv4.address is defined and ansible_default_ipv4.address|length>0 %}
+{{ hostname_a_record | default(ansible_default_ipv4.address) }} {{ inventory_hostname }} {{ ansible_hostname }}
+{% endif %}
+{% endif %}
+
+{% if baserole_ipv6_enable %}
+# The following lines are desirable for IPv6 capable hosts
+::1 localhost.localdomain localhost localhost6.localdomain6	localhost6 ip6-localhost ip6-loopback
+
+{% if hostname_aaaa_record is defined and hostname_aaaa_record|length>0 or ansible_default_ipv6.address is defined and ansible_default_ipv6.address|length>0 %}
+{{ hostname_aaaa_record | default(ansible_default_ipv6.address) }} {{ inventory_hostname }} {{ ansible_hostname }}
+{% endif %}
+
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+{% endif %}
+{% if baserole_manage_hosts_extra_entries is defined and baserole_manage_hosts_extra_entries|length > 0 %}
+
+{{ baserole_manage_hosts_extra_entries }}
+{% endif %}

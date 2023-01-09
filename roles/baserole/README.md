@@ -95,6 +95,8 @@ Tags:
 
 ## Hostname configuration
 
+If enabled: set v4+v6-records in /etc/hosts (uses dns-query of inventory_hostname, fallback is primary ip) ... and possibly other extra entries.
+
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
 | baserole_manage_hosts_file | Enable managing of /etc/hosts (otherwise skip) | boolean (True, False) |no | False|
