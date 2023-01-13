@@ -1,0 +1,70 @@
+#cloud-config
+hostname: {{ proxmox_vm_hostname }}
+
+# Set the default user
+system_info:
+  default_user:
+    name: {{ cloudinit_os_default_user }}
+
+# Define user(s)
+chpasswd:
+  list:
+{% if cloudinit_os_default_rootpassword is defined and cloudinit_os_default_rootpassword|length > 0 %}
+    - root:{{ cloudinit_os_default_rootpassword }}
+{% endif %}
+    - {{ cloudinit_os_default_user }}:{{ cloudinit_os_default_userpassword }}
+  expire: false
+
+# Upgrade packages on instance, Default: false
+package_upgrade: {{ cloudinit_package_upgrade|lower | default('false') }}
+
+# System settings
+resize_rootfs: {{ cloudinit_resize_rootfs|lower | default('true') }}
+
+ssh_authorized_keys:
+{% for key in cloudinit_os_ssh_pubkeys %}
+  - {{ key }}
+{% endfor %}
+timezone: {{ cloudinit_os_timezone }}
+disable_root: {{ cloudinit_disable_root|lower | default('false') }}
+
+# Template for any additional commands on boot
+bootcmd:
+  - [ sh, -c, echo "=========bootcmd=========" ]
+
+# run commands in system (no comments allowed here):
+runcmd:
+  - [ sh, -c, echo "=========runcmd=========" ]
+{% if cloudinit_vm_distribution == "debian" %}
+  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=\"\"/GRUB_CMDLINE_LINUX_DEFAULT=\"net.ifnames=0 biosdevname=0\"/' /etc/default/grub
+{% endif %}
+{% if cloudinit_vm_distribution == "ubuntu" %}
+  - sed -i 's/^GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' /etc/default/grub
+{% endif %}
+  - update-grub
+{% if cloudinit_move_network_config_to_main_file %}
+  - echo "source /etc/network/interfaces.d/*\n" > /etc/network/interfaces
+  - sed /^#/d /etc/network/interfaces.d/50-cloud-init >> /etc/network/interfaces
+  - rm /etc/network/interfaces.d/50-cloud-init
+  - sed -i 's/^# control-manual eth0/auto eth0/' /etc/network/interfaces
+{% else %}
+  - sed -i 's/^# control-manual eth0/auto eth0/' /etc/network/interfaces.d/50-cloud-init
+{% endif %}
+{% if cloudinit_dns_set_servers %}
+{% for key in cloudinit_dns_servers %}
+  - echo "nameserver {{ key }}" >> /etc/resolv.conf
+{% endfor %}
+{% endif %}
+{% if cloudinit_os_ssh_root_pwauth %}
+  - echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+{% endif %}
+  - touch /etc/cloud/cloud-init.disabled
+  - reboot
+
+# Note that the file to disable cloud-init is checked to know when the vm is booted
+
+# To know when to log in, if reading console
+final_message: "SYSTEM READY TO LOG IN"
+
+# disable network config (in case cloud-init is not disabled:
+# echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
