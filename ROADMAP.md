@@ -36,7 +36,7 @@ Roadmap
   - glusterfs (?)
 
 **Virtualization**
-  - proxmox (including cloud-init) -> Code committen
+  - proxmox (including cloud-init) -> see folder: playbooks/proxmox
     - VM management: https://github.com/mikaelflora/ansible-role-proxmox-vm
     - lxc?
   - libvirt/KVM (including cloud-init) -> Code committen
