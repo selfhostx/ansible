@@ -1,0 +1,75 @@
+# {{ ansible_managed }}
+# server_names_hash_bucket_size 64;
+
+upstream {{ nginx_rev_localhttp_name | default('proxmox') }} {
+   server {{ nginx_rev_localhttp_target }};
+   keepalive {{ nginx_rev_keepalive }};
+}
+
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=APP_cache:10m max_size=3g inactive=120m use_temp_path=off;
+
+server {
+    listen      80;
+    listen [::]:80;
+    server_name {{ nginx_hostname | default(inventory_hostname) }};
+
+    location / {
+      return 301 https://$host$request_uri;
+    }
+}
+
+
+server {
+{% if nginx_http2_activate %}
+    listen {{ nginx_ssl_port }} ssl http2;
+    listen [::]:{{ nginx_ssl_port }} ssl http2;
+{% else %}
+    listen {{ nginx_ssl_port }} ssl;
+    listen [::]:{{ nginx_ssl_port }} ssl;
+{% endif %}
+
+    server_name {{ nginx_hostname | default(inventory_hostname) }};
+
+    ssl_certificate "{{ nginx_tls_cert | default('/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem') }}";
+    ssl_certificate_key "{{ nginx_tls_privkey | default('/etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem') }}";
+
+    include {{ nginx_tls_hardening_snippet }};
+
+    client_max_body_size 25m;
+    charset utf-8;
+
+    access_log /var/log/nginx/{{ inventory_hostname }}-access.log;
+    error_log /var/log/nginx/{{ inventory_hostname }}-error.log;
+
+    # ask search engines not to index the site
+    add_header X-Robots-Tag "noindex, nofollow";
+
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json;
+    gzip_vary on;
+
+    proxy_redirect off;
+
+  location / {
+       client_max_body_size 50M;
+
+       # proper websocket proxying
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
+       proxy_set_header Host $host;
+       proxy_connect_timeout 3600s;
+       proxy_read_timeout 3600s;
+       proxy_send_timeout 3600s;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+       proxy_set_header X-Forwarded-Port $server_port;
+       
+       # don't buffer anything
+       proxy_request_buffering off;
+       proxy_buffering off;
+
+       proxy_pass https://{{ nginx_rev_localhttp_name | default('proxmox') }};
+  }
+}
