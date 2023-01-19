@@ -43,7 +43,7 @@
     "EnableInsecureOutgoingConnections": false,
     "AllowedUntrustedInternalConnections": "",
     "EnableMultifactorAuthentication": false,
-    "EnforceMultifactorAuthentication": {{ mattermost_enforcemultifactorauthentication_guests | lower }},
+    "EnforceMultifactorAuthentication": {{ mattermost_enforcemultifactorauthentication_users | lower }},
     "EnableUserAccessTokens": false,
     "AllowCorsFrom": "",
     "CorsExposedHeaders": "",
@@ -543,7 +543,7 @@
   "GuestAccountsSettings": {
     "Enable": false,
     "AllowEmailAccounts": true,
-    "EnforceMultifactorAuthentication": {{ mattermost_enforcemultifactorauthentication_users | lower }},
+    "EnforceMultifactorAuthentication": {{ mattermost_enforcemultifactorauthentication_guests | lower }},
     "RestrictCreationToDomains": "{{ mattermost_restrictcreationtodomains }}"
   },
   "ImageProxySettings": {
