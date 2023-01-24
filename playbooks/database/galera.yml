@@ -1,0 +1,88 @@
+---
+- name: Install nrs galera
+  hosts: MY_GALERA_GROUP
+
+  vars_files:
+    - MY_vault.yml
+
+  vars:
+    # see: https://github.com/mrlesmithjr/ansible-mariadb-galera-cluster/blob/master/defaults/main.yml
+    
+    # mariadb_mysql_root_password: -> vault
+    galera_enable_mariadb_repo: False
+    mariadb_bind_address: 0.0.0.0
+    # mariadb_tls_files ?
+
+    galera_cluster_bind_interface: "eth0"
+    # Define bind address for galera cluster (derived from galera_cluster_bind_interface):
+    # galera_cluster_bind_address: "{{ hostvars[inventory_hostname]['ansible_' + galera_cluster_bind_interface]['ipv4']['address'] }}"
+
+    # Defines wsrep node address
+    # galera_wsrep_node_address: "{{ galera_cluster_bind_address }}:{{ galera_wsrep_node_address_port }}"
+    galera_wsrep_slave_threads: "auto"
+
+    # galera_cluster_bind_address -> per node
+    galera_cluster_name: "MY_CLUSTERNAME"
+    # same inventory group as the playbook is running on!
+    galera_cluster_nodes_group: MY_GALERA_GROUP
+    
+    mariadb_swappiness: 1
+
+    mariadb_charset_server: utf8mb4
+    mariadb_collation_server: utf8mb4_general_ci
+    mariadb_charset_client: utf8mb4
+
+    mariadb_databases:
+      - name: MY_DATABASE
+        # init_script: files/init_mydb.sql
+    mariadb_mysql_users:
+      - name: MY_DBUSER
+        hosts:
+          - "%"
+          - "127.0.0.1"
+          - "::1"
+          - "localhost"
+        password: "{{ MY_galera_password_var_from_vault }}"
+        # encrypted: no
+        # priv: *.*:USAGE
+        # state: present (default)
+        # append_privs: no (default)
+
+    galera_mysql_first_node: DB1.DOMAIN.TLD
+    mariadb_pri_domain_name: DOMAIN.TLD
+    mariadb_smtp_domain_name: DOMAIN.TLD
+    mariadb_smtp_server: localhost
+    galera_email_notifications: root@DOMAIN.TLD
+    galera_notify_mail_from: root@DOMAIN.TLD
+    galera_notify_mail_to: root@DOMAIN.TLD
+
+    # If this is defined it will create a file with overrides
+
+    # https://mariadb.com/kb/en/replication-and-binary-log-system-variables/#log_slave_updates
+    mariadb_config_overrides:
+       mariadb:
+         log_slave_updates: 1
+         max_connections: 512
+
+    # 2DO: later tls encryption
+    # galera_wsrep_tls_enabled: true
+    # galera_sst_tls_enabled: true
+
+    # mariadb_tls_files:
+    #   ca_cert:
+    #     name: "ca.pem"
+    #     content: |
+    #       -- ca-cert content --
+    #   server_key:
+    #     name: "server-key.pem"
+    #     content: |
+    #       -- server-cert content --
+    #   server_cert:
+    #     name: "server-cert.pem"
+    #     content: |
+    #       -- server-cert content --
+    
+  tasks:
+    - name: Include ansible-mariadb-galera-cluster
+      include_role:
+        name: mrlesmithjr.mariadb_galera_cluster

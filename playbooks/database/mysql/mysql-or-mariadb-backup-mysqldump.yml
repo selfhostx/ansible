@@ -1,0 +1,5 @@
+---
+# - hosts: all
+- hosts: mysql_servers
+  roles:
+    - { role: stefanux.mysqlbackup }
