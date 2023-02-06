@@ -11,8 +11,6 @@
     ansible.builtin.command: apt-get -y -o DPkg::options::="--force-confdef" -o DPkg::options::="--force-confold" upgrade
     environment:
       DEBIAN_FRONTEND: noninteractive
-    args:
-      warn: False
     register: upgrade_output_debian
     when:
       - ansible_os_family == "Debian"
