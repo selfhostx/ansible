@@ -6,8 +6,8 @@
     - network
   block:
 
-  # requires dnspython on master: pip install dnspython / pip3 install dnspython
-  - name: Set Hostname from inventory
+  # requires dnspython on master: pip install dnspython / pip3 install dnspython or via packages python3-dnspython
+  - name: Set Hostname from inventory (requires dnspython on ansible controller)
     copy:
       content: "{{ inventory_hostname_short }}"
       dest: /etc/hostname
