@@ -1,0 +1,5 @@
+---
+- name: Run baserole
+  hosts: all
+  roles:
+    - { role: selfhostx.ansible.baserole }
