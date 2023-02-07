@@ -30,7 +30,6 @@
   ansible.builtin.service:
     name: "{{ baserole_ntp_systemd_timesyncd_servicename }}"
     enabled: yes
-    masked: no
 
 - name: Update Grub Config
   ansible.builtin.command: update-grub
