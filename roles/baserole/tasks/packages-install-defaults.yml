@@ -5,7 +5,7 @@
     ansible.builtin.apt:
       name: "{{ baserole_package_defaults_debian }}"
       state: present
-      install_recommends: no
+      install_recommends: false
       cache_valid_time: "{{ baserole_package_cache_valid_time }}"
     when:
       - ansible_os_family == "Debian"
@@ -47,7 +47,7 @@
     - Manage Qemu Guest Agent
 
   - name: Install openVM guest tools (except Windows)
-    package: name="{{ baserole_package_guest_agent_vmware_package }}" state=present
+    ansible.builtin.package: name="{{ baserole_package_guest_agent_vmware_package }}" state=present
     when:
     - baserole_package_guest_agent_enable
     - "'machine_is_virtual' in group_names"

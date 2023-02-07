@@ -2,8 +2,8 @@
   - name: Update package list and autoremove (debian family)
     ansible.builtin.apt:
       upgrade: no
-      update_cache: yes
-      autoremove: yes
+      update_cache: true
+      autoremove: true
     when:
       - ansible_os_family == "Debian"
 
@@ -19,7 +19,7 @@
     ansible.builtin.yum:
       name: '*'
       state: latest # noqa package-latest
-      update_cache: yes
+      update_cache: true
     register: upgrade_output_redhat
     when:
       - ansible_os_family == "RedHat"

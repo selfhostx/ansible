@@ -2,7 +2,7 @@
   # conditions for user-tasks:
   - name: No Conditions set for skipping
     ansible.builtin.set_fact:
-      skip_this_user: False
+      skip_this_user: false
     when:
       - item.conditional_hostgroup is undefined
       - item.conditional_var_name_exists is undefined
@@ -17,7 +17,7 @@
 
   - name: Set Condition Skip
     ansible.builtin.set_fact:
-      skip_this_user: True
+      skip_this_user: true
     when:
       - item.conditional_hostgroup is defined
       - item.conditional_var_name_exists is defined
@@ -32,7 +32,7 @@
 
   - name: Check if conditional_hostgroup is present
     ansible.builtin.set_fact:
-      skip_this_user: False
+      skip_this_user: false
     when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
     tags:
       - htop
@@ -45,11 +45,11 @@
 
   - name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
     ansible.builtin.set_fact:
-      skip_this_user: False
+      skip_this_user: false
     when:
       - lookup('vars', item.conditional_var_name_exists) is defined
-    changed_when: False
-    ignore_errors: True
+    changed_when: false
+    ignore_errors: true
     tags:
       - htop
       - nano
@@ -115,7 +115,7 @@
 
   - name: Set Skip if state (of user) is absent
     ansible.builtin.set_fact:
-      skip_this_user: True
+      skip_this_user: true
     when:
       - item.state is defined
       - item.state == "absent"

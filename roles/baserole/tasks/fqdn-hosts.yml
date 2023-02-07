@@ -14,7 +14,7 @@
       mode: '0644'
     register: hostname_file
 
-  - name: change hostname on running system
+  - name: Change hostname on running system
     ansible.builtin.command: hostname -F /etc/hostname
     when: hostname_file.changed
 
@@ -41,18 +41,18 @@
   - name: Gather Reverse-Record (v4)
     ansible.builtin.set_fact:
       hostname_reverse_record_v4: "{{ lookup('community.general.dig', '{{ ansible_default_ipv4.address }}') }}"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Gather Reverse-Record (v6)
     ansible.builtin.set_fact:
       hostname_reverse_record_v6: "{{ lookup('community.general.dig', '{{ ansible_default_ipv6.address }}') }}"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Warn if domainname has no A-Record
     ansible.builtin.fail: msg='Warning - A-Record for does not exist for {{ inventory_hostname }}'
     when:
     - hostname_a_record == "NXDOMAIN"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Warn if domainname has different A-Record than default IPv4-Address
     ansible.builtin.fail: msg='A-Record for {{ inventory_hostname }} is set to {{ hostname_a_record }}'
@@ -68,27 +68,27 @@
     ansible.builtin.fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v4 }}"'
     when:
     - hostname_reverse_record_v4 == "NXDOMAIN"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Warn if host has no Reverse-Record (v6)
     ansible.builtin.fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v6 }}"'
     when:
     - hostname_reverse_record_v6 == "NXDOMAIN"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Warn if host has different Reverse-Record (v4)
     ansible.builtin.fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v4 }}"'
     when:
     - hostname_reverse_record_v4 != inventory_hostname
     - not hostname_reverse_record_v4 == "NXDOMAIN"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Warn if host has different Reverse-Record (v6)
     ansible.builtin.fail: msg='Warning - Reverse-Record is "{{ hostname_reverse_record_v6 }}"'
     when:
     - hostname_reverse_record_v6 != inventory_hostname
     - not hostname_reverse_record == "NXDOMAIN"
-    ignore_errors: yes
+    ignore_errors: true
 
   - name: Fail if FQDN is not inventory_hostname
     ansible.builtin.fail: msg='Failing - FQDN is not set up properly'
@@ -97,7 +97,7 @@
     - ansible_hostname | length = 0
     - ansible_hostname == none
     - ansible_hostname != inventory_hostname
-    ignore_errors: yes
+    ignore_errors: true
 
 # tasks from mrlesmithjr.etc-hosts (License: MIT) START
 # https://github.com/mrlesmithjr/ansible-etc-hosts/blob/master/tasks/main.yml
@@ -109,7 +109,7 @@
     - network
 
   block:
-  - name: pre-reqs (RedHat)
+  - name: Pre-reqs (RedHat)
     ansible.builtin.yum:
       name: ["libselinux-python"]
       state: present
@@ -119,7 +119,7 @@
       ansible_os_family == "RedHat" and
       ansible_distribution != "Fedora"
 
-  - name: pre-reqs (RedHat)
+  - name: Pre-reqs (RedHat)
     ansible.builtin.dnf:
       name: ["libselinux-python"]
       state: present
@@ -129,7 +129,7 @@
       ansible_os_family == "RedHat" and
       ansible_distribution == "Fedora"
 
-  - name: main | updating /etc/hosts (localhost)
+  - name: Main | updating /etc/hosts (localhost)
     ansible.builtin.template:
       src: "{{ baserole_manage_hosts_template }}"
       dest: /etc/hosts

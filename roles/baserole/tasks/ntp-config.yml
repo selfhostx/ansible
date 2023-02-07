@@ -3,7 +3,7 @@
   ansible.builtin.yum:
     name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     state: present
-    update_cache: yes
+    update_cache: true
   when:
     - ansible_os_family == "RedHat"
     - baserole_ntp_daemon == "systemd-timesyncd"

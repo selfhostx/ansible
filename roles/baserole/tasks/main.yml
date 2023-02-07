@@ -17,7 +17,7 @@
   ansible.posix.sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
-    sysctl_set: yes
+    sysctl_set: true
     state: "{{ item.state | default(omit) }}"
     sysctl_file: "{{ baserole_sysctl_path | default(omit) }}"
     ignoreerrors: "{{ baserole_sysctl_ignoreerrors | default(omit) }}"
@@ -112,7 +112,7 @@
 - name: Include user-root.yml
   ansible.builtin.include_tasks:
     file: "user-root.yml"
-  tags: 
+  tags:
     - bash
     - pubkey
     - ssh
@@ -176,7 +176,7 @@
   when: baserole_machine_id_regenerate|bool
 
 - name: Include journald.yml
-  include_tasks:
+  ansible.builtin.include_tasks:
     file: "journald.yml"
     apply:
       tags:
