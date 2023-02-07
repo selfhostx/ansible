@@ -169,6 +169,13 @@ see https://www.freedesktop.org/software/systemd/man/timesyncd.conf.html for inf
 | baserole_ntp_systemd_timesyncd_pollintervalminsec | The minimum poll interval for NTP messages | integer | no | 32 |
 | baserole_ntp_systemd_timesyncd_pollintervalmaxsec | The maximum poll interval for NTP messages  | integer | no | 2048 |
 
+NTP-server (primary is pool.ntp.org):
+```
+baserole_ntp_systemd_timesyncd_ntp_primary: "pool.ntp.org"
+baserole_ntp_systemd_timesyncd_ntp_fallback: "0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org"
+```
+
+
 ## Proxy (system-level)
 
 |Variable|Description|possible values|required|default|
@@ -250,7 +257,6 @@ baserole_package_defaults_debian:
   - bzip2
   - curl
   - dnsutils
-  - ethtool
 ```
 
 ### package upgrades
