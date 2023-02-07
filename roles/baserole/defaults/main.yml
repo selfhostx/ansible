@@ -186,7 +186,6 @@ baserole_package_defaults_redhat:
   - rsync
   - sudo
   - sysstat
-  - tcpdump
   - traceroute
   - unzip
 
