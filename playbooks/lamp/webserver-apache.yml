@@ -1,0 +1,5 @@
+---
+- name: Install Apache
+  hosts: all
+  roles:
+    - selfhostx.apache
