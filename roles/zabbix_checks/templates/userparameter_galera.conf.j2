@@ -1,0 +1,69 @@
+#Total number of cluster membership changes happened.
+UserParameter=galera.cluster_conf_id[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_cluster_conf_id';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Current number of members in the cluster.
+UserParameter=galera.cluster_size[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_cluster_size';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Status of this cluster component. That is, whether the node is part of a PRIMARY or NON_PRIMARY component.
+UserParameter=galera.cluster_status[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_cluster_status';" | HOME={{ zabbix_homedir }} mysql -N
+
+#If the value is OFF, the node has not yet connected to any of the cluster components.
+UserParameter=galera.wsrep_connected[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_connected';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Shows the internal state of the EVS Protocol
+UserParameter=galera.wsrep_evs_state[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_evs_state';" | HOME={{ zabbix_homedir }} mysql -N
+
+#How much the slave lag is slowing down the cluster.
+UserParameter=galera.wsrep_flow_control_paused[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_flow_control_paused';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Returns the number of FC_PAUSE events the node has received. Does not reset over time
+UserParameter=galera.wsrep_flow_control_recv[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_flow_control_recv';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Returns the number of FC_PAUSE events the node has sent. Does not reset over time
+UserParameter=galera.wsrep_flow_control_sent[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_flow_control_sent';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Displays the group communications UUID.
+UserParameter=galera.wsrep_gcom_uuid[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_gcomm_uuid';" | HOME={{ zabbix_homedir }} mysql -N
+
+#The sequence number, or seqno, of the last committed transaction.
+UserParameter=galera.wsrep_last_committed[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_last_committed';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Internal Galera Cluster FSM state number.
+
+UserParameter=galera.wsrep_local_state[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_local_state';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total number of local transactions that were aborted by slave transactions while in execution.
+UserParameter=galera.wsrep_local_bf_aborts[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_local_bf_aborts';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Current (instantaneous) length of the recv queue.
+UserParameter=galera.wsrep_local_recv_queue[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_local_recv_queue';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Current (instantaneous) length of the send queue.
+UserParameter=galera.wsrep_local_send_queue[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_local_send_queue';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Human-readable explanation of the state.
+UserParameter=galera.wsrep_local_state_comment[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_local_state_comment';" | HOME={{ zabbix_homedir }} mysql -N
+
+#The UUID of the state stored on this node.
+UserParameter=galera.wsrep_local_state_uuid[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_local_state_uuid';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Whether the server is ready to accept queries.
+UserParameter=galera.wsrep_ready[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_ready';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total size of write-sets received from other nodes.
+UserParameter=galera.wsrep_received_bytes[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_received_bytes';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total size of write-sets replicated.
+UserParameter=galera.replicated_bytes[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_replicated_bytes';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total size of data replicated.
+UserParameter=galera.wsrep_repl_data_bytes[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_repl_data_bytes';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total number of keys replicated.
+UserParameter=galera.wsrep_repl_keys[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_repl_keys';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total size of keys replicated in bytes
+UserParameter=galera.wsrep_repl_keys_bytes[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_repl_keys_bytes';" | HOME={{ zabbix_homedir }} mysql -N
+
+#Total size of other bits replicated
+UserParameter=galera.wsrep_repl_other_bytes[*],echo "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS where VARIABLE_NAME = 'wsrep_repl_other_bytes';" | HOME={{ zabbix_homedir }} mysql -N

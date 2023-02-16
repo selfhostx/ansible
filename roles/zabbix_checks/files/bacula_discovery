@@ -1,0 +1,45 @@
+#!/bin/bash
+file="/tmp/jobs_discovery_lld.txt"
+
+getjob_names()
+{
+    until [ -z "$1" ]
+    do
+      if [ ${1:0} != 'Job:' ]
+      then
+          tmp=${1:0}
+          parameter=${tmp%%=*}
+          value=${tmp##*=}
+          eval $parameter=$value
+      fi
+      shift
+    done
+    if [ $Enabled == '1' ]
+    then
+      echo $name
+    fi
+}
+
+## GENERATE AUTO DISCOVERY JSON
+generate_zabbix_json()
+{
+  echo -e "{" > $file
+  echo -e "\t\"data\":[" >> $file
+  first=1
+  for i in $*
+  do
+    if [ $first == 0 ]
+    then
+      echo -e "\t," >> $file
+    fi
+    first=0
+    echo -e "\t{\"{#JOB}\":\"$i\"}" >> $file
+  done
+  echo -e "\t]" >> $file
+  echo -e "}" >> $file
+}
+
+## EXECUTION
+generate_zabbix_json $(echo "show job"|bconsole|grep Job:|while read LINE;do getjob_names $LINE;done)
+cat $file
+rm -f $file

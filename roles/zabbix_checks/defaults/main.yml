@@ -1,0 +1,28 @@
+---
+# defaults file for zabbix
+# keeping this consistent with zabbix-collection
+# https://github.com/ansible-collections/community.zabbix/blob/main/roles/zabbix_agent/defaults/main.yml
+
+zabbix_user: "zabbix"
+zabbix_group: "zabbix"
+zabbix_homedir: "/var/lib/zabbix"
+zabbix_scripts_dir: /etc/zabbix/scripts
+
+# zabbix_api_user: -> vault
+# zabbix_api_pass -> vault
+
+zabbix_win_install_dir: 'C:\Zabbix'
+zabbix_agent_win_include: "{{ zabbix_win_install_dir }}\\zabbix_agent.d\\"
+
+zabbix_agent_include_dir: /etc/zabbix/zabbix_agentd.d
+zabbix_agent2_include_dir: "/etc/zabbix/zabbix_agent2.d"
+zabbix_agent_conf_mode: "0600"
+
+zabbix_agent_service: "zabbix-agent"
+zabbix_agent2_service: "zabbix-agent2"
+
+# do not run tasks if not present in host_vars/group_vars:
+zabbix_checks_mysql_enable: false
+zabbix_checks_galera_enable: false
+zabbix_checks_bacula_enable: false
+zabbix_checks_iostat_enable: false

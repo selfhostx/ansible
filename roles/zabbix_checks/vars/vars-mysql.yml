@@ -1,0 +1,6 @@
+---
+zabbix_mysql_monitoring_user: "zbx_monitor"
+zabbix_mysql_defaultsfile: "{{ zabbix_homedir }}/.my.cnf"
+mysql_user_name: "{{ zabbix_mysql_monitoring_user }}"
+zabbix_userparameter_mysql_filename: "{{ zabbix_agent_include_dir }}/userparameter_mysql.conf"
+# roles/dj-wasabi.zabbix-agent/vars/...

@@ -1,0 +1,67 @@
+---
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-mysql.yml"
+
+- name: Generate Password
+  ansible.builtin.set_fact:
+    zabbix_mysql_monitoring_password: "{{ lookup('password', '/dev/null length=20 chars=ascii_letters') }}"
+  no_log: True
+  when:
+    - zabbix_mysql_monitoring_password is not defined or zabbix_mysql_monitoring_password|length == 0
+
+- name: Set password
+  ansible.builtin.set_fact:
+    mysql_user_password: "{{ zabbix_mysql_monitoring_password }}"
+  no_log: True
+
+# 2 tasks from geerlingguy.mysql
+- name: Determine required MySQL Python libraries.
+  ansible.builtin.set_fact:
+    deb_mysql_python_package: "{% if 'python3' in ansible_python_interpreter|default('') %}python3-mysqldb{% else %}python-mysqldb{% endif %}"
+
+- name: Ensure MySQL Python libraries are installed.
+  ansible.builtin.apt: "name={{ deb_mysql_python_package }} state=present"
+
+- name: Create MySQL monitoring user
+  # needs python-mysqldb or python3-mysqldb
+  community.mysql.mysql_user:
+    name: "{{ zabbix_mysql_monitoring_user }}"
+    host: "localhost"
+    password: "{{ zabbix_mysql_monitoring_password }}"
+    priv: "*.*:USAGE,REPLICATION CLIENT,PROCESS,SHOW DATABASES,SHOW VIEW"
+    state: "present"
+    append_privs: "yes"
+    encrypted: "no"
+  no_log: true
+
+- name: Copy user-my.cnf file with password credentials.
+  ansible.builtin.template:
+    src: "mysql_user-my.cnf.j2"
+    dest: "{{ zabbix_mysql_defaultsfile }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  no_log: true
+
+- name: Copy userparameters for mysql
+  ansible.builtin.template:
+    src: "userparameter_mysql.conf.j2"
+    # src: "{{ role_path }}/templates/zabbix/userparameter_mysql.conf.j2"
+    dest: "{{ zabbix_userparameter_mysql_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent
+
+- name: Check if credentials are working from zabbix user
+  # FIXME put in vars
+  ansible.builtin.command: mysqladmin --defaults-file="{{ zabbix_mysql_defaultsfile }}" -hlocalhost -P3306 ping
+  become: yes
+  become_user: "{{ zabbix_user }}"
+  changed_when: false
+  failed_when: "'mysqld is alive' not in mysqladmin_output.stdout"
+  register: mysqladmin_output
+
+- name: Show output of mysqld. message should be like mysqld is alive (when OK)
+  ansible.builtin.debug:
+    msg: "{{ mysqladmin_output }}"

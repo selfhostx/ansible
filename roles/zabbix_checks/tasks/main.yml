@@ -1,0 +1,63 @@
+---
+# tasks file for zabbix-checks
+
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+# common tasks:
+
+- name: Create zabbix Include directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Create zabbix home directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_homedir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0700'
+
+# Includes of specific tasks:
+
+- name: Include mysql tasks
+  ansible.builtin.include_tasks:
+    file: "mysql.yml"
+    apply:
+      tags:
+        - mysql
+  tags: mysql
+  when: zabbix_checks_mysql_enable|bool
+
+- name: Include galera tasks
+  ansible.builtin.include_tasks:
+    file: "galera.yml"
+    apply:
+      tags:
+        - galera
+  tags: galera
+  when: zabbix_checks_galera_enable|bool
+
+- name: Include bacula tasks
+  ansible.builtin.include_tasks:
+    file: "bacula.yml"
+    apply:
+      tags:
+        - bacula
+  tags: bacula
+  when: zabbix_checks_bacula_enable|bool
+
+- name: Include iostat tasks
+  ansible.builtin.include_tasks:
+    file: "iostat.yml"
+    apply:
+      tags:
+        - iostat
+  tags: iostat
+  when: zabbix_checks_iostat_enable|bool
