@@ -1,0 +1,10 @@
+---
+- name: Install zabbix checks
+  hosts: all
+  roles:
+    - { role: selfhostx.ansible.zabbix_checks, tags: zabbix_checks }
+
+#  vars:
+
+  vars_files:
+    - MY_VAULT.yml

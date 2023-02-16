@@ -31,12 +31,12 @@ see defaults/main.yml for more variables
 Example Playbook
 ----------------
 
-```
-FIXME
-```
+see: playbooks/monitoring/zabbix-checks.yml
+
+License
+=======
 
 GPL-3.0-or-later
-
 
 Author Information
 ==================
