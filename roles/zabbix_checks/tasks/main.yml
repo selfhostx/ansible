@@ -26,6 +26,15 @@
 
 # Includes of specific tasks:
 
+- name: Include dns tasks
+  ansible.builtin.include_tasks:
+    file: "dns.yml"
+    apply:
+      tags:
+        - dns
+  tags: dns
+  when: zabbix_checks_dns_enable|bool
+
 - name: Include mysql tasks
   ansible.builtin.include_tasks:
     file: "mysql.yml"
