@@ -1,2 +1,2 @@
 ---
-zabbix_userparameter_zfs_zol_filename: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/userparameter_zfs_zol.conf"
+zabbix_userparameter_zfs_zol_filename: "userparameter_zfs_zol.conf"

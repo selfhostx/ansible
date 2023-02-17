@@ -18,7 +18,7 @@
 - name: Update dns_query_check.sh
   ansible.builtin.copy:
     src: "dns_query_check.sh"
-    dest: "{{ zabbix_dnscheck_script_filename }}"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_dnscheck_script_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     mode: '0755'

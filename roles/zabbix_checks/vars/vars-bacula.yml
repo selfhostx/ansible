@@ -1,5 +1,5 @@
 ---
-zabbix_bacula_userparameter_filename: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/userparameter_bacula.conf"
+zabbix_bacula_userparameter_filename: "userparameter_bacula.conf"
 zabbix_bacula_sudoers_filename: "/etc/sudoers.d/20_zabbix-bacula-sudoers"
 zabbix_bacula_script_check_job_filename: bacula_check_job
 zabbix_bacula_script_check_job_dest: "{{ zabbix_scripts_dir }}/{{ zabbix_bacula_script_check_job_filename }}"

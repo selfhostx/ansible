@@ -15,8 +15,8 @@
 
 - name: Copy script for tcpstats template
   ansible.builtin.copy:
-    src: "files/{{ zabbix_userparameter_tcpstats_script_filename }}"
-    dest: "{{ zabbix_userparameter_tcpstats_script_dest }}"
+    src: "{{ zabbix_userparameter_tcpstats_script_filename }}"
+    dest: "{{ zabbix_userparameter_tcpstats_script_dir }}/{{ zabbix_userparameter_tcpstats_script_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     mode: '0750'
@@ -27,5 +27,5 @@
     dest: "{{ zabbix_userparameter_tcpstats_dest }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
-    mode: '0600'
+    mode: '{{ zabbix_agent_conf_mode }}'
   notify: Restart zabbix-agent

@@ -1,2 +1,2 @@
 ---
-zabbix_userparameter_galera_filename: "{{ zabbix_agent_include_dir }}/userparameter_galera.conf"
+zabbix_userparameter_galera_filename: "userparameter_galera.conf"

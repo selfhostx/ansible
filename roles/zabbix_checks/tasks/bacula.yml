@@ -8,7 +8,7 @@
 - name: Copy userparameters for bacula
   ansible.builtin.template:
     src: "userparameter_bacula.conf.j2"
-    dest: "{{ zabbix_bacula_userparameter_filename }}"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_bacula_userparameter_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     mode: '{{ zabbix_agent_conf_mode }}'

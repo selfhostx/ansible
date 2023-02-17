@@ -9,7 +9,7 @@ zabbix_agent2: false
 zabbix_user: "zabbix"
 zabbix_group: "zabbix"
 zabbix_homedir: "/var/lib/zabbix"
-zabbix_scripts_dir: /etc/zabbix/scripts
+zabbix_scripts_dir: "/etc/zabbix/scripts"
 
 # zabbix_api_user: -> vault
 # zabbix_api_pass -> vault
@@ -17,7 +17,7 @@ zabbix_scripts_dir: /etc/zabbix/scripts
 zabbix_win_install_dir: 'C:\Zabbix'
 zabbix_agent_win_include: "{{ zabbix_win_install_dir }}\\zabbix_agent.d\\"
 
-zabbix_agent_include_dir: /etc/zabbix/zabbix_agentd.d
+zabbix_agent_include_dir: "/etc/zabbix/zabbix_agentd.d"
 zabbix_agent2_include_dir: "/etc/zabbix/zabbix_agent2.d"
 zabbix_agent_conf_mode: "0600"
 

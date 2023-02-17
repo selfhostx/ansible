@@ -15,10 +15,10 @@
 - name: Copy userparameters for wireguard
   template:
     src: "userparameter_wireguard.conf.j2"
-    dest: "{{ zabbix_wireguard_userparameter_filename }}"
+    dest: "{{ zabbix_agent_include if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_wireguard_userparameter_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
-    mode: '0600'
+    mode: '{{ zabbix_agent_conf_mode }}'
   notify: Restart zabbix-agent
 
 - name: Create zabbix scripts directory if it does not exist
