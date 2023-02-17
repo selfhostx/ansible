@@ -2,7 +2,7 @@
 - name: Include check-specific variables
   ansible.builtin.include_vars: "vars-dns.yml"
 
-- name: "Install pwgen"
+- name: Install pwgen
   ansible.builtin.package:
     name: "pwgen"
     state: present

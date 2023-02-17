@@ -3,6 +3,9 @@
 # keeping this consistent with zabbix-collection
 # https://github.com/ansible-collections/community.zabbix/blob/main/roles/zabbix_agent/defaults/main.yml
 
+# set to true to enable the agent2:
+zabbix_agent2: false
+
 zabbix_user: "zabbix"
 zabbix_group: "zabbix"
 zabbix_homedir: "/var/lib/zabbix"
