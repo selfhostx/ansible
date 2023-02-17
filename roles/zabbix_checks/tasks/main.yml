@@ -44,6 +44,15 @@
   tags: galera
   when: zabbix_checks_galera_enable|bool
 
+- name: Include glusterfs tasks
+  ansible.builtin.include_tasks:
+    file: "glusterfs.yml"
+    apply:
+      tags:
+        - glusterfs
+  tags: glusterfs
+  when: zabbix_checks_glusterfs_enable|bool
+
 - name: Include bacula tasks
   ansible.builtin.include_tasks:
     file: "bacula.yml"

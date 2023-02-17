@@ -1,0 +1,4 @@
+UserParameter=gluster.discovery,sudo {{ zabbix_script_full_path }} discovery 
+UserParameter=pool.discovery,sudo {{ zabbix_script_full_path }} peers-discovery 
+UserParameter=gluster.volume[*],sudo {{ zabbix_script_full_path }} $1 $2
+UserParameter=peers.status,sudo {{ zabbix_script_full_path }} peers-status 

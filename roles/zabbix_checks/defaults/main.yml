@@ -24,6 +24,7 @@ zabbix_agent2_service: "zabbix-agent2"
 # do not run tasks if not present in host_vars/group_vars:
 zabbix_checks_bacula_enable: false
 zabbix_checks_galera_enable: false
+zabbix_checks_glusterfs_enable: false
 zabbix_checks_iostat_enable: false
 zabbix_checks_mysql_enable: false
 zabbix_checks_postfix_enable: false
