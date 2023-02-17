@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+#
+UserParameter=postfix.active, sudo {{ zabbix_scripts_postfix_stats_dest }} active
+UserParameter=postfix.deferred, sudo {{ zabbix_scripts_postfix_stats_dest }} deferred
+UserParameter=postfix.incoming, sudo {{ zabbix_scripts_postfix_stats_dest }} incoming
+UserParameter=postfix.maildrop, sudo {{ zabbix_scripts_postfix_stats_dest }} maildrop
+UserParameter=postfix.queue, sudo {{ zabbix_scripts_postfix_stats_dest }} queue
+UserParameter=postfix.tempblocked, sudo {{ zabbix_scripts_postfix_stats_dest }} tempblocked

@@ -1,0 +1,12 @@
+---
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-zfs-zol.yml"
+
+- name: Copy userparameters for ZFS
+  ansible.builtin.template:
+    src: "userparameter_zfs_zol.conf.j2"
+    dest: "{{ zabbix_userparameter_zfs_zol_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent

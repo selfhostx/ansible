@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+#
+UserParameter=wg.list.discovery[*],sudo {{ zabbix_wireguard_script_filename }} $1
+UserParameter=wg.port.used[*],sudo /usr/bin/wg show $1 listen-port
+UserParameter=wg.fw.mark[*],sudo /usr/bin/wg show $1 fwmark
+UserParameter=wg.peers.count[*],sudo /usr/bin/wg show $1 peers | wc -l 
+UserParameter=wg.peers.connected[*],sudo /usr/bin/wg show $1 endpoints |grep -v "(none)" | wc -l
+UserParameter=wg.endpoint.address[*],sudo /usr/bin/wg show all endpoints |grep -i $1 |awk -F'=' '{print $$2}' | sed -r 's/(.*):.*/\1/g' | sed -e 's/\[//g' | sed -e 's/\]//g' | sed -e s'/\t//g'
+UserParameter=wg.endpoint.port[*],sudo /usr/bin/wg show all endpoints |grep -i $1 |awk -F':' '{print $$2}'
+UserParameter=wg.endpoint.handshake[*],sudo /usr/bin/wg show all latest-handshakes |grep -i $1 | awk '{print $$3}'
+UserParameter=wg.endpoint.allowedips[*],sudo /usr/bin/wg show all allowed-ips |grep -i $1 | cut -f3-
+UserParameter=wg.endpoint.transferup[*],sudo /usr/bin/wg show all transfer |grep -i $1 | awk '{print $$4}'
+UserParameter=wg.endpoint.transferdown[*],sudo /usr/bin/wg show all transfer |grep -i $1 | awk '{print $$3}'
+UserParameter=wg.endpoint.keepalive[*],sudo /usr/bin/wg show all persistent-keepalive |grep -i $1 | awk '{print $$3}'

@@ -1,0 +1,6 @@
+---
+zabbix_userparameter_tcpstats_filename: "userparameter_tcpstats.conf"
+zabbix_userparameter_tcpstats_dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_tcpstats_filename }}"
+zabbix_userparameter_tcpstats_script_dir: "/usr/local/bin"
+zabbix_userparameter_tcpstats_script_filename: "tcpstats.sh"
+zabbix_userparameter_tcpstats_script_dest: "{{ zabbix_userparameter_tcpstats_script_dir }}/{{ zabbix_userparameter_tcpstats_script_filename }}"

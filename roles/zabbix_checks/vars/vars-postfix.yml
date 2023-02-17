@@ -1,0 +1,5 @@
+---
+zabbix_userparameter_postfix_filename: "{{ zabbix_agent_include if not zabbix_agent2 else zabbix_agent2_include_dir }}/userparameter_postfix.conf"
+zabbix_sudoers_postfix_filename: "/etc/sudoers.d/20_zabbix-postfix-stats-sudoers"
+zabbix_scripts_postfix_stats_filename: "postfix-stats.sh"
+zabbix_scripts_postfix_stats_dest: "{{ zabbix_scripts_dir }}/postfix-stats.sh"

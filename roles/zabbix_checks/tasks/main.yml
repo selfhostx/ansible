@@ -61,3 +61,39 @@
         - iostat
   tags: iostat
   when: zabbix_checks_iostat_enable|bool
+
+- name: Include postfix tasks
+  ansible.builtin.include_tasks:
+    file: "postfix.yml"
+    apply:
+      tags:
+        - postfix
+  tags: postfix
+  when: zabbix_checks_postfix_enable|bool
+
+- name: Include tcpstats tasks
+  ansible.builtin.include_tasks:
+    file: "tcpstats.yml"
+    apply:
+      tags:
+        - tcpstats
+  tags: tcpstats
+  when: zabbix_checks_tcpstats_enable|bool
+
+- name: Include wireguard tasks
+  ansible.builtin.include_tasks:
+    file: "wireguard.yml"
+    apply:
+      tags:
+        - wireguard
+  tags: wireguard
+  when: zabbix_checks_wireguard_enable|bool
+
+- name: Include ZFS ZoL tasks
+  ansible.builtin.include_tasks:
+    file: "zfs_zol.yml"
+    apply:
+      tags:
+        - zfs_zol
+  tags: zfs_zol
+  when: zabbix_checks_zfs_zol_enable|bool
