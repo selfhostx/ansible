@@ -1,5 +1,4 @@
 ---
 zabbix_userparameter_tcpstats_filename: "userparameter_tcpstats.conf"
-zabbix_userparameter_tcpstats_dest: "{{ zabbix_userparameter_tcpstats_filename }}"
-zabbix_userparameter_tcpstats_script_dir: "/usr/local/bin"
-zabbix_userparameter_tcpstats_script_filename: "tcpstats.sh"
+zabbix_tcpstats_script_dir: "/usr/local/bin"
+zabbix_tcpstats_script_filename: "tcpstats.sh"

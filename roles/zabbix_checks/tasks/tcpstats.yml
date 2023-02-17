@@ -14,9 +14,9 @@
     mode: '0750'
 
 - name: Copy script for tcpstats template
-  ansible.builtin.copy:
-    src: "{{ zabbix_userparameter_tcpstats_script_filename }}"
-    dest: "{{ zabbix_userparameter_tcpstats_script_dir }}/{{ zabbix_userparameter_tcpstats_script_filename }}"
+  ansible.builtin.template:
+    src: tcpstats.sh.j2
+    dest: "{{ zabbix_tcpstats_script_dir }}/{{ zabbix_tcpstats_script_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     mode: '0750'
@@ -24,7 +24,7 @@
 - name: Copy userparameters for tcpstats
   ansible.builtin.template:
     src: userparameter_tcpstats.conf.j2
-    dest: "{{ zabbix_userparameter_tcpstats_dest }}"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_tcpstats_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     mode: '{{ zabbix_agent_conf_mode }}'

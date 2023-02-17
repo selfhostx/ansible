@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# {{ ansible_managed }}
 # Date:                 22/08/2016
 # Author:               Long Chen
 # Description:          A script to send TCP stats to zabbix server by using zabbix sender
@@ -37,7 +37,7 @@ print host, a[i]}}'
 }
 
 # Send the results to zabbix server by using zabbix sender
-result=$((get_TCP_socket_states; get_TCP_conn_stats) | /usr/bin/zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -i - 2>&1)
+result=$((get_TCP_socket_states; get_TCP_conn_stats) | /usr/bin/zabbix_sender -c {{ zabbix_agent_conf if not zabbix_agent2 else zabbix_agent2_conf }} -i - 2>&1)
 response=$(echo "$result" | awk -F ';' '$1 ~ /^info/ && match($1,/[0-9].*$/) {sum+=substr($1,RSTART,RLENGTH)} END {print sum}')
 if [ -n "$response" ]; then
         echo "$response"

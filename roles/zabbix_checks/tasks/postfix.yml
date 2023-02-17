@@ -13,8 +13,8 @@
 
 - name: Copy postfix-stats.sh for postfix template
   ansible.builtin.copy:
-    src: "files/{{ zabbix_scripts_postfix_stats_filename }}"
-    dest: "{{ zabbix_scripts_postfix_stats_dest }}"
+    src: "{{ zabbix_scripts_postfix_stats_filename }}"
+    dest: "{{ zabbix_scripts_dir }}/{{ zabbix_scripts_postfix_stats_filename }}"
     # root owns it because sudo:
     owner: "root"
     group: "{{ zabbix_group }}"
@@ -22,7 +22,7 @@
 
 - name: Sudo without password for zabbix for command postfix stats
   ansible.builtin.copy:
-    content: "zabbix ALL=NOPASSWD: {{ zabbix_scripts_postfix_stats_dest }}\n"
+    content: "zabbix ALL=NOPASSWD: {{ zabbix_scripts_dir }}/{{ zabbix_scripts_postfix_stats_filename }}\n"
     # \n might triggers errors on some ansible versions: https://github.com/ansible/ansible/issues/6077
     dest: "{{ zabbix_sudoers_postfix_filename }}"
     # owner: "root"

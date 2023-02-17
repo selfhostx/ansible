@@ -19,10 +19,12 @@ zabbix_agent_win_include: "{{ zabbix_win_install_dir }}\\zabbix_agent.d\\"
 
 zabbix_agent_include_dir: "/etc/zabbix/zabbix_agentd.d"
 zabbix_agent2_include_dir: "/etc/zabbix/zabbix_agent2.d"
-zabbix_agent_conf_mode: "0600"
-
+zabbix_agent_conf: "/etc/zabbix/zabbix_agentd.conf"
+zabbix_agent2_conf: "/etc/zabbix/zabbix_agent2.conf"
 zabbix_agent_service: "zabbix-agent"
 zabbix_agent2_service: "zabbix-agent2"
+
+zabbix_agent_conf_mode: "0600"
 
 # do not run tasks if not present in host_vars/group_vars:
 zabbix_checks_bacula_enable: false
@@ -30,6 +32,7 @@ zabbix_checks_dns_enable: false
 zabbix_checks_galera_enable: false
 zabbix_checks_glusterfs_enable: false
 zabbix_checks_iostat_enable: false
+zabbix_checks_mdraid_enable: false
 zabbix_checks_mysql_enable: false
 zabbix_checks_postfix_enable: false
 zabbix_checks_tcpstats_enable: false

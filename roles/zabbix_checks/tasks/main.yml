@@ -80,6 +80,15 @@
   tags: iostat
   when: zabbix_checks_iostat_enable|bool
 
+- name: Include mdraid tasks
+  ansible.builtin.include_tasks:
+    file: "mdraid.yml"
+    apply:
+      tags:
+        - mdraid
+  tags: mdraid
+  when: zabbix_checks_mdraid_enable|bool
+
 - name: Include postfix tasks
   ansible.builtin.include_tasks:
     file: "postfix.yml"
