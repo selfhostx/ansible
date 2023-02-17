@@ -6,7 +6,7 @@
 
 - name: Create zabbix Include directory if it does not exist
   file:
-    path: "{{ zabbix_agent_include if not zabbix_agent2 else zabbix_agent2_include_dir }}"
+    path: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     state: directory
