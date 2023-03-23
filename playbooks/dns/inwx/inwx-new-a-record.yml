@@ -1,0 +1,52 @@
+---
+# ansible-playbook inwx-new-a-record.yml --ask-vault-pass
+#
+# Install:
+# - ansible-galaxy collection install inwx.collection
+# - python3-pip / python-pip
+# - pip3 install requests / pip install requests
+#
+# possible options: https://github.com/inwx/ansible-collection/blob/master/plugins/modules/dns.py
+#
+- name: Create DNS-Record at inwx
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+
+  # vars:
+    # - inwx_dns_user: -> vault
+    # - inwx_dns_password: -> vault
+
+  vars_files:
+    - vault.yml
+
+  vars_prompt:
+    - name: inwx_domain
+      prompt: "Top-level Domain? "
+      private: false
+    - name: inwx_record_name
+      prompt: "Record Name? "
+      private: false
+    - name: inwx_record_value
+      prompt: "Record Value (IP)? "
+      private: false
+
+  tasks:
+    # - name: Ensure 'pip' is installed
+    #   ansible.builtin.apt:
+    #     name: python3-pip
+    #     update_cache: true
+    # - name: Ensure python module 'requests' is installed
+    #   ansible.builtin.pip:
+    #     name: requests
+    #     state: present
+
+    - name: Ensure A record exists
+      inwx.collection.dns:
+        domain: "{{ inwx_domain }}"
+        type: A
+        record: "{{ inwx_record_name }}"
+        value: "{{ inwx_record_value }}"
+        solo: true
+        username: "{{ inwx_dns_user }}"
+        password: "{{ inwx_dns_password }}"

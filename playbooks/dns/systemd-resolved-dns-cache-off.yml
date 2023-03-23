@@ -1,0 +1,23 @@
+---
+# run ansible-playbook with sudo when passwordless sudo is not enabled.
+- name: Deactivate systemd-resolved DNS-caching
+  hosts: localhost
+
+  tasks:
+    - name: Update systemd-resolved configuration.
+      ansible.builtin.lineinfile:
+        dest: "/etc/systemd/resolved.conf"
+        line: "{{ item.name }}={{ item.value }}"
+        regexp: "^{{ item.name }}="
+      with_items:
+        - name: Cache
+          value: "no"
+      notify: Restart systemd-resolved
+      become: true
+
+  handlers:
+    - name: Restart systemd-resolved
+      ansible.builtin.service:
+        name: systemd-resolved
+        state: restarted
+      become: true
