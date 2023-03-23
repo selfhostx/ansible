@@ -1,5 +1,5 @@
 ---
-- name: Ensure /etc/nginx/sites-enabled/default is absent'
+- name: Ensure /etc/nginx/sites-enabled/default is absent
   ansible.builtin.file:
     path: '/etc/nginx/sites-enabled/default'
     state: 'absent'
