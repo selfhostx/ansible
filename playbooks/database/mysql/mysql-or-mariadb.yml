@@ -1,6 +1,7 @@
 # source: https://github.com/mjanser/ansible-role-mysql / https://galaxy.ansible.com/geerlingguy/mysql
-- hosts: all
-  #vars_files:
+- name: Install mysql or mariadb depending on distribution default
+  hosts: all
+  # vars_files:
   #  - group_vars/mysql-or-mariadb.yml
   roles:
     - { role: geerlingguy.mysql }
@@ -17,23 +18,23 @@
   vars_prompt:
     - name: mysql_root_password
       prompt: "mysql root-Password? "
-      private: yes
+      private: true
     - name: mysql_username
       prompt: "mysql_username? "
-      private: no
+      private: false
     - name: mysql_user_password
       prompt: "mysql user password? "
-      private: yes
+      private: true
     - name: mysql_database
       prompt: "create mysql DB (provide name; Default: empty)? "
-      private: no
+      private: false
       default: ''
     - name: mysql_encoding
       prompt: "mysql encoding (examples: utf8 utf8mb4 ; Default=utf8)? "
-      private: no
+      private: false
     - name: mysql_collation
       prompt: "mysql collation (examples: utf8_bin utf8_general_ci utf8mb4_general_ci ; Default: utf8_general_ci)? "
-      private: no
+      private: false
 
   vars:
     # defaults: see https://github.com/geerlingguy/ansible-role-mysql/blob/master/defaults/main.yml
