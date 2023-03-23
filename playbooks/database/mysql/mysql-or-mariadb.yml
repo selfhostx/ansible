@@ -5,14 +5,14 @@
   roles:
     - { role: geerlingguy.mysql }
   pre_tasks:
-    - name: Set packages Names on Debian buster
-      set_fact:
-        mysql_packages:
-          - default-mysql-server
-          - default-mysql-server-core
-      when:
-        - ansible_distribution == 'Debian'
-        - ansible_distribution_release == 'buster' or ansible_distribution_release == 'bullseye'
+# this workaround should not be needed with a current geerlingguy.mysql version:
+#    - name: Set packages Name to default-mysql-server (Debian > 9, Ubuntu > 18.04 with universe enabled)
+#      set_fact:
+#        mysql_packages:
+#          - default-mysql-server
+#          - default-mysql-server-core
+#      when:
+#        - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   vars_prompt:
     - name: mysql_root_password
@@ -37,6 +37,13 @@
 
   vars:
     # defaults: see https://github.com/geerlingguy/ansible-role-mysql/blob/master/defaults/main.yml
+
+    # moved to group_vars/mysql_servers.yml :
+    # mysql_bind_address: '127.0.0.1'
+    # mysql_root_password_update: true
+    # mysql_user_password_update: true
+
+
 #    mysql_root_password: "{{ lookup('env', 'mysql_root_password') }}"
 #    mysql_database: "{{ lookup('env', 'mysql_database') }}"
 #    mysql_username: "{{ lookup('env', 'mysql_username') }}"
