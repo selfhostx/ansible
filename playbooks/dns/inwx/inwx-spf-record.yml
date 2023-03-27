@@ -1,0 +1,50 @@
+---
+# ansible-playbook inwx-new-a-record.yml --ask-vault-pass
+#
+# Install:
+# - ansible-galaxy collection install inwx.collection
+# - python3-pip / python-pip
+# - pip3 install requests / pip install requests
+#
+# possible options: https://github.com/inwx/ansible-collection/blob/master/plugins/modules/dns.py
+#
+- name: Create DNS-Record at inwx
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+
+  # vars:
+    # - inwx_dns_user: -> vault
+    # - inwx_dns_password: -> vault
+
+  vars_files:
+    - my_vault.yml
+
+  vars:
+    spf_policy: "v=spf1 mx ~all"
+    domains:
+      - domain1.tld
+      - domain2.tld
+    ttl: 3600
+
+  tasks:
+    # - name: Ensure 'pip' is installed
+    #   ansible.builtin.apt:
+    #     name: python3-pip
+    #     update_cache: true
+    # - name: Ensure python module 'requests' is installed
+    #   ansible.builtin.pip:
+    #     name: requests
+    #     state: present
+
+    - name: Ensure TXT record exists for SPF
+      inwx.collection.dns:
+        domain: "{{ item }}"
+        type: TXT
+        record: ""
+        value: "{{ spf_policy }}"
+        solo: true
+        ttl: "{{ ttl }}"
+        username: "{{ inwx_dns_user }}"
+        password: "{{ inwx_dns_password }}"
+      with_items: "{{ domains }}"
