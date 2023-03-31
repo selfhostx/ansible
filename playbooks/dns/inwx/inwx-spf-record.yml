@@ -43,7 +43,8 @@
         type: TXT
         record: ""
         value: "{{ spf_policy }}"
-        solo: true
+        # remove all existing txt records? (caution!)
+        # solo: true
         ttl: "{{ ttl }}"
         username: "{{ inwx_dns_user }}"
         password: "{{ inwx_dns_password }}"
