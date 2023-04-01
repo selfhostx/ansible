@@ -12,7 +12,7 @@ server {
   listen [::]:80 default_server; 
   server_name  {{ mattermost_hostname }};
   location / {
-# remember: 301 = moved permanently (search engines will react), 302 = moved temporarily (search engines will hold back)
+    # remember: 301 = moved permanently (search engines will react), 302 = moved temporarily (search engines will hold back)
     return 301 https://$server_name$request_uri;
   }
 }
