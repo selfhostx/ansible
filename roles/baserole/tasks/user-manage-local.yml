@@ -200,6 +200,8 @@
       ansible.builtin.template:
         src: "{{ baserole_bashrc_template }}"
         dest: "/home/{{ item.user }}/.bashrc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_bashrc_configure
@@ -211,6 +213,8 @@
       ansible.builtin.template:
         src: "{{ baserole_vimrc_template }}"
         dest: "/home/{{ item.user }}/.vimrc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_vimrc_configure
@@ -222,6 +226,8 @@
       ansible.builtin.template:
         src: "{{ baserole_nanorc_template }}"
         dest: "/home/{{ item.user }}/.nanorc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_nanorc_configure
@@ -233,6 +239,8 @@
       ansible.builtin.file:
         path: "/home/{{ item.user }}/.config/htop"
         state: directory
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0750'
       when:
         - baserole_htoprc_configure
@@ -243,6 +251,8 @@
       ansible.builtin.template:
         src: "{{ baserole_htoprc_template }}"
         dest: "/home/{{ item.user }}/.config/htop/htoprc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_htoprc_configure
