@@ -14,6 +14,26 @@ supported distributions:
   - CI (travis, gitlab runner, ...?)
 
 
+Roles
+-----
+
+ Roles (includes recommendations)                              | Description 
+--------------------------------------------------------------|-------------------
+[apache](https://github.com/selfhostx/ansible-role-apache)    | apache webserver
+[bacula](roles/bacula)                                        | backup system
+[baserole](roles/baserole)                                    | basic role for (new) systems
+[certbot](https://github.com/selfhostx/ansible-role-certbot)  | certbot (letsencrypt)
+[dokuwiki](roles/dokuwiki)                                    | dokuwiki (PHP+file-based wiki)
+[mailrelay](roles/mailrelay)                                  | relay mails via postfix
+[mattermost](roles/mattermost)                                | mattermost (instant messenger)
+[nginx (common)](roles/nginx_common)                          | nginx common role
+[PHP](https://github.com/geerlingguy/ansible-role-php)        | PHP-role (geerlingguy)
+[samba (standalone)](roles/samba_standalone)                  | samba fileserver (standalone, without AD)
+[zabbix_checks](roles/zabbix_checks)                          | a couple of useful templates and userparameters for zabbix (monitoring system)
+
+more planned, see [Roadmap](ROADMAP.md)
+
+
 Requirements
 ------------
 
@@ -100,6 +120,7 @@ similiar projects
 - debops https://docs.debops.org/en/stable-3.0/
 - https://github.com/JGoutin/ansible_home
 - https://github.com/davestephens/ansible-nas
+- https://github.com/sacredheartsc/selfhosted
 
 appstores
 - cloudron: https://www.cloudron.io/store/index.html
@@ -107,4 +128,5 @@ appstores
 
 app-installer:
 - bitnami (aquired by vmware)
-- turnkey (worth a look)
+- turnkey (own scripts)
+- pikapods (based on docker)
