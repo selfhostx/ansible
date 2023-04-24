@@ -1,6 +1,9 @@
 zabbix checks role
 ==================
 
+official zabbix-project already shares a lot of templates: https://github.com/zabbix/community-templates
+
+
 
 Commands
 --------
