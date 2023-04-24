@@ -116,13 +116,14 @@ trap 'error ${LINENO}' ERR
 similiar projects
 -----------------
 
+ansible-collectionm:
 - https://github.com/tteck/Proxmox
 - debops https://docs.debops.org/en/stable-3.0/
 - https://github.com/JGoutin/ansible_home
 - https://github.com/davestephens/ansible-nas
 - https://github.com/sacredheartsc/selfhosted
 
-appstores
+app-stores.
 - cloudron: https://www.cloudron.io/store/index.html
 - yunohost: https://yunohost.org/en/apps
 
@@ -130,3 +131,6 @@ app-installer:
 - bitnami (aquired by vmware)
 - turnkey (own scripts)
 - pikapods (based on docker)
+
+organizations supporting hosting:
+- https://docs.codeberg.org/getting-started/what-is-codeberg/#what-is-codeberg-e.v.%3F
