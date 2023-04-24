@@ -1,0 +1,62 @@
+<domain type='kvm'>
+  <name>{{ libvirt_vm_fqdn }}</name>
+  {% if libvirt_vm_uuid is defined %}
+  <uuid>{{ libvirt_vm_uuid }}</uuid>
+  {% endif %}
+  <memory unit='MiB'>{{ libvirt_vm_memory_max }}</memory>
+  <currentMemory unit='MiB'>{{ libvirt_vm_memory_current }}</currentMemory>
+  <vcpu placement='static'>{{ libvirt_vm_cpu_cores }}</vcpu>
+  <os>
+    <type arch='x86_64' machine='{{ libvirt_vm_machine | default('pc-i440fx-5.2') }}'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/kvm</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='{{ libvirt_vm_imagepath }}'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      {% if libvirt_vm_cloudimage_iso_path is defined and libvirt_vm_cloudimage_iso_path != "n" %}
+      <source file='{{ libvirt_vm_cloudimage_iso_path }}'/>
+      {% endif %}
+      <target dev='hdc' bus='ide'/>
+      <readonly/>
+    </disk>
+    <controller type='ide' index='0'>
+    </controller>
+    <controller type='usb' index='0'>
+    </controller>
+    <interface type='bridge'>
+      {% if libvirt_vm_net_mac is defined and libvirt_vm_net_mac|length > 0 %}
+      <mac address='{{ libvirt_vm_net_mac }}'/>
+      {% endif %}
+      <source bridge='{{ libvirt_vm_net_bridge }}'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <input type='mouse' bus='ps2'/>
+    <graphics type='vnc' port='-1' autoport='yes' keymap='de'/>
+    <video>
+      <model type='cirrus' vram='9216' heads='1'/>
+    </video>
+    <memballoon model='virtio'>
+    </memballoon>
+  </devices>
+</domain>

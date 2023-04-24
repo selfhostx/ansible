@@ -1,0 +1,60 @@
+#cloud-config
+network:
+  config: disabled
+
+# Set the default user
+system_info:
+  default_user:
+    name: {{ libvirt_os_default_user }}
+
+# Enable password authentification - recommend to remove that with first ansible run!
+ssh_pwauth: true
+
+# Define user(s)
+chpasswd:
+  list:
+{% if libvirt_os_default_rootpassword is defined and libvirt_os_default_rootpassword|length > 0 %}
+    - root:{{ libvirt_os_default_rootpassword }}
+{% endif %}
+    - {{ libvirt_os_default_user }}:{{ libvirt_os_default_userpassword }}
+  expire: false
+
+# System settings
+resize_rootfs: True
+ssh_pwauth: "{{ libvirt_os_ssh_pwauth | default(True) }}"
+ssh_authorized_keys:
+{% for key in libvirt_os_ssh_pubkeys %}
+  - {{ key }}
+{% endfor %}
+timezone: {{ libvirt_os_timezone }}
+{% if libvirt_os_default_rootpassword is defined and libvirt_os_default_rootpassword|length > 0 %}
+disable_root: false
+{% endif %}
+
+# Template for any additional commands on boot
+bootcmd:
+  - [ sh, -c, echo "=========bootcmd=========" ]
+
+# Note that the file to disable cloud-init is checked to know when the vm is booted
+runcmd:
+  - [ sh, -c, echo "=========runcmd=========" ]
+{% if libvirt_vm_os == "debian" %}
+  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=\"\"/GRUB_CMDLINE_LINUX_DEFAULT=\"net.ifnames=0 biosdevname=0\"/' /etc/default/grub
+  - update-grub
+  - mv /etc/network/interfaces.d/50-cloud-init /etc/network/interfaces
+  - sed -i 's/^# control-manual eth0/auto eth0/' /etc/network/interfaces
+  - echo "\nsource /etc/network/interfaces.d/*" >> /etc/network/interfaces
+{% endif %}
+{% if libvirt_vm_os == "ubuntu" %}
+  - sed -i 's/^GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' /etc/default/grub
+  - update-grub
+{% endif %}
+  - echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+  - echo "nameserver 9.9.9.9" >> /etc/resolv.conf
+  - echo "nameserver 2001:4860:4860::8888" >> /etc/resolv.conf
+  - echo "nameserver 2620:fe::fe" >> /etc/resolv.conf
+  - touch /etc/cloud/cloud-init.disabled
+  - reboot
+
+# To know when to log in, if reading console
+final_message: "SYSTEM READY TO LOG IN"
