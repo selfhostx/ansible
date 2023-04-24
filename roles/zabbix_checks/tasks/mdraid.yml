@@ -7,7 +7,7 @@
 - name: Copy userparameters for mdraid
   ansible.builtin.template:
     src: "userparameter_mdraid.conf.j2"
-    dest: "{{ zabbix_userparameter_mdraid_filename }}"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_mdraid_filename }}"
     owner: "{{ zabbix_user }}"
     group: "{{ zabbix_group }}"
     mode: '{{ zabbix_agent_conf_mode }}'
