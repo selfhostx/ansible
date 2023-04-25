@@ -30,8 +30,7 @@
     #exclude:
     #  - 'mattermost/config/config.json'
   when: not mattermost_skip_download
-  notify:
-    - restart mattermost
+  notify: Restart mattermost
 
 - name: Cleanup downloaded folder (directories linked to datadir)
   ansible.builtin.file:
@@ -86,8 +85,7 @@
     mode: '0660'
     src: '{{ mattermost_config_json_template }}'
   when: mattermost_managed_config
-  notify:
-    - 'restart mattermost'
+  notify: Restart mattermost
 
 - name: Ensure correct permissions on app path
   ansible.builtin.file:
@@ -128,7 +126,7 @@
     mode: '0644'
     src: 'templates/etc/systemd/system/mattermost.service.j2'
   register: mattermost_unitfile_changed
-  notify: 'restart mattermost'
+  notify: Restart mattermost
 
 - name: Reload unitfile with systemctl daemon-reload
   # make sure daemon_reload happens before other handlers like restart
