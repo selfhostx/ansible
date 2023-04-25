@@ -17,13 +17,14 @@ supported distributions:
 Roles
 -----
 
- Roles (includes recommendations)                              | Description 
+ Roles (includes recommendations)                             | Description 
 --------------------------------------------------------------|-------------------
 [apache](https://github.com/selfhostx/ansible-role-apache)    | apache webserver
 [bacula](roles/bacula)                                        | backup system
 [baserole](roles/baserole)                                    | basic role for (new) systems
 [certbot](https://github.com/selfhostx/ansible-role-certbot)  | certbot (letsencrypt)
 [dokuwiki](roles/dokuwiki)                                    | dokuwiki (PHP+file-based wiki)
+[libvirt](roles/libvirt)                                      | simple virtualization via libvirt+KVM
 [mailrelay](roles/mailrelay)                                  | relay mails via postfix
 [mattermost](roles/mattermost)                                | mattermost (instant messenger)
 [nginx (common)](roles/nginx_common)                          | nginx common role
