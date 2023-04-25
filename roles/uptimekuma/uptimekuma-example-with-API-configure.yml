@@ -1,0 +1,120 @@
+---
+# setup of server:
+# docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1
+# see https://github.com/louislam/uptime-kuma
+
+# setup of ansible controller:
+# pip install uptime-kuma-api
+# ansible-galaxy collection install git+https://github.com/lucasheld/ansible-uptime-kuma.git
+
+- name: Install uptime kuma
+  hosts: uptime_kuma
+  # hosts: all
+  roles:
+    # - { role: selfhostx.ansible.baserole, tags: baserole }
+    - geerlingguy.pip
+    # - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+    - { role: selfhostx.certbot, tags: certbot }
+    - { role: selfhostx.ansible.uptimekuma, tags: uptimekuma }
+
+  vars_files:
+    - my-vault.yml
+
+  vars:
+    uptimekuma_role_git_import: true
+    uptimekuma_role_npm_import: true
+    uptimekuma_role_npm_name: "morgangraphics.ansible_role_nvm"
+    uptimekuma_role_pm2_import: true
+
+    # uptimekuma_api_username: "-> vault"
+    # uptimekuma_api_password: "-> vault"
+    uptimekuma_api_url: "http://127.0.0.1:3001"
+    # uptimekuma_pushover_accesstoken: "-> vault"
+    # uptimekuma_pushover_userkey: "-> vault"
+    # uptimekuma_pushover_apptoken: "-> vault"
+
+    # morgangraphics.ansible_role_nvm, specific version (i.e. 18.15.0):
+    # uptimekuma_nodejs_version: "18.15.0"
+    # or just latest LTS:
+    uptimekuma_nodejs_version: "lts"
+
+    # when using nginx_common:
+    # uptimekuma_nginx_use_nginx_common_snippet: true
+
+    # letsencrypt:
+    certbot_create_method: nginx
+    certbot_certs:
+      - domains:
+        - uptime.stefanux.net
+    certbot_auto_renew_minute: 17
+    certbot_auto_renew_hour: 3
+    certbot_admin_email: support@stefanux.net
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+
+  post_tasks:
+
+    - name: Install python3-setuptools for pip (at least Debian10 needs it)
+      ansible.builtin.package:
+        name: python3-setuptools
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Pip install uptime-kuma-api
+      ansible.builtin.pip:
+        name: uptime-kuma-api
+
+    - name: Specify the initial username and password
+      lucasheld.uptime_kuma.setup:
+        api_url: "{{ uptimekuma_api_url }}"
+        api_username: "{{ uptimekuma_api_username }}"
+        api_password: "{{ uptimekuma_api_password }}"
+
+    - name: Change preferences
+      lucasheld.uptime_kuma.settings:
+        api_url: "{{ uptimekuma_api_url }}"
+        api_username: "{{ uptimekuma_api_username }}"
+        api_password: "{{ uptimekuma_api_password }}"
+        checkUpdate: true
+        primaryBaseURL: "uptimerobot.stefanux.net"
+        dnsCache: false
+        tlsExpiryNotifyDays: 14
+      tags:
+        - preferences
+
+    # see ~/.ansible/collections/ansible_collections/lucasheld/uptime_kuma/plugins/modules/notification_info.py for info about notifications
+    - name: Add notification
+      lucasheld.uptime_kuma.notification:
+        api_url: "{{ uptimekuma_api_url }}"
+        api_username: "{{ uptimekuma_api_username }}"
+        api_password: "{{ uptimekuma_api_password }}"
+        # id: 1
+        type: pushover
+        name: "pushover"
+        pushoverapptoken: "{{ uptimekuma_pushover_apptoken }}"
+        pushbulletAccessToken: "{{ uptimekuma_pushover_accesstoken }}"
+        pushoveruserkey: "{{ uptimekuma_pushover_userkey }}"
+        pushoverdevice: "st-pixel3a"
+        # -2, -1, 0, 1, 2:
+        pushoverpriority: 2
+        isDefault: true
+        # apply on all existing:
+        applyExisting: false
+        state: present
+      tags:
+        - notifications_set
+
+    - name: Get all notifications
+      lucasheld.uptime_kuma.notification_info:
+        api_url: "{{ uptimekuma_api_url }}"
+        api_username: "{{ uptimekuma_api_username }}"
+        api_password: "{{ uptimekuma_api_password }}"
+      register: result
+      tags:
+        - notifications_show
+
+    - name: Get all notifications
+      ansible.builtin.debug:
+        msg: "{{ result }}"
+      tags:
+        - notifications_show

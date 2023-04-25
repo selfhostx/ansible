@@ -1,0 +1,21 @@
+---
+- name: Remove default config (when enabled)
+  ansible.builtin.file:
+    path: "{{ uptimekuma_nginx_default_config }}"
+    state: absent
+  notify: Restart nginx
+  when: uptimekuma_nginx_remove_default_config
+
+- name: Ensure nginx config is present
+  ansible.builtin.template:
+    dest: "{{ uptimekuma_nginx_config_src_dir }}/{{ uptimekuma_nginx_config_filename }}"
+    mode: "0644"
+    src: "{{ uptimekuma_nginx_template }}"
+  notify: Restart nginx
+
+- name: Enable nginx config via symbolic link
+  ansible.builtin.file:
+    src: "{{ uptimekuma_nginx_config_src_dir }}/{{ uptimekuma_nginx_config_filename }}"
+    dest: "{{ uptimekuma_nginx_config_dst_dir }}/{{ uptimekuma_nginx_config_filename }}"
+    state: link
+  notify: Restart nginx
