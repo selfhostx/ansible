@@ -4,6 +4,7 @@ Roadmap
 **ansible frontends**
   - semaphore: https://github.com/stefanux/ansible-role-semaphore (forked from morbidick.semaphore) focussing on manual install
     thulium_drake.ansible_semaphore / https://github.com/Thulium-Drake/ansible-role-ansible_semaphore (features package install)
+  - rundeck
   - awx [manual instructions](instructions/awx-manual-install.txt)
   - tower
 
