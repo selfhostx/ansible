@@ -1,0 +1,158 @@
+# manual install of awx (without kubernetes):
+# Installation based of: https://community.hetzner.com/tutorials/awx-without-kubernetes
+
+[Unit]
+Description=AWX service (using Docker Compose)
+Requires=docker.service
+After=docker.service
+
+[Service]
+User=awx
+WorkingDirectory=/opt/awx/awx
+ExecStart=/usr/bin/docker compose -f tools/docker-compose/_sources/docker-compose.yml up
+ExecStop=/usr/bin/docker compose -f tools/docker-compose/_sources/docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target
+
+useradd -s /bin/bash -m -d /opt/awx awx
+
+
+# And then add that user to the docker group:
+gpasswd -a awx docker
+
+
+apt install git make python3-setuptools-scm docker-buildx-plugin
+# docker-buildx-plugin missing in instructions
+
+pip3 install ansible
+
+su - awx
+
+# change workdir to home /opt/awx:
+git clone -b 21.10.0 https://github.com/ansible/awx.git
+git clone https://github.com/ansible/awx-logos.git
+
+cd /opt/awx/awx
+git switch -c localchanges
+
+cp ../awx-logos/awx/ui/client/assets/favicon.ico \
+   ../awx-logos/awx/ui/client/assets/logo-header.svg \
+   ../awx-logos/awx/ui/client/assets/logo-login.svg \
+   awx/ui/public/static/media/
+
+echo "CSRF_TRUSTED_ORIGINS = ['awx.YOURDOMAIN.TLD']" >> /opt/awx/awx/tools/docker-compose/ansible/roles/sources/files/local_settings.py
+echo "ALLOWED_HOSTS = ['awx.YOURDOMAIN.TLD']" >> /opt/awx/awx/tools/docker-compose/ansible/roles/sources/files/local_settings.py
+echo "DEBUG = False" >> /opt/awx/awx/tools/docker-compose/ansible/roles/sources/files/local_settings.py
+
+bzw:
+
+/opt/awx/awx/tools/docker-compose/ansible/roles/sources/files/local_settings.py
+
+CSRF_TRUSTED_ORIGINS = ['awx.YOURDOMAIN.TLD']
+ALLOWED_HOSTS = ['awx.YOURDOMAIN.TLD']
+DEBUG = False
+
+
+# optional external postgres: /opt/awx/awx/tools/docker-compose/inventory
+
+git config --global user.email "USER@DOMAIN.TLD"
+git config --global user.name "John Doe"
+
+# new file:   tools/docker-compose/ansible/roles/sources/files/local_settings.py
+#	modified:   awx/ui/public/static/media/favicon.ico
+#	modified:   awx/ui/public/static/media/logo-header.svg
+#	modified:   awx/ui/public/static/media/logo-login.svg
+
+git commit awx/ui/public/static/media/favicon.ico awx/ui/public/static/media/logo-header.svg awx/ui/public/static/media/logo-login.svg tools/docker-compose/ansible/roles/sources/files/local_settings.py
+# git commit -a
+
+# Fehler: CPU does not support x86-64-v2 -> proxmox-CPU type auf "host" stellen
+
+# in /opt/awx/awx
+make docker-compose-build
+
+make awx/projects docker-compose-sources
+
+echo 'fs.inotify.max_user_watches=524288' > /etc/sysctl.d/99-awx.conf
+sysctl -p /etc/sysctl.d/99-awx.conf
+
+oder host_vars:
+baserole_sysctl_key_value:
+  - name: 
+    key: fs.inotify.max_user_watches
+    value: 524288
+    state: present
+
+
+systemctl start awx
+
+# watch migration status
+journalctl -f -u awx
+
+docker exec -ti tools_awx_1 awx-manage changepassword admin
+
+Apr 23 12:46:22 awx docker[13348]: tools_awx_1       | Admin password: XYZ
+Apr 23 12:46:56 awx docker[13348]: tools_awx_1       | 2023-04-23 10:46:56,401 INFO success: awx-rsyslogd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+
+
+/etc/nginx/sites-enabled/default
+
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  server_name awx.YOURDOMAIN.TLD;
+
+  location / {
+    # remember: 301 = moved permanently (search engines will react), 302 = moved temporarily (search engines will hold back)
+    return 301 https://$server_name$request_uri;
+  }
+
+  #location / {
+  #  proxy_set_header Host      $host;
+  #  proxy_set_header X-Real-IP $remote_addr;
+  #  proxy_pass                 http://localhost:8013;
+  #}
+}
+
+
+server {
+  listen 443 ssl default_server;
+  listen [::]:443 ssl default_server;
+  server_name awx.YOURDOMAIN.TLD;
+
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers CHACHA20:-AES:AESGCM:AESCCM:!kRSA:!PSK:!aECDSA:!aDSS:!aNULL:!eNULL:!SHA1:!MD5;
+  ssl_ecdh_curve X25519:secp521r1:secp384r1;
+
+  # Diffie Hellman parameters for DH(E) key exchange.
+  # Generate these using our ansible role diffie_hellman_parameters or manually using 'openssl dhparam -outform PEM -out /etc/ssl/private/dhparam2048.pem 2048'. Make sure to set appropiate access rights!
+  # DH param size should match RSA key size, so if you use RSA 4096 make sure you use 4096 bit DH params, too! (Some legacy clients will choke on 4096 bit DH though.)
+  # ssl_dhparam "/etc/ssl/private/dhparam.pem";
+
+  # HSTS (ngx_http_headers_module is required) (63072000 seconds: 1 year)
+  add_header Strict-Transport-Security "max-age=31536000";
+
+  # Enable OCSP stapling.
+  ssl_stapling on;
+  ssl_stapling_verify on;
+
+  ssl_certificate     /etc/letsencrypt/live/awx.YOURDOMAIN.TLD/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/awx.YOURDOMAIN.TLD/privkey.pem;
+
+  location / {
+    proxy_set_header Host      $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass                 http://localhost:8013;
+    proxy_read_timeout 30;
+  }
+}
+
+docker exec -ti tools_awx_1 awx-manage changepassword admin
+Changing password for user 'admin'
+Password: 
+Password (again): 
+Password changed successfully for user 'admin'
