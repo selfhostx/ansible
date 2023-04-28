@@ -1,6 +1,12 @@
 Roadmap
 =======
 
+**ansible frontends**
+  - semaphore: https://github.com/stefanux/ansible-role-semaphore (forked from morbidick.semaphore) focussing on manual install
+    thulium_drake.ansible_semaphore / https://github.com/Thulium-Drake/ansible-role-ansible_semaphore (features package install)
+  - awx [manual instructions](instructions/awx-manual-install.txt)
+  - tower
+
 **Backup**
   - **bacula** https://github.com/selfhostx/ansible/blob/main/roles/bacula
   - bareos (veselahouba.bareos)
@@ -36,10 +42,13 @@ Roadmap
   - glusterfs (?)
 
 **Virtualization**
-  - proxmox (including cloud-init) -> see folder: [laybooks/proxmox](playbooks/proxmox)
+  - proxmox (including cloud-init) -> see folder: [playbooks/proxmox](playbooks/proxmox)
     - VM management: https://github.com/mikaelflora/ansible-role-proxmox-vm
     - *LXC*
-  - libvirt/KVM (including cloud-init) -> FIXME Code commit
+    - balancing:
+      - PVE Balance: https://github.com/PLUTEX/pve_balance
+      - proxmox_migrate.py: https://github.com/HeinleinSupport/proxmox-tools/blob/master/proxmox_migrate.py
+  - [libvirt](roles/libvirt)+KVM (including cloud-init)
   - *ovirt? (if maintainer is found)*
   - Container
     - *k3s (if maintainer is found)*
@@ -66,7 +75,7 @@ Roadmap
     - minio
     - ceph RGW
   - SSH sftpgo
-  - *SeaweedFS ((if maintainer is found)*
+  - *SeaweedFS (if maintainer is found)*
   - *OpenMediaVault / TrueNAS Core? (if maintainer is found)*
 
 **Webserver**
