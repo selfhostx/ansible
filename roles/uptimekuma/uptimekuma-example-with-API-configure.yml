@@ -8,7 +8,7 @@
 # ansible-galaxy collection install git+https://github.com/lucasheld/ansible-uptime-kuma.git
 
 - name: Install uptime kuma
-  hosts: uptime_kuma
+  hosts: uptimekuma.YOURDOMAIN.TLD
   # hosts: all
   roles:
     # - { role: selfhostx.ansible.baserole, tags: baserole }
@@ -45,10 +45,10 @@
     certbot_create_method: nginx
     certbot_certs:
       - domains:
-        - uptime.stefanux.net
+        - uptimekuma.YOURDOMAIN.TLD
     certbot_auto_renew_minute: 17
     certbot_auto_renew_hour: 3
-    certbot_admin_email: support@stefanux.net
+    certbot_admin_email: mail@YOURDOMAIN.TLD
     certbot_create_if_missing: true
     certbot_install_from_source: false
 
@@ -76,7 +76,7 @@
         api_username: "{{ uptimekuma_api_username }}"
         api_password: "{{ uptimekuma_api_password }}"
         checkUpdate: true
-        primaryBaseURL: "uptimerobot.stefanux.net"
+        primaryBaseURL: "uptimekuma.YOURDOMAIN.TLD"
         dnsCache: false
         tlsExpiryNotifyDays: 14
       tags:
