@@ -348,6 +348,9 @@ see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_mod
 |---|---|---|---|---|
 | name | username | text | yes | empty |
 | group | group(s) | text | no | empty |
+| group_primary  | primary group(s) | text | no | empty |
+| group_secondary | secondary/supplemental group(s) membership(s) | text, comma seperated list | no | empty |
+| group_append | true: append group(s), false: set group(s) exactly as given | boolean (true, false) | no | empty |
 | conditional_hostgroup | Create this user only when this ansible-group (membership) is present (in inventory or dynamically assigned) | | | empty |
 | home | home-directory | text (path) | any valid path | no | /home/$name |
 | uid | Set specific user id | int (number 1-999 für sysaccounts or 1000-60000, depending on distribution) | no | |

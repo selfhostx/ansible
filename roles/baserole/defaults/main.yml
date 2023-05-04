@@ -276,7 +276,9 @@ baserole_usercreate_local: true
 
 # valid attributes in baserole_userlist_local dictionary:
 # name: -> username # REQUIRED
-# group: -> group(s)
+# group_primary: -> primary group
+# group_secondary: -> secondary/supplemental group(s) membership(s)
+# group_append: (false, true) -> true: append group(s), false: set group(s) exactly as given
 # conditional_hostgroup: group -> only create the user when this ansible-group membership is present (from inventory)
 # home: -> home-directory
 # uid: user id
