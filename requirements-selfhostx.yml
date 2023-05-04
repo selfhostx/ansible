@@ -22,6 +22,9 @@ roles:
   - name: stefanux.mysqlbackup
     src: https://github.com/stefanux/ansible-mysqlbackup.git
     scm: git
+  - name: stefanux.semaphore
+    src: https://github.com/stefanux/ansible-role-semaphore.git
+    scm: git
   - name: selfhostx.certbot
     src: https://github.com/selfhostx/ansible-role-certbot.git
     scm: git
