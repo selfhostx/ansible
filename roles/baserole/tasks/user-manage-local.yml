@@ -63,7 +63,7 @@
     ansible.builtin.user:
       name:               '{{ item.user }}'
       group:              '{{ item.group_primary      | d(omit) }}'
-      groups:             '{{ item.group_additional   | d(omit) }}'
+      groups:             '{{ item.group_secondary    | d(omit) }}'
       append:             '{{ item.group_append_group | d(omit) }}'
       home:               '{{ item.home               | d(omit) }}'
       uid:                '{{ item.uid                | d(omit) }}'
