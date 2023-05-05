@@ -55,7 +55,7 @@ Roadmap
     - *k3s (if maintainer is found)*
     - *k8s (if maintainer is found)*
     - docker (swarm)
-      - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker Vergleich: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
+      - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker compare: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
       - registry
         - ...?
       - optional management tools:
@@ -134,7 +134,7 @@ Roadmap
 **DNS**
   - **self-hosted:**
     - recursive
-      - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync von Zertifikaten wenn letsencrypt, nginx-reverse-proxy für Statusseite)
+      - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync of certificates when letsencrypt is used, nginx-reverse-proxy for statuspage)
       - bind (2DO -> maintainer needed)
       - unbound (2DO -> maintainer needed)
     - autoritative
