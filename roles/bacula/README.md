@@ -25,8 +25,8 @@ Currently only tested on mysql / mariadb and Ubuntu/Debian in LTS-Versions.
 ### customize (at least) this vars:
 (see example playbooks).
 
-bacula_dir_fqdn: "fqdn.of.director.domain.tld"
-bacula_sd_fqdn: "fqdn.of.sd.domain.tld"
+bacula_dir_fqdn: "bacula-dir.DOMAIN.TLD"
+bacula_sd_fqdn: "bacula-sd.DOMAIN.TLD"
 
 bacula_dir_restore_path: "/var/bacula-restores" (Default restore path)
 bacula_sd_archive_device: "/var/bacula-volumes" (Default volume path)
@@ -36,7 +36,7 @@ bacula_dir_db_engine: mysql
 
 ### Define the director/SD via (host_vars / group_vars):
 
-host_vars/bacula-dir1.stefanux.net.yml
+host_vars/bacula-dir.DOMAIN.TLD.yml
 
 ```yaml
 ---
@@ -97,7 +97,7 @@ bacula_dir_pool_max_volumes: 100
 
 ### Host overrides
 
-Example: host_vars/host1.domain.tld.yml
+Example: host_vars/host1.DOMAIN.TLD.yml
 
 **own fileset**:
 ```yaml
