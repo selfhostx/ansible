@@ -1,27 +1,29 @@
 ---
 galaxy_info:
   role_name: bacula
-  author: stefanux
-  description: Manage bacula
+  author: selfhostx
+  description: Manage bacula from ansible
 
-  license: license MIT
+  license: MIT
 
-  min_ansible_version: 2.4
+  min_ansible_version: 2.9
 
   platforms:
     - name: Debian
       versions:
         - buster
+        - bullseye
         - stretch
     - name: Ubuntu
       versions:
         - focal
         - bionic
-        - xenial
+        - jammy
 
   galaxy_tags:
-   - system
-   - packaging
    - backup
+   - bacula
+   - server
+   - system
 
 dependencies: []
