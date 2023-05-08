@@ -68,15 +68,6 @@
     recurse: true
     state: directory
 
-- name: Create uptime kuma start skript
-  ansible.builtin.template:
-    src: "start.sh.j2"
-    dest: "{{ uptimekuma_install_dir }}/start.sh"
-    owner: "{{ uptimekuma_user }}"
-    group: "{{ uptimekuma_group }}"
-    mode: '0750'
-  notify: Restart uptime kuma
-
 - name: Clone uptime robot repo
   ansible.builtin.git:
     clone: true
@@ -98,6 +89,15 @@
   args:
     chdir: "{{ uptimekuma_install_dir }}"
   when: uptimekuma_cloned.changed
+
+- name: Create uptime kuma start skript
+  ansible.builtin.template:
+    src: "start.sh.j2"
+    dest: "{{ uptimekuma_install_dir }}/start.sh"
+    owner: "{{ uptimekuma_user }}"
+    group: "{{ uptimekuma_group }}"
+    mode: '0750'
+  notify: Restart uptime kuma
 
 - name: Create systemd service file for uptime kuma
   ansible.builtin.template:
