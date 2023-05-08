@@ -89,7 +89,7 @@
   become_user: "{{ uptimekuma_user }}"
   register: uptimekuma_cloned
 
-- name: Install uptimerobot
+- name: Install uptime kuma
   ansible.builtin.shell: bash -ilc 'npm run setup'
   #args:
  #   executable: "{{ uptimekuma_shell_bin }}"
@@ -109,14 +109,14 @@
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
 
-- name: Enable and start uptimerobot as systemd unit
+- name: Enable and start uptime kuma as systemd unit
   ansible.builtin.systemd:
     name: "{{ uptimekuma_service_name }}"
     state: started
     enabled: true
   when: not uptimekuma_use_pm2
 
-- name: Install uptimerobot via pm2
+- name: Install uptime kuma via pm2
   ansible.builtin.shell: bash -ilc 'pm2 start server/server.js -f --name {{ uptimekuma_pm2_servicename }}'
   #args:
   #  executable: "{{ uptimekuma_shell_bin }}"
