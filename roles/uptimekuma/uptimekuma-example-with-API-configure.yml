@@ -21,11 +21,6 @@
     - my-vault.yml
 
   vars:
-    uptimekuma_role_git_import: true
-    uptimekuma_role_npm_import: true
-    uptimekuma_role_npm_name: "morgangraphics.ansible_role_nvm"
-    uptimekuma_role_pm2_import: true
-
     # uptimekuma_api_username: "-> vault"
     # uptimekuma_api_password: "-> vault"
     uptimekuma_api_url: "http://127.0.0.1:3001"
@@ -35,8 +30,8 @@
 
     # morgangraphics.ansible_role_nvm, specific version (i.e. 18.15.0):
     # uptimekuma_nodejs_version: "18.15.0"
-    # or just latest LTS:
-    uptimekuma_nodejs_version: "lts"
+    # or just latest LTS (this is default):
+    # uptimekuma_nodejs_version: "lts"
 
     # when using nginx_common:
     # uptimekuma_nginx_use_nginx_common_snippet: true

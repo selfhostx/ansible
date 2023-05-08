@@ -7,7 +7,7 @@ After=network.target
 Type=simple
 User={{ uptimekuma_user }}
 WorkingDirectory={{ uptimekuma_install_dir }}
-{% if uptimekuma_use_nvm and not uptimekuma_use_pm2 %}
+{% if uptimekuma_use_nvm %}
 ExecStart={{ uptimekuma_install_dir }}/start.sh
 {% else %}
 ExecStart=/usr/bin/npm run server/server.js

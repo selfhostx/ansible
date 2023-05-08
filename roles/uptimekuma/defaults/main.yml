@@ -7,7 +7,6 @@ uptimekuma_user: "uptimekuma"
 uptimekuma_group: "uptimekuma"
 uptimekuma_shell_bin: /bin/bash
 uptimekuma_shell_config: ".bashrc"
-uptimekuma_memberof_groups: "pm2"
 
 uptimekuma_listen_host: localhost
 uptimekuma_listen_port: 3001
@@ -23,21 +22,15 @@ uptimekuma_role_npm_import: false
 uptimekuma_use_nvm: true
 uptimekuma_nvm_nodejs_version: "lts"
 
-uptimekuma_role_pm2_import: false
-uptimekuma_use_pm2: false
-
 uptimekuma_role_git_name: "geerlingguy.git"
 uptimekuma_role_nvm_name: "morgangraphics.ansible_role_nvm"
 uptimekuma_role_npm_name: "robertdebock.npm"
-uptimekuma_role_pm2_name: "selfhostx.ansible.pm2"
 
 uptimekuma_service_file_template: "uptime-kuma-systemd-unit.j2"
 uptimekuma_service_file_target: "/lib/systemd/system/uptime-kuma.service"
 uptimekuma_service_name: "uptime-kuma"
-uptimekuma_pm2_servicename: "{{ uptimekuma_service_name }}"
 
 # reverse-proxy-config (see: https://github.com/louislam/uptime-kuma/wiki/Reverse-Proxy )
-
 # use nginx to make a ssl reverse-proxy-config:
 uptimekuma_nginx_deploy_reverseconfig: true
 uptimekuma_nginx_template: "nginx-uptime-kuma.j2"

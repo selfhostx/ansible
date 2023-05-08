@@ -59,19 +59,6 @@
   - uptimekuma_use_nvm
   - uptimekuma_role_nvm_name is defined
 
-#- name: Import role pm2
-#  ansible.builtin.import_role:
-#    name: "{{ uptimekuma_role_pm2_name }}"
-#  when: uptimekuma_role_pm2_import
-
-- name: Install pm2 via npm
-  ansible.builtin.shell: bash -ilc 'npm install pm2 -g'
-  #  args:
-  #    executable: "{{ uptimekuma_shell_bin }}"
-  become: true
-  become_user: "{{ uptimekuma_user }}"
-  when: uptimekuma_use_pm2
-
 - name: Create uptime kuma folder
   ansible.builtin.file:
     path: "{{ uptimekuma_install_dir }}"
@@ -117,7 +104,6 @@
     src: "{{ uptimekuma_service_file_template }}"
     dest: "{{ uptimekuma_service_file_target }}"
   notify: Reload systemd units
-  when: not uptimekuma_use_pm2
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
@@ -127,27 +113,6 @@
     name: "{{ uptimekuma_service_name }}"
     state: started
     enabled: true
-  when: not uptimekuma_use_pm2
-
-- name: Install uptime kuma via pm2
-  ansible.builtin.shell: bash -ilc 'pm2 start server/server.js -f --name {{ uptimekuma_pm2_servicename }}'
-  #args:
-  #  executable: "{{ uptimekuma_shell_bin }}"
-  become: true
-  become_user: "{{ uptimekuma_user }}"
-  args:
-    chdir: "{{ uptimekuma_install_dir }}"
-  when:
-  - uptimekuma_cloned.changed
-  - uptimekuma_use_pm2
-  register: uptimekuma_installed
-
-- name: Show output
-  ansible.builtin.debug:
-    msg: "{{ uptimekuma_installed.stdout}}"
-  when:
-  - uptimekuma_use_pm2
-  - uptimekuma_installed is defined
 
 - include_tasks: nginx.yml
   when: uptimekuma_nginx_deploy_reverseconfig
