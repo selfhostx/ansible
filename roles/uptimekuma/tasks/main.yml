@@ -73,7 +73,7 @@
   ansible.builtin.git:
     clone: true
     dest: "{{ uptimekuma_install_dir }}"
-    force: yes
+    force: true
     repo: "{{ uptimekuma_git_repo_url }}"
     update: true
     version: '{{ uptimekuma_version | default(omit) }}'
