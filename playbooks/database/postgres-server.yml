@@ -1,0 +1,16 @@
+# on target: python3-psycopg2
+---
+- hosts: bacula_dir
+  roles:
+    - { role: geerlingguy.postgresql }
+
+#  vars_files:
+#    - my_vault.yml
+  vars:
+    postgres_packagename: python3-psycopg2
+    
+  pre_tasks:
+    - name: Install PHP-packages for Apache
+      package:
+        name: "{{ postgres_packagename }}"
+        state: present

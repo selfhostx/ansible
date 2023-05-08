@@ -1,0 +1,41 @@
+---
+# template for zabbix: https://github.com/cryptage21/iostat-zabbix
+
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-iostat.yml"
+
+- name: "Install jq"
+  ansible.builtin.package:
+    name: "jq"
+    state: present
+
+- name: "Install sysstat"
+  ansible.builtin.package:
+    name: "sysstat"
+    state: present
+
+- name: Copy userparameters for iostat
+  ansible.builtin.template:
+    src: "userparameter_iostat.conf.j2"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_iostat_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent
+
+- name: Create zabbix scripts directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_scripts_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy iostat.sh for iostat template
+  ansible.builtin.copy:
+    src: "{{ zabbix_iostat_script }}"
+    dest: "{{ zabbix_scripts_dir }}/{{ zabbix_iostat_script }}"
+    # root owns it because sudo:
+    owner: "root"
+    group: "{{ zabbix_group }}"
+    mode: '0750'

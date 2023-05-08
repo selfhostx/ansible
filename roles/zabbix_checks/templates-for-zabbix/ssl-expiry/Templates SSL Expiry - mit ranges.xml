@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-06-05T19:44:45Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template SSL Expiry 25 SMTP-STARTTLS</template>
+            <name>Template SSL Expiry 25 SMTP-STARTTLS</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>SSL Certificate Expiry Check</name>
+                    <type>EXTERNAL</type>
+                    <key>ssl-cert-check.sh[&quot;{HOST.CONN}&quot;,&quot;-p 25&quot;,&quot;-1&quot;]</key>
+                    <delay>3600;60m/1-7,00:00-24:00</delay>
+                    <history>30d</history>
+                    <value_type>FLOAT</value_type>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=14 and {last()}&gt;0</expression>
+                            <name>SSL Certificate of {HOST.DNS}  Port 25 Submission-STARTTLS expires in less than 14 days</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=30 and {last()}&gt;14</expression>
+                            <name>SSL Certificate of {HOST.DNS}  Port 25 Submission-STARTTLS expires in less than 30 days</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL Certificate of {HOST.DNS}  Port 25 Submission-STARTTLS has expired</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;30</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 25 Submission-STARTTLS more than 30 days valid</name>
+                            <status>DISABLED</status>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+        <template>
+            <template>Template SSL Expiry 443 HTTPS</template>
+            <name>Template SSL Expiry 443 HTTPS</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>SSL Certificate Expiry Check</name>
+                    <type>EXTERNAL</type>
+                    <key>ssl-cert-check.sh[&quot;-s {HOST.CONN}&quot;,&quot;-1&quot;]</key>
+                    <delay>3600;60m/1-7,00:00-24:00</delay>
+                    <history>30d</history>
+                    <value_type>FLOAT</value_type>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=14 and {last()}&gt;0</expression>
+                            <name>SSL Certificate of {HOST.DNS} expires in less than 14 days</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=30 and {last()}&gt;14</expression>
+                            <name>SSL Certificate of {HOST.DNS} expires in less than 30 days</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL Certificate of {HOST.DNS} has expired</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;30</expression>
+                            <name>SSL Certificate of {HOST.DNS} more than 30 days valid</name>
+                            <status>DISABLED</status>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+        <template>
+            <template>Template SSL Expiry 465 SMTP-SSL</template>
+            <name>Template SSL Expiry 465 SMTP-SSL</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>SSL Certificate Expiry Check</name>
+                    <type>EXTERNAL</type>
+                    <key>ssl-cert-check.sh[&quot;{HOST.CONN}&quot;,&quot;-p 465&quot;,&quot;-1&quot;]</key>
+                    <delay>3600;60m/1-7,00:00-24:00</delay>
+                    <history>30d</history>
+                    <value_type>FLOAT</value_type>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=14 and {last()}&gt;0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 465 SMTP-SSL expires in less than 14 days</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=30 and {last()}&gt;14</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 465 SMTP-SSL expires in less than 30 days</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 465 SMTP-SSL has expired</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;30</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 465 SMTP-SSL more than 30 days valid</name>
+                            <status>DISABLED</status>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+        <template>
+            <template>Template SSL Expiry 587 Submission-STARTTLS</template>
+            <name>Template SSL Expiry 587 Submission-STARTTLS</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>SSL Certificate Expiry Check</name>
+                    <type>EXTERNAL</type>
+                    <key>ssl-cert-check.sh[&quot;{HOST.CONN}&quot;,&quot;-p 587&quot;,&quot;-1&quot;]</key>
+                    <delay>3600;60m/1-7,00:00-24:00</delay>
+                    <history>30d</history>
+                    <value_type>FLOAT</value_type>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=14 and {last()}&gt;0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 587 Submission-STARTTLS expires in less than 14 days</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=30 and {last()}&gt;14</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 587 Submission-STARTTLS expires in less than 30 days</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 587 Submission-STARTTLS has expired</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;30</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 587 Submission-STARTTLS more than 30 days valid</name>
+                            <status>DISABLED</status>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+        <template>
+            <template>Template SSL Expiry 993 IMAP-SSL</template>
+            <name>Template SSL Expiry 993 IMAP-SSL</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>SSL Certificate Expiry Check</name>
+                    <type>EXTERNAL</type>
+                    <key>ssl-cert-check.sh[&quot;{HOST.CONN}&quot;,&quot;-p 993&quot;,&quot;-1&quot;]</key>
+                    <delay>3600;60m/1-7,00:00-24:00</delay>
+                    <history>30d</history>
+                    <value_type>FLOAT</value_type>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=14 and {last()}&gt;0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 993 IMAP-SSL expires in less than 14 days</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=30 and {last()}&gt;14</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 993 IMAP-SSL expires in less than 30 days</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 993 IMAP-SSL has expired</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;30</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 993 IMAP-SSL more than 30 days valid</name>
+                            <status>DISABLED</status>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+        <template>
+            <template>Template SSL Expiry 995 POP3-SSL</template>
+            <name>Template SSL Expiry 995 POP3-SSL</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>SSL Certificate Expiry Check</name>
+                    <type>EXTERNAL</type>
+                    <key>ssl-cert-check.sh[&quot;{HOST.CONN}&quot;,&quot;-p 995&quot;,&quot;-1&quot;]</key>
+                    <delay>3600;60m/1-7,00:00-24:00</delay>
+                    <history>30d</history>
+                    <value_type>FLOAT</value_type>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=14 and {last()}&gt;0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 995 POP3-SSL expires in less than 14 days</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=30 and {last()}&gt;14</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 995 POP3-SSL expires in less than 30 days</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 995 POP3-SSL has expired</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&gt;30</expression>
+                            <name>SSL Certificate of {HOST.DNS} Port 995 POP3-SSL more than 30 days valid</name>
+                            <status>DISABLED</status>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>

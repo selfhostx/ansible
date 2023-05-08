@@ -1,19 +1,27 @@
 Roadmap
 =======
 
+**ansible frontends**
+  - semaphore: [example playbook](playbook/semaphore.yml) https://github.com/stefanux/ansible-role-semaphore (forked from morbidick.semaphore) focussing on manual install
+    thulium_drake.ansible_semaphore / https://github.com/Thulium-Drake/ansible-role-ansible_semaphore (features package install)
+  - rundeck
+  - awx [manual instructions](instructions/awx-manual-install.txt)
+  - tower
+
 **Backup**
-  - bacula https://github.com/stefanux/ansible-role-bacula
-  - bareos (2DO Coding)
-  - Borg+Borgmatic (2DO Port Code)
-  - restic (2DO Coding, maintainer needed)
+  - **bacula** https://github.com/selfhostx/ansible/blob/main/roles/bacula
+  - bareos (veselahouba.bareos)
+  - *Borg+Borgmatic (if maintainer is found)*
+  - *restic (if maintainer is found)*
   - mysql/mariadb (-> geerlingguy.mysql )
     - fulldump (SQL commands):
       - mysqlbackup https://github.com/stefanux/ansible-mysqlbackup
     - other methods:
       - FIXME
+  - proxmox backup server (FIXME checkin Code)
   - pfsense config (2DO https://github.com/pfsensible/core ?)
   - opensense config (2DO https://github.com/naturalis/ansible-opnsense ?)
-  - etckeeper (2DO)
+  - *etckeeper (if maintainer is found)*
 
 **Git**
   - git (client) -> geerlingguy.git
@@ -23,76 +31,85 @@ Roadmap
 
 **Filesystems**
   - ZFS
-    - vanilla install (2DO)
+    - vanilla install (2DO, planned)
     - Pool management (create, by-id-devices via vars)
     - special-usecases:
       - Proxmox https://github.com/bashclub/proxmox-zfs-postinstall
       - Samba shadow-copies "Zamba" https://github.com/bashclub/zamba-lxc-toolbox/
-    - snapshot house-keeping: zfs-keep-and-clean https://github.com/bashclub/zfs-housekeeping
     - ZFS autosnapshot
+      - snapshot house-keeping: zfs-keep-and-clean https://github.com/bashclub/zfs-housekeeping
+      - monitoring like check-zfs-replication https://github.com/bashclub/check-zfs-replication
   - ceph (?)
   - glusterfs (?)
 
 **Virtualization**
-  - proxmox (including cloud-init) -> Code committen
+  - proxmox (including cloud-init) -> see folder: [playbooks/proxmox](playbooks/proxmox)
     - VM management: https://github.com/mikaelflora/ansible-role-proxmox-vm
-    - lxc?
-  - libvirt/KVM (including cloud-init) -> Code committen
-  - ovirt?
-  - k8s
-  - **Docker**
-    - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker Vergleich: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
-    - registry
-      - ...?
-    - optional management tools:
-      - portainer
-      - traefik
+    - *LXC*
+    - balancing:
+      - PVE Balance: https://github.com/PLUTEX/pve_balance
+      - proxmox_migrate.py: https://github.com/HeinleinSupport/proxmox-tools/blob/master/proxmox_migrate.py
+  - [libvirt](roles/libvirt)+KVM (including cloud-init)
+  - *ovirt? (if maintainer is found)*
+  - Container
+    - *k3s (if maintainer is found)*
+    - *k8s (if maintainer is found)*
+    - docker (swarm)
+      - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker compare: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
+      - registry
+        - ...?
+      - optional management tools:
+        - portainer
+        - traefik
 
 **Instant messenger**
-  - mattermost (Code ready)
-  - matrix-synapse / element-web
-  - ...?
+  - [mattermost](roles/mattermost)
+  - *matrix-synapse / element-web (if maintainer is found)*
+  - *rocket.chat (if maintainer is found)*
 
 **Filesharing**
   - samba
-    - standalone (2DO: shadowcopy + fruit von bashclub ergänzen + ZFS) geerlingguy.samba / https://github.com/stefanux/ansible-role-samba.git
+    - standalone (2DO: merge shadowcopy + fruit from bashclub + ZFS) geerlingguy.samba / https://github.com/stefanux/ansible-role-samba.git
     - AD-member "zmb-member" https://github.com/bashclub/zamba-lxc-toolbox
   - nextcloud (-> https://github.com/JGoutin/ansible_home/tree/master/roles/nextcloud ?)
   - S3
     - minio
     - ceph RGW
   - SSH sftpgo
-  - SeaweedFS (?)
-  - OpenMediaVault / TrueNAS Core?
+  - *SeaweedFS (if maintainer is found)*
+  - *OpenMediaVault / TrueNAS Core? (if maintainer is found)*
 
 **Webserver**
-  - nginx
-    - reverse-proxy
-  - Apache ( -> geerlingguy.apache )
+  - nginx [nginx_common](roles/nginx_common)
+    - reverse-proxy ( geerlingguy.nginx ?)
+  - caddy (2DO)
+  - apache ( -> geerlingguy.apache )
     - apache only (simple static sites)
     - redirector
     - LAMP  (-> geerlingguy.php geerlingguy.php-versions )
       - mod_php
-      - php-fpm
+      - php-fpm (2DO)
   - All-in-one-packages
-    - froxlor  (Code ready)
-    - ispconfig (maintainer needed)
+    - froxlor  (FIXME Code ready)
+    - *ispconfig (maintainer needed)*
 
 **TLS-cert + CA-management**
   - letsencrypt
     - certbot -> https://github.com/selfhostx/ansible-role-certbot
-    - helper-scripte -> deploy_hook
+    - helper-scripte -> deploy_hook (FIXME code commit)
   - certificate distribution
     - own certs (individual, wildcards) -> Code available
     - vaulted files via sops https://github.com/mozilla/sops ? 2DO)
-  - internal CA (creates certs for hosts) -> 2DO
+  - internal CAs:
+    - creates certs for hosts) -> 2DO
+    - distribute CAs (will be implemented in baserole)
 
 **E-Mail**
   - mailserver
-    - dovecot + postfix)
+    - dovecot + postfix (2DO)
       - stand-alone
       - backends like LDAP
-    - mailcow
+    - mailcow (FIXME, Code ready, publish)
     - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
   - groupware
     - kopano (maintainer needed)
@@ -115,9 +132,9 @@ Roadmap
   - (stunnel -> needed?)
 
 **DNS**
-  - **self-hosted:*
+  - **self-hosted:**
     - recursive
-      - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync von Zertifikaten wenn letsencrypt, nginx-reverse-proxy für Statusseite)
+      - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync of certificates when letsencrypt is used, nginx-reverse-proxy for statuspage)
       - bind (2DO -> maintainer needed)
       - unbound (2DO -> maintainer needed)
     - autoritative
@@ -128,14 +145,14 @@ Roadmap
       - bind? -> 2DO: maintainer needed
     - DoH / dnscrypt (maintainer needed)
     - adfiltering
-      - powerdns with filtering (lua-based) - unreleased solution available
-      - pihole ?
-      - adguard home?
+      - powerdns with filtering (lua-based) -> FIXME code commit
+      - *pihole?*
+      - *adguard home?*
   - **DNS (external service)**:
     - hetzner oder hosttech via https://github.com/ansible-collections/community.dns
     - inwx.de (because they offer official ansible-support, dnssec, anycast and API)
-      - example
-      - zone-management on inwx (request creation of a API-account via support-ticket)
+      - [inwx playbook examples](playbooks/dns/inwx)
+      - zone-management on inwx (request creation of a API-account via support-ticket!)
     - netcup https://docs.ansible.com/ansible/latest/collections/community/general/netcup_dns_module.html
     - cloudflare https://docs.ansible.com/ansible/latest/collections/community/general/cloudflare_dns_module.html
     - AWS/Route53?
@@ -145,63 +162,48 @@ Roadmap
   - mysql (limited distribution-support or use packages from oracle?; community.mysql )
   - mariadb
     - standalone
-    - galera (2DO)
+    - galera ( -> mrlesmithjr.mariadb_galera_cluster - tested, good, active maintenance )
   - PostgreSQL ( -> geerlingguy.postgresql )
   - management-tools:
     - phpmyadmin
     - phpPgAdmin
 
 **Monitoring**
-  - icinga(2) (maintainer needed)
-  - zabbix ( community.zabbix )
-    - including checks/templates:
-      - bacula
-      - bareos (2DO)
-      - iostat
-      - glusterfs
-      - mysql
-      - postfix
-      - pfsense (2DO)
-        - wireguard/openvpn/ipsec
-      - tcpstats
-      - opnsense (2DO)
-        - wireguard/openvpn/ipsec
-      - strongswan (ipsec)
-      - wireguard
-      - ZFS https://github.com/stefanux/zabbix_zfs-on-linux
-      - ... (2DO extend List)
-  - Uptime Kuma (for SoHo or extra monitoring - include simple statuspage)
-  - statuspages: cachet, cstate, ... -> need maintainers
+  - *icinga(2) (maintainer needed)*
+  - zabbix ( community.zabbix https://github.com/ansible-collections/community.zabbix -> active development, good code)
+    - checks/templates: [see our role with various zabbix checks](roles/zabbix_checks)
+  - Uptime Kuma (for SoHo or extra monitoring - include simple statuspage) FIXMe code commit
+  - statuspages: Uptime Kuma, *cachet, cstate, ... -> need maintainers*
 
 **User directory**
   - LDAP?
     - Samba
     - 389dir
     - UCS univention
-    - SSSD integratin on system
+    - SSSD integration on system
   - keycloak?
   - ...?
 
 **Firewall**
-  - opensense
+  - opnsense
   - pfsense
   - hostfirewall
-    - iptables/nftables geerlingguy.firewall (maybe iptables-persistent ?)
+    - iptables/nftables -> geerlingguy.firewall (maybe iptables-persistent ?)
     - ufw
 
 **Clustering**
-  - keepalived
+  - keepalived -> evrardjp.keepalived
   - Filesync:
     - csync2
     - unison (?)
 
-**Reverse-Proxy/Loadbalancer**
-  self-hosted:
+**Reverse-Proxy/Loadbalancer**:
+  - self-hosted:
     - haproxy
     - nginx proxy manager GUI (needs docker)
     - nginx reverse proxy (vanilla)
     - apache mod_proxy (maintainer needed)
-  managed (via API):
+  - managed (via API):
     - hetzner LB
     - ...?
 
@@ -220,24 +222,25 @@ Roadmap
 
 **Apps**
   - Videoconference
+    - opentalk (still beta)
     - bbb ( https://github.com/juanluisbaptiste/ansible-bigbluebutton )
     - jitsi via docker (but usage discouraged due to limitations, over-complex architecture and bad documentation)
   - Wiki
-    - dokuwiki https://github.com/stefanux/ansible-role-dokuwiki
-    - wiki.js? (2Do: maintainer needed; -> https://github.com/supertarto/ansible-wikijs ?)
-    - bookstack (2Do: maintainer needed)
-    - mediawiki (2Do: maintainer needed)
+    - [dokuwiki](roles/dokuwiki)
+    - *wiki.js? (2Do: maintainer needed; -> https://github.com/supertarto/ansible-wikijs ?)*
+    - *bookstack (2Do: maintainer needed)*
+    - *mediawiki (2Do: maintainer needed)*
   - Netbox (IPAM/IT Asset Management)
   - Piwik (2DO)
-  - passwortmanager
-    - vaultwarden (done)
-    - hashicorp vault (2DO maintainer needed)?
-    - privacyIDEA (2DO maintainer needed)
-  - roundcube webmail
+  - passwordmanager
+    - vaultwarden (FIXME code commit)
+    - *hashicorp vault (2DO maintainer needed)?*
+    - *privacyIDEA (2DO maintainer needed)*
+  - roundcube webmail (2DO)
   - Ticketsystems
     - Zammad
   - kimai2 (timetracking)
-  - joplin (note taking application)
+  - *joplin (note taking application; 2DO maintainer needed)*
 
 **candidates**
   - Guacamole (remote desktop gateway)
@@ -248,8 +251,8 @@ Roadmap
   - mastodon (twitter-alternative)
   - nodebb
   - peertube
-  - teakspeak / mumble
-  - kanban-board: wekan? focalboard? planka?
+  - teamspeak / mumble
+  - kanban-boards (trello style): wekan? focalboard? planka?
   - whiteboard https://github.com/cracker0dks/whiteboard (could be replaced by videoconferencing-tool like bbb)
   - wordpress
   - distributed key/value stores

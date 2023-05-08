@@ -101,7 +101,7 @@
         challenge: dns-01
         acme_directory: "{{ cert_wildcard_acme_directory }}"
         acme_version: 2
-        terms_agreed: yes
+        terms_agreed: true
         remaining_days: "{{ cert_wildcard_remaining_days }}"
       register: challenge
 
@@ -124,9 +124,9 @@
       inwx.collection.dns:
         domain: "{{ cert_wildcard_zone }}"
         type: TXT
-        record: "{{ inwx_record_name }}"
-        value: "{{ inwx_record_value }}"
-        solo: yes
+        record: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource'] }}"
+        value: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
+        solo: true
         username: "{{ inwx_dns_user }}"
         password: "{{ inwx_dns_password }}"
       when: cert_wildcard_dns_provider_name == "inwx"
@@ -148,7 +148,7 @@
         challenge: dns-01
         acme_directory: "{{ cert_wildcard_acme_directory }}"
         acme_version: 2
-        terms_agreed: yes
+        terms_agreed: true
         remaining_days: "{{ cert_wildcard_remaining_days }}"
         data: "{{ challenge }}"
       register: cert_retrieval
@@ -169,9 +169,9 @@
         state: absent
         domain: "{{ cert_wildcard_zone }}"
         type: TXT
-        record: "{{ inwx_record_name }}"
-        value: "{{ inwx_record_value }}"
-        solo: yes
+        record: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource'] }}"
+        value: "{{ challenge['challenge_data']['*.' + cert_wildcard_domain]['dns-01']['resource_value'] }}"
+        solo: true
         username: "{{ inwx_dns_user }}"
         password: "{{ inwx_dns_password }}"
       when: cert_wildcard_dns_provider_name == "inwx"
@@ -194,7 +194,7 @@
         owner: "{{ cert_wildcard_owner }}"
         group: "{{ cert_wildcard_group }}"
         mode: 0644
-        backup: yes
+        backup: true
       with_items:
         - "{{ cert_wildcard_certname }}"
         - "{{ cert_wildcard_fullchain }}"
@@ -209,7 +209,7 @@
         owner: "{{ cert_wildcard_owner }}"
         group: "{{ cert_wildcard_group }}"
         mode: '0600'
-        backup: yes
+        backup: true
       notify:
         - restart cert_wildcard_restart_service
       when: cert_wildcard_copy_enable

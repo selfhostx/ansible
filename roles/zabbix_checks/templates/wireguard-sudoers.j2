@@ -1,0 +1,3 @@
+{{ zabbix_user }} ALL=(ALL) NOPASSWD: {{ zabbix_wireguard_script_filename }} INTERFACES
+{{ zabbix_user }} ALL=(ALL) NOPASSWD: {{ zabbix_wireguard_script_filename }} PEERS
+{{ zabbix_user }} ALL=(ALL) NOPASSWD: /usr/bin/wg show *

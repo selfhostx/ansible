@@ -1,0 +1,52 @@
+---
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-glusterfs.yml"
+
+- name: Create zabbix Include directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy userparameters for glusterfs
+  ansible.builtin.template:
+    src: "userparameter_glusterfs.conf.j2"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_glusterfs_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent
+
+- name: Create zabbix scripts directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_scripts_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy glusterfs-stats.sh for glusterfs template
+  ansible.builtin.copy:
+    src: "gluster-monitoring.pl"
+    dest: "{{ zabbix_script_full_path }}"
+    # root owns it because sudo:
+    owner: "root"
+    group: "{{ zabbix_group }}"
+    mode: '0750'
+
+- name: sudo without password for zabbix for command glusterfs-stats.sh
+  ansible.builtin.copy:
+    content: "zabbix ALL=NOPASSWD: {{ zabbix_scripts_dir }}/gluster-monitoring.pl\n"
+    # \n might triggers errors on some ansible versions: https://github.com/ansible/ansible/issues/6077
+    dest: "{{ zabbix_sudoers_glusterfs_filename }}"
+    # owner: "root"
+    # group: "root"
+    mode: 0440
+    validate: 'visudo -cf %s'
+
+- name: Ensure libswitch-perl is present
+  ansible.builtin.apt:
+    name: "{{ zabbix_glusterfs_dependencies }}"
+    state: present

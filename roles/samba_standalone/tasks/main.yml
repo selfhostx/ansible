@@ -43,7 +43,7 @@
 
 - name: Template Samba config
   template:
-    backup: yes
+    backup: true
     dest: '{{ samba_config_file }}'
     mode: '0660'
     src: '{{ samba_template }}'
@@ -58,8 +58,8 @@
     password: "{{ item.password | password_hash('sha512') }}"
     groups: "{{ item.groups | default('') }}"
     # update_password: on_create
-    append: yes
-    create_home: yes
+    append: true
+    create_home: true
   when:
   - samba_create_users
   - samba_userlist is defined

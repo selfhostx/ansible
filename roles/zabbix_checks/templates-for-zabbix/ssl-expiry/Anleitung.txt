@@ -1,0 +1,8 @@
+nach ExternalScripts
+   /usr/lib/zabbix/externalscripts/  oder was konfiguriert ist: grep -i ExternalScripts /etc/zabbix/zabbix_server.conf
+
+Autor:
+  https://prefetch.net/articles/checkcertificate.html
+
+Fork:
+  https://github.com/stefanux/ssl-cert-check

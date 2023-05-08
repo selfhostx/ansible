@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Run baserole
+  hosts: all
   roles:
     - { role: selfhostx.ansible.baserole }
 
@@ -10,18 +11,18 @@
       - user: MyUser
         # random example password:
         password: "$6$olCnBZ0jQiGUOyd5$Iual2nFwPiFw.70i7sH4JZVw6xGsn8CZZvw8hPHARSTd8tP7WqwHu6hFyc2K2H7ooDbIWEPuY2M18KlChee16/"
-        sudo_nopass: True
+        sudo_nopass: true
         shell: /bin/bash
-        generate_ssh_key: True
+        generate_ssh_key: true
         ssh_key_type: rsa
         default_editor: nano
-  
+
   pre_tasks:
-  - name: Install python for Ansible (Debian only)
-    raw: test -e /usr/bin/python3 || (apt-get -y update && apt install -y python3)
-    register: output
-    changed_when: output.stdout | length > 0
+    - name: Install python for Ansible (Debian only)
+      ansible.builtin.raw: test -e /usr/bin/python3 || (apt-get -y update && apt install -y python3)
+      register: output
+      changed_when: output.stdout | length > 0
 
   tasks:
-  - name: Gathering Facts now
-    setup:
+    - name: Gathering Facts now
+      ansible.builtin.setup:

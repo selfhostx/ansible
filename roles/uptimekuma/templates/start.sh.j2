@@ -1,0 +1,8 @@
+#!/bin/sh
+# {{ ansible_managed }}
+
+export NVM_DIR="/home/{{ uptimekuma_user }}/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# when run manual:
+# cd {{ uptimekuma_install_dir }}
+npm run start

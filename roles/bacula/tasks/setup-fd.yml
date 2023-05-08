@@ -9,7 +9,7 @@
   - packages
 
 - name: Setup FD | Install bacula-fd package (Windows)
-  win_chocolatey:
+  chocolatey.chocolatey.win_chocolatey:
     name: "{{ bacula_fd_package_name }}"
     state: present
   when: ansible_os_family == "Windows"

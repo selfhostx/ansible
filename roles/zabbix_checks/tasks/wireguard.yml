@@ -1,0 +1,48 @@
+---
+# template for zabbix: https://github.com/cryptage21/wireguard-zabbix
+
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-wireguard.yml"
+
+- name: Create zabbix Include directory if it does not exist
+  file:
+    path: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy userparameters for wireguard
+  template:
+    src: "userparameter_wireguard.conf.j2"
+    dest: "{{ zabbix_agent_include if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_wireguard_userparameter_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent
+
+- name: Create zabbix scripts directory if it does not exist
+  file:
+    path: "{{ zabbix_scripts_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy wireguard.sh for wireguard template
+  copy:
+    src: "wireguard.sh"
+    dest: "{{ zabbix_wireguard_script_filename }}"
+    # root owns it because sudo:
+    owner: "root"
+    group: "{{ zabbix_group }}"
+    mode: '0750'
+
+- name: sudo without password for zabbix for command wireguard.sh
+  template:
+    src: "wireguard-sudoers.j2"
+    dest: "{{ zabbix_wireguard_sudoers_filename }}"
+    owner: "root"
+    group: "root"
+    mode: 0440
+    validate: 'visudo -cf %s'

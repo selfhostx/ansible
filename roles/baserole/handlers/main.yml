@@ -30,12 +30,11 @@
   ansible.builtin.service:
     name: "{{ baserole_ntp_systemd_timesyncd_servicename }}"
     enabled: yes
-    masked: no
 
 - name: Update Grub Config
   ansible.builtin.command: update-grub
 
 - name: Restart journald
-  systemd: 
-    name: systemd-journald 
+  ansible.builtin.systemd:
+    name: systemd-journald
     state: restarted

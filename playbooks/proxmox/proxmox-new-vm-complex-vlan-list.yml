@@ -1,0 +1,299 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_proxmox_module.html
+# ansible-galaxy collection install community.general
+
+# ansible-playbook proxmox-new-vm.yml -D -e "cloudinit_os_default_rootpassword=secret123 cloudinit_os_default_user=debian cloudinit_os_default_userpassword=secret123"
+
+- hosts: proxmox
+
+  vars_files:
+   - MY_VAULT.yml
+
+  vars:
+    # -> put into group_vars/proxmox.yml:
+    # proxmox_api_host: server1.domain.tld
+    # proxmox_create_node: server1
+    # set if node name is not equal to ansible ssh-connection:
+    # proxmox_create_node_ansible: server1.domain.tld
+
+    # -> vaulted vars:
+    # proxmox_api_user: root@pam
+    # proxmox_api_pass: SECRET
+
+    # proxmox_vm_hostname: cloud-init-test.domain.tld
+    # proxmox_vm_disksize: values -> disk size total (example: "20G") or grow by GB: (example: "+18G")
+    proxmox_vm_diskdevice: virtio0
+    proxmox_vm_vga: qxl
+    proxmox_vm_onboot: "yes"
+    proxmox_vm_ostype: l26
+    proxmox_vm_distribution: debian
+    proxmox_vm_agent: "yes"
+    proxmox_vm_autostart: "yes"
+
+    cloudinit_os_default_user: debian
+    # cloudinit_os_default_rootpassword: -> vault
+    # cloudinit_os_default_userpassword: -> vault
+    # baserole_root_password_hash_sha512: -> vault
+    # baserole_user_password_hash_sha512: -> vault
+    cloudinit_disable_root: false
+    cloudinit_package_upgrade: true
+    cloudinit_resize_rootfs: true
+
+    proxmox_resize: True
+    proxmox_start: True
+    # proxmox_destroy: True
+    proxmox_destroy: False
+    # upgrades packages (will slow down depending how current the cloudinit_image is/how many packages are outdated) 
+    proxmox_upgrade_packages_on_create: True
+
+    # move config from /etc/network/interfaces.d/50-cloud-init to /etc/network/interfaces :
+    cloudinit_move_network_config_to_main_file: True
+
+    # proxmox_vm_cloudinit_image: debian-11-genericcloud-amd64-20220121-894
+
+    proxmox_snippet_dir: /var/lib/vz/snippets
+    proxmox_snippet_storage: local
+    # storage 'proxmox_cephfs' does not support content-type 'images':
+    # proxmox_snippet_dir: /mnt/pve/proxmox_cephfs/snippets
+    # proxmox_snippet_storage: proxmox_cephfs
+
+    # proxmox_snippet_user_data_file: user-data.yml
+    proxmox_snippet_user_data_file: user-data-{{ proxmox_vm_hostname }}.yml
+    proxmox_snippet_user_data_dest: "{{ proxmox_snippet_dir }}/{{ proxmox_snippet_user_data_file }}"
+    proxmox_snippet_user_data_template: templates/proxmox_cloudinit_user_data.j2
+
+    proxmox_net0: "virtio,bridge=vmbr0"
+
+    # set dns server in custom user-config !will not work on proxmox since DNS searchdomain and DNS server defaults to host settings (of node running the vm)!
+    cloudinit_dns_set_servers: True
+    cloudinit_dns_servers:
+      - 8.8.4.4
+      - 1.1.1.1
+      - 2001:4860:4860::8888
+      - 2620:fe::fe
+
+    cloudinit_os_ssh_pubkeys:
+      -  ssh-rsa AAAAB... my_1st_pubkey_CHANGE_ME
+      -  ssh-rsa AAAAB... my_2nd_pubkey_CHANGE_ME
+
+    # default is false:
+    cloudinit_os_ssh_root_pwauth: True
+    cloudinit_os_timezone: "Europe/Berlin"
+
+    proxmox_config_update: "yes"
+
+    proxmox_networks:
+      - vlan: "100"
+        name: "internal"
+        net4: "192.168.0"
+        mask4: 24
+        gw4: "192.168.0.1"
+        net6: "2a00:1:2:3"
+        mask6: 64
+        gw6: "2a00:1:2:3::1"
+      - vlan: "101"
+        name: "internal"
+        net4: "192.168.1"
+        mask4: 24
+        gw4: "192.168.1.1"
+        net6: "2a01:1:2:3"
+        mask6: 64
+        gw6: "2a01:1:2:3::1"
+
+  vars_prompt:
+    - name: proxmox_vm_hostname
+      prompt: "hostname (FQDN) "
+      default: vm1.domain.tld
+      private: no
+    - name: cloudinit_vm_distribution
+      prompt: "which distribution is used (currently debian, ubuntu) "
+      default: "debian"
+      private: no
+    - name: proxmox_vm_cloudinit_image
+      prompt: "Template to use (Examples:  template-cloudinit-deb11-latest, template-cloudinit-ubuntu22-04-latest, ...) "
+      default: "template-cloudinit-deb11-latest"
+      private: no
+    - name: proxmox_vm_memory_max
+      prompt: "Max Memory (in MiB) "
+      default: 2048
+      private: no
+    - name: proxmox_vm_cores
+      prompt: "Count of Cores (number) "
+      default: 2
+      private: no
+    - name: proxmox_vm_disksize
+      prompt: "size of Disk "
+      default: 20G
+      private: no
+    - name: proxmox_vm_storage
+      prompt: 'choose storage (local, ...) '
+      default: "local"
+      private: no
+    - name: proxmox_vm_vlan
+      prompt: "which vlan (200 -> internal IT, 201 -> Test, 202 -> Prod, 203 -> backend-systems) "
+      default: "200"
+      private: no
+# old complex input:
+#    - name: proxmox_vm_ip_config
+#      prompt: "set IP (network is always /26) and gw .1 / .65 / .129 / .193"
+#     default: "ip=195.96.156.60/26,gw=195.96.156.1,ip6=2a12:e00:200::60/48,gw6=2a12:e00:200::1"
+#      private: no
+    - name: proxmox_vm_ip4
+      prompt: "v4 IP (just last number or no) "
+      private: no
+    - name: proxmox_vm_ip6
+      prompt: "v6 IP (just last number or no) "
+      private: no
+
+
+  tasks:
+
+  - name: Set network mode dualstack when both v4 and v6 address are present
+    ansible.builtin.set_fact:
+      proxmox_vm_network_mode: dualstack
+      proxmox_vm_ip_config: 'ip={{ item.net4 }}.{{ proxmox_vm_ip4 }}/{{ item.mask4 }},gw={{ item.gw4 }},ip6={{ item.net6 }}::{{ proxmox_vm_ip6 }}/{{ item.mask6 | default("64") }},gw6={{ item.gw6 }}'
+    loop: "{{ proxmox_networks }}"
+    when:
+    - item.vlan == proxmox_vm_vlan
+    - proxmox_vm_ip4 is defined and proxmox_vm_ip4 != "no"
+    - proxmox_vm_ip6 is defined and proxmox_vm_ip6 != "no"
+    run_once: true
+
+  - name: Set network mode v4only
+    ansible.builtin.set_fact:
+      proxmox_vm_network_mode: v4only
+      proxmox_vm_ip_config: 'ip={{ item.net4 }}.{{ proxmox_vm_ip4 }}/{{ item.mask4 }},gw={{ item.gw4 }}'
+    loop: "{{ proxmox_networks }}"
+    when:
+    - item.vlan == proxmox_vm_vlan
+    - proxmox_vm_ip4 is defined and proxmox_vm_ip4 != "no"
+    - proxmox_vm_ip6 is not defined or proxmox_vm_ip6 == "no"
+    run_once: true
+
+  - name: Set network mode v6only
+    ansible.builtin.set_fact:
+      proxmox_vm_network_mode: v6only
+      proxmox_vm_ip_config: 'ip6={{ item.net6 }}::{{ proxmox_vm_ip6 }}/{{ item.mask6 | default("64") }},gw6={{ item.gw6 }}'
+    loop: "{{ proxmox_networks }}"
+    when:
+    - item.vlan == proxmox_vm_vlan
+    - proxmox_vm_ip4 is not defined or proxmox_vm_ip4 == "none"
+    - proxmox_vm_ip6 is defined and proxmox_vm_ip6 != "none"
+    run_once: true
+
+  - name: Print network config for cloud-init
+    debug:
+      msg: "vlan is {{ proxmox_vm_vlan }} cloud-init-config is: {{ proxmox_vm_ip_config }} "
+    run_once: true
+
+  - name: Create cloud init user-data for guest
+    template:
+      src: "{{ proxmox_snippet_user_data_template }}"
+      dest: "{{ proxmox_snippet_user_data_dest }}"
+      mode: '0640'
+    run_once: true
+    delegate_to: "{{ proxmox_create_node_ansible | default(proxmox_create_node) }}"
+
+  - name: Clone VM
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmox_api_user }}"
+      api_password: "{{ proxmox_api_pass }}"
+      api_host: "{{ proxmox_api_host }}"
+      node: "{{ proxmox_create_node }}"
+      name: "{{ proxmox_vm_hostname }}"
+      pool: "{{ proxmox_pool | default(omit) }}"
+      storage: "{{ proxmox_vm_storage }}"
+      clone: "{{ proxmox_vm_cloudinit_image }}"
+      timeout: 120
+    register: proxvm
+    run_once: true
+    delegate_to: "{{ proxmox_create_node_ansible | default(proxmox_create_node) }}"
+
+#  - name: Waiting to start virtual server machine completely
+#    wait_for:
+#        timeout: 45
+#    when: proxvm.changed == true 
+
+  - name: Resize Disk
+    ansible.builtin.command: "qm resize {{ proxvm.vmid }} {{ proxmox_vm_diskdevice | default('virtio0') }}  {{ proxmox_vm_disksize }}"
+    when: proxmox_resize
+    run_once: true
+    delegate_to: "{{ proxmox_create_node_ansible | default(proxmox_create_node) }}"
+
+  - name: Configure VM
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmox_api_user }}"
+      api_password: "{{ proxmox_api_pass }}"
+      api_host: "{{ proxmox_api_host }}"
+      node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+      vmid: "{{ proxvm.vmid }}"
+      name: "{{ proxmox_vm_hostname }}"
+      cores: "{{ proxmox_vm_cores }}"
+      memory: "{{ proxmox_vm_memory_max }}"
+      vga: "{{ proxmox_vm_vga }}"
+      boot: c
+      bootdisk: virtio0
+      onboot: "{{ proxmox_vm_onboot|lower }}"
+      ostype: "{{ proxmox_vm_ostype }}"
+      agent: "{{ proxmox_vm_agent|lower }}"
+      autostart: "{{ proxmox_vm_autostart|lower }}"
+      serial:
+        serial0: socket
+      update: "{{ proxmox_config_update }}"
+      # state: present
+      cicustom: "user={{ proxmox_snippet_storage }}:snippets/{{ proxmox_snippet_user_data_file }}"
+      # disabled since it does not work (see extra task)
+      #net:
+        # doku: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#parameter-net
+        # net[n]: 'model="XX:XX:XX:XX:XX:XX",bridge="value",rate="value",tag="value",firewall="1|0",trunks="vlanid"'
+        # net0: '{{ proxmox_net_config }}'
+      ipconfig:
+        # doku: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#parameter-ipconfig
+        # ipconfig[n]='[gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,ip=<IPv4Format/CIDR>] [,ip6=<IPv6Format/CIDR>]'
+        ipconfig0: '{{ proxmox_vm_ip_config }}'
+
+      # the following options are visible in web-GUI, but we do not set them since we use cicustom:
+      #ciuser: wis
+      #cipassword: "{{ cloudinit_os_default_userpassword }}"
+      #searchdomains: 'domain.tld'
+      # 3 namservers at max:
+      nameservers:
+      - '8.8.8.8'
+      - '1.1.1.1'
+      - '2001:4860:4860::8888'
+      #sshkeys: |
+      #  ssh-rsa AAAAB... my_1st_pubkey
+      #  ssh-rsa AAAAB... my_2nd_pubkey
+    run_once: true
+
+  - name: Configure network adapter # noqa no-changed-when
+    # workaround since net0 is ignored on update (see shttps://github.com/ansible-collections/community.general/issues/1342)
+    ansible.builtin.command: "qm set {{ proxvm.vmid }} -net0 {{ proxmox_net0 }},tag={{ proxmox_vm_vlan }}"
+    run_once: true
+
+  - name: Add cloud-init drive # noqa no-changed-when
+    ansible.builtin.command: "qm set {{ proxvm.vmid }} --ide2 {{ proxmox_snippet_storage }}:cloudinit"
+    run_once: true
+
+  # if "state: started" in create-task, not all config is correct (i.e. bootorder), so start it afterwards:
+  - name: Start VM
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmox_api_user }}"
+      api_password: "{{ proxmox_api_pass }}"
+      api_host: "{{ proxmox_api_host }}"
+      node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+      vmid: "{{ proxvm.vmid }}"
+      state: started
+    when: proxmox_start
+    run_once: true
+
+  - name: Destroy VM
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmox_api_user }}"
+      api_password: "{{ proxmox_api_pass }}"
+      api_host: "{{ proxmox_api_host }}"
+      node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+      vmid: "{{ proxvm.vmid }}"
+      state: absent
+    when: proxmox_destroy
+    run_once: true

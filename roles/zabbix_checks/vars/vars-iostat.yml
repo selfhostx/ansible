@@ -1,0 +1,3 @@
+---
+zabbix_userparameter_iostat_filename: "userparameter_iostat.conf"
+zabbix_iostat_script: "iostat.sh"

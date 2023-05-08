@@ -67,7 +67,7 @@
       - ssh
 
   - name: Copy pubkeys to authorized_keys for root
-    ansible.builtin.copy:
+    ansible.builtin.template:
       src: "{{ baserole_root_authorizedkeys }}"
       dest: "/root/.ssh/authorized_keys"
       owner: root

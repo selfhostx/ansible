@@ -57,7 +57,7 @@
     owner: root
     group: root
     mode: 0644
-    backup: yes
+    backup: true
   notify: restart postfix
   when:
   - postfix_relay_role is defined
@@ -86,7 +86,7 @@
   ansible.builtin.user:
     name: postfix
     groups: sasl
-    append: yes
+    append: true
   notify:
     - restart postfix
   when:
@@ -150,7 +150,7 @@
     owner: root
     group: root
     mode: 0644
-    backup: yes
+    backup: true
   notify:
     - restart postfix
   when:

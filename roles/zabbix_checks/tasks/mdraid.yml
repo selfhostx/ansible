@@ -1,0 +1,14 @@
+# source: https://github.com/MogiePete/zabbix-mdadm-template
+---
+
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-mdraid.yml"
+
+- name: Copy userparameters for mdraid
+  ansible.builtin.template:
+    src: "userparameter_mdraid.conf.j2"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_mdraid_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent

@@ -1,0 +1,3 @@
+#Defaults:zabbix !requiretty
+#Defaults:zabbix !syslog
+zabbix ALL = (root) NOPASSWD: /etc/zabbix/ipsec.sh

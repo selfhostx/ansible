@@ -1,0 +1,7 @@
+instance-id: iid-{{ libvirt_vm_fqdn }}-01
+local-hostname: {{ libvirt_vm_fqdn }}
+
+{% if libvirt_os_network_interface is defined and libvirt_os_network_interface|length > 0 %}
+network-interfaces: |
+{{ libvirt_os_network_interface|indent(2, true) }}
+{% endif %}

@@ -19,11 +19,25 @@ roles:
   - src: powerdns.pdns_recursor
   - src: powerdns.dnsdist
   - src: tcharl.ansible_role_libvirt_host
+  - name: stefanux.mysqlbackup
+    src: https://github.com/stefanux/ansible-mysqlbackup.git
+    scm: git
+  - name: stefanux.semaphore
+    src: https://github.com/stefanux/ansible-role-semaphore.git
+    scm: git
+  - name: selfhostx.certbot
+    src: https://github.com/selfhostx/ansible-role-certbot.git
+    scm: git
+  - name: selfhostx.apache
+    src: https://github.com/selfhostx/ansible-role-apache.git
+    scm: git
 
 collections:
   - name: https://github.com/selfhostx/ansible.git
     type: git
+  - name: chocolatey.chocolatey
   - name: community.crypto
+  - name: community.general
   - name: community.libvirt
   - name: community.mysql
   - name: community.zabbix

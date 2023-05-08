@@ -11,13 +11,13 @@
       - baserole_dns_resolver_daemon == "systemd-resolved"
 
   - name: Write resolv.conf
-    ansible.builtin.template: 
+    ansible.builtin.template:
       src: "{{ baserole_dns_template_resolv_conf }}"
       dest: /etc/resolv.conf
       owner: root
       group: root
       mode: '0644'
-      follow: yes
+      follow: true
 
   - name: Configure systemd-resolved (native config)
     ansible.builtin.template:

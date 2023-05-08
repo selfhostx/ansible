@@ -15,7 +15,7 @@
     ansible.builtin.template:
       src: sshd_default_template.j2
       dest: "/etc/default/ssh"
-      backup: yes
+      backup: true
       owner: root
       group: root
       mode: '0644'
@@ -29,7 +29,7 @@
     community.crypto.openssh_keypair:
       path: "/etc/ssh/ssh_host_{{ item }}_key"
       type: "{{ item }}"
-      force: "{{ baserole_openssh_force_gen_keys|bool }}"
+      force: "{{ baserole_openssh_force_gen_keys | bool }}"
     with_items:
       - "{{ baserole_openssh_key_types }}"
     when:

@@ -1,0 +1,80 @@
+# source: https://github.com/mjanser/ansible-role-mysql / https://galaxy.ansible.com/geerlingguy/mysql
+- name: Install mysql or mariadb depending on distribution default
+  hosts: all
+  # vars_files:
+  #  - group_vars/mysql-or-mariadb.yml
+  roles:
+    - { role: geerlingguy.mysql }
+  pre_tasks:
+# this workaround should not be needed with a current geerlingguy.mysql version:
+#    - name: Set packages Name to default-mysql-server (Debian > 9, Ubuntu > 18.04 with universe enabled)
+#      set_fact:
+#        mysql_packages:
+#          - default-mysql-server
+#          - default-mysql-server-core
+#      when:
+#        - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  vars_prompt:
+    - name: mysql_root_password
+      prompt: "mysql root-Password? "
+      private: true
+    - name: mysql_username
+      prompt: "mysql_username? "
+      private: false
+    - name: mysql_user_password
+      prompt: "mysql user password? "
+      private: true
+    - name: mysql_database
+      prompt: "create mysql DB (provide name; Default: empty)? "
+      private: false
+      default: ''
+    - name: mysql_encoding
+      prompt: "mysql encoding (examples: utf8 utf8mb4 ; Default=utf8)? "
+      private: false
+    - name: mysql_collation
+      prompt: "mysql collation (examples: utf8_bin utf8_general_ci utf8mb4_general_ci ; Default: utf8_general_ci)? "
+      private: false
+
+  vars:
+    # defaults: see https://github.com/geerlingguy/ansible-role-mysql/blob/master/defaults/main.yml
+
+    # moved to group_vars/mysql_servers.yml :
+    # mysql_bind_address: '127.0.0.1'
+    # mysql_root_password_update: true
+    # mysql_user_password_update: true
+
+
+#    mysql_root_password: "{{ lookup('env', 'mysql_root_password') }}"
+#    mysql_database: "{{ lookup('env', 'mysql_database') }}"
+#    mysql_username: "{{ lookup('env', 'mysql_username') }}"
+#    mysql_user_password: "{{ lookup('env', 'mysql_user_password') }}"
+#    mysql_encoding: "{{ lookup('env', 'mysql_encoding') }}"
+#    mysql_collation: "{{ lookup('env', 'mysql_collation') }}"
+    mysql_bind_address: '127.0.0.1'
+    mysql_root_password_update: true
+    mysql_user_password_update: true
+
+    # create user (without DB)?
+#    community.mysql.mysql_user:
+#      - name: "{{ mysql_username }}"
+        # host: "%"
+#        host: localhost
+#        password: "{{ mysql_user_password }}"
+        # priv: "{{ mysql_database }}.*:ALL"
+#        append_privileges: yes
+
+    # create database?
+#   community.mysql.mysql_db:
+#     - name: "{{ mysql_database }}"
+#       encoding: "{{ mysql_encoding }}"
+#       collation: "{{ mysql_collation }}"
+
+    # create user + grant?
+#    community.mysql.mysql_user:
+#      - name: "{{ mysql_username }}"
+#        # host: "%"
+#        host: localhost
+#        password: "{{ mysql_user_password }}"
+#        priv: "{{ mysql_database }}.*:ALL"
+#        append_privileges: yes

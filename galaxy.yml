@@ -2,10 +2,10 @@
 ---
 namespace: selfhostx
 name: ansible
-version: 0.0.1
+version: 1.2.0
 readme: README.md
 authors:
-- FIXME
+- selfhostx
 description: ansible-Collection for selhosters
 license_file: LICENSE
 # tags:

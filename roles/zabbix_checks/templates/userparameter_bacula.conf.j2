@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+#
+UserParameter=BACULA.discovery,/usr/bin/sudo {{ zabbix_bacula_script_bacula_discovery_dest }}
+UserParameter=BACULA.check[*],/usr/bin/sudo {{ zabbix_bacula_script_check_job_dest }} $1 $2 $3 $4

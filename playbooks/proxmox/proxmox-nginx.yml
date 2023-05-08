@@ -1,0 +1,28 @@
+- hosts: 
+    - proxmox
+  roles: 
+    - { role: selfhostx.ansible.nginx_common }
+  vars:
+    nginx_ssl_port: 443
+    nginx_http2_activate: True
+    # nginx_tls_cert: X
+    # nginx_tls_privkey: Y
+    nginx_rev_keepalive: 32
+    nginx_rev_localhttp: True
+    # nginx_rev_localhttp_name: proxmox_8006
+    nginx_rev_localhttp_target: "127.0.0.1:8006"
+
+  handlers:
+  - name: 'Reload nginx'
+    listen: 'Reload nginx'
+    ansible.builtin.systemd:
+      state: 'reloaded'
+      name: 'nginx'
+
+  tasks:
+  - name: Template Nginx Reverse Proxy Config
+    template:
+      src: templates/proxmox-nginx.j2
+      dest: "/etc/nginx/sites-enabled/{{ inventory_hostname }}.conf"
+      mode: "0644"
+    notify: Reload nginx

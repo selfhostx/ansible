@@ -1,0 +1,4 @@
+---
+zabbix_userparameter_postfix_filename: "userparameter_postfix.conf"
+zabbix_sudoers_postfix_filename: "/etc/sudoers.d/20_zabbix-postfix-stats-sudoers"
+zabbix_scripts_postfix_stats_filename: "postfix-stats.sh"

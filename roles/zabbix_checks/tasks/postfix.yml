@@ -1,0 +1,31 @@
+---
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-postfix.yml"
+
+- name: Copy userparameters for postfix
+  ansible.builtin.template:
+    src: "userparameter_postfix.conf.j2"
+    dest: "{{ zabbix_userparameter_postfix_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '0600'
+  notify: Restart zabbix-agent
+
+- name: Copy postfix-stats.sh for postfix template
+  ansible.builtin.copy:
+    src: "{{ zabbix_scripts_postfix_stats_filename }}"
+    dest: "{{ zabbix_scripts_dir }}/{{ zabbix_scripts_postfix_stats_filename }}"
+    # root owns it because sudo:
+    owner: "root"
+    group: "{{ zabbix_group }}"
+    mode: '0750'
+
+- name: Sudo without password for zabbix for command postfix stats
+  ansible.builtin.copy:
+    content: "zabbix ALL=NOPASSWD: {{ zabbix_scripts_dir }}/{{ zabbix_scripts_postfix_stats_filename }}\n"
+    # \n might triggers errors on some ansible versions: https://github.com/ansible/ansible/issues/6077
+    dest: "{{ zabbix_sudoers_postfix_filename }}"
+    # owner: "root"
+    # group: "root"
+    mode: 0440
+    validate: 'visudo -cf %s'

@@ -1,0 +1,6 @@
+Name: Galera State
+Mapping:
+1 - Joining
+2 - Donor/Desynced
+3 - Joined
+4 - Synced

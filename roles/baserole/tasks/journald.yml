@@ -1,7 +1,7 @@
 ---
 
 - name: Set /etc/systemd/journald.conf
-  template:
+  ansible.builtin.template:
     src: "{{ baserole_journald_template }}"
     dest: /etc/systemd/journald.conf
     owner: root

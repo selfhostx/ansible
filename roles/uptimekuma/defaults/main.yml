@@ -1,0 +1,51 @@
+---
+# defaults file for uptime kuma
+
+uptimekuma_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+
+uptimekuma_user: "uptimekuma"
+uptimekuma_group: "uptimekuma"
+uptimekuma_shell_bin: /bin/bash
+uptimekuma_shell_config: ".bashrc"
+
+uptimekuma_listen_host: localhost
+uptimekuma_listen_port: 3001
+
+uptimekuma_install_dir: "/opt/uptimekuma"
+uptimekuma_git_repo_url: "https://github.com/louislam/uptime-kuma.git"
+
+# otional (which roles are defined in the vars below):
+uptimekuma_role_git_import: false
+# npm is being installed from packages or optionally a role is used:
+uptimekuma_role_npm_import: false
+# OR you choose nvm (which substitutes npm with a user-specific runtime which is independent from system packages):
+uptimekuma_use_nvm: true
+uptimekuma_nvm_nodejs_version: "lts"
+
+uptimekuma_role_git_name: "geerlingguy.git"
+uptimekuma_role_nvm_name: "morgangraphics.ansible_role_nvm"
+uptimekuma_role_npm_name: "robertdebock.npm"
+
+uptimekuma_service_file_template: "uptime-kuma-systemd-unit.j2"
+uptimekuma_service_file_target: "/lib/systemd/system/uptime-kuma.service"
+uptimekuma_service_name: "uptime-kuma"
+
+# reverse-proxy-config (see: https://github.com/louislam/uptime-kuma/wiki/Reverse-Proxy )
+# use nginx to make a ssl reverse-proxy-config:
+uptimekuma_nginx_deploy_reverseconfig: true
+uptimekuma_nginx_template: "nginx-uptime-kuma.j2"
+uptimekuma_nginx_remove_default_config: true
+uptimekuma_nginx_config_filename: uptimekuma
+
+# if you use our nginx_common role, use "true" here:
+uptimekuma_nginx_use_nginx_common_snippet: false
+
+uptimekuma_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+uptimekuma_nginx_tls_hardening_snippet: "{{ uptimekuma_nginx_snippet_directory }}/tls-hardening.conf"
+# enable HSTS (not used when uptimekuma_nginx_use_nginx_common_snippet: true):
+uptimekuma_tls_hsts_enable: true
+uptimekuma_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+uptimekuma_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ uptimekuma_hostname }}/fullchain.pem"
+uptimekuma_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ uptimekuma_hostname }}/privkey.pem"

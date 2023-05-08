@@ -1,0 +1,130 @@
+---
+# set to host or a group from inventory:
+- hosts: MYHOST.domain.tld
+
+  vars_files:
+#    - my_vault.yml
+
+  roles:
+    # baserole:
+    - { role: selfhostx.ansible.baserole }
+    - { role: selfhostx.certbot }
+    - { role: geerlingguy.mysql }
+    - { role: stefanux.mysqlbackup }
+    - { role: selfhostx.ansible.nginx_common }
+    - { role: selfhostx.certbot  }
+    # - { role: selfhostx.ansible.mattermost } -> included at the end
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+    # vault: FIXME:
+    mysql_root_password: "-> Vault"
+    mattermost_db_password: "-> Vault"
+    mattermost_atrestencryptkey: "-> Vault"
+    mattermost_smtppassword: "-> Vault" 
+
+    # letsencrypt:
+    certbot_create_method: nginx
+    certbot_certs:
+      - domains:
+        - MYHOST.domain.tld
+    certbot_auto_renew_minute: 19
+    certbot_auto_renew_hour: 3
+    certbot_admin_email: mattermost@domain.tld
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+
+    # mariadb
+    # mysql_root_password: "-> vault"
+
+    mysql_database: "mattermost"
+    mysql_encoding: "utf8mb4"
+    mysql_collation: "utf8mb4_general_ci"
+    mysql_username: "mattermost"
+    mysql_user_password: "{{ mattermost_db_password }}"
+
+    mysql_bind_address: '127.0.0.1'
+    mysql_root_password_update: true
+    mysql_user_password_update: true
+
+    # initial run:
+    # mattermost_managed_config: True
+    # later:
+    mattermost_managed_config: False
+
+    mattermost_publiclinksalt: "-> vault"
+    mattermost_hostname: MYHOST.domain.tld
+    mattermost_sitename: "my mattermost site"
+    mattermost_version: "7.1.4"
+
+    mattermost_db_type: "mysql"
+    mattermost_db_server: "tcp(localhost:3306)"
+
+    mattermost_db_user: "{{ mysql_username }}"
+    mattermost_db_database: "{{ mysql_database }}"
+    mattermost_db_mysql_collation: "{{ mysql_collation }}"
+
+    # enable user invites etc: https://docs.mattermost.com/configure/configuration-settings.html#enable-account-creation
+    mattermost_enableusercreation: True
+
+    # mattermost_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ mattermost_hostname }}/fullchain.pem"
+    # mattermost_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ mattermost_hostname }}/privkey.pem"
+
+    # customize e-mails:
+    mattermost_feedbackname: ""
+    mattermost_feedbackemail: ""
+    mattermost_replytoaddress: "noreply@domain.tld"
+    mattermost_feedbackorganization: ""
+    mattermost_sendemailnotifications: false
+    mattermost_enablesmtpauth: false
+    mattermost_smtpusername: "noreply@domain.tld"
+    # mattermost_smtppassword: "-> vault"
+    mattermost_smtpserver: "my-smtp-relay.domain.tld"
+    mattermost_smtpport: 587
+    mattermost_email_connectionsecurity: "STARTTLS"
+    # https://docs.mattermost.com/configure/configuration-settings.html#email-notification-contents
+    # full|generic in old E20
+    mattermost_emailnotificationcontentstype: "full"
+    # https://docs.mattermost.com/configure/configuration-settings.html#push-notification-contents
+    # generic_no_channel|generic|full|id_loaded
+    mattermost_sendpushnotifications_enable: true
+    mattermost_sendpushnotifications_content: "full"
+
+    mattermost_userstatusawaytimeout: 300
+
+    # unattended upgrade (automatic upgrades on debian; does not include mattermost):
+    unattended_mail: 'root'
+    unattended_minimal_steps: true
+    unattended_mail_only_on_error: true
+    unattended_remove_unused_dependencies: true
+    unattended_automatic_reboot: true
+    unattended_automatic_reboot_time: 03:43
+    unattended_random_sleep: 300
+
+  tasks:
+    - name: Create mattermost DB
+      community.mysql.mysql_db:
+        name: "{{ mysql_database }}"
+        encoding: "{{ mysql_encoding }}"
+        collation: "{{ mysql_collation }}"
+
+    - name: Grant Access to mattermost DB
+      community.mysql.mysql_user:
+        name: "{{ mysql_username }}"
+        # host: "%"
+        host: localhost
+        password: "{{ mysql_user_password }}"
+        priv: "{{ mysql_database }}.*:ALL"
+
+    - name: Install mattermost
+      ansible.builtin.include_role:
+        name: "selfhostx.ansible.mattermost"
+
+# OPTIONAL: unattended-upgrades
+#    - name: Include unattended-upgrades for virtual systems
+#      ansible.builtin.include_role:
+#        name: jnv.unattended-upgrades
+#      when:
+#      - "'machine_is_virtual' in group_names"
+#      - ansible_os_family == "Debian"

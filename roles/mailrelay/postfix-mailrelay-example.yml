@@ -1,0 +1,28 @@
+---
+# get a testmail? -> append: -e "postfix_send_test_mail=true"
+- name: Run baserole
+  hosts: all
+  roles:
+    - { role: selfhostx.ansible.mailrelay, tags: mailrelay }
+
+  vars:
+    # change this values accordingly (DOMAIN.TLD, ...)
+    # consider moving these vars to group_vars/all or environment-specific var-files
+    postfix_relay_role: "satellite"
+    postfix_relayhost: "[mailrelay.DOMAIN.TLD]"
+    # or via mx-records:
+    # postfix_relayhost: "DOMAIN.TLD"
+
+    # postfix_take_ansible_name_as_myorigin: true
+    postfix_smtp_sasl_auth_enable: true
+    postfix_sasl_user: "mailrelay@DOMAIN.TLD"
+    postfix_myorigin: DOMAIN.TLD
+    postfix_send_test_mail: false
+    postfix_send_test_mail_host: localhost
+    # 1 recipient with name: "Admin <admin@DOMAIN.TLD>"
+    # more than one: "Admin1 <admin@DOMAIN.TLD>, Admin2 <admin2@DOMAIN.TLD>"
+    postfix_send_test_mail_from: "root@DOMAIN.TLD"
+    postfix_send_test_mail_to: "root@DOMAIN.TLD"
+    postfix_send_test_mail_port: 25
+    postfix_send_test_mail_subject: "Installation of postfix is working on:"
+    postfix_send_test_mail_body: "...and i did it with Ansible!"

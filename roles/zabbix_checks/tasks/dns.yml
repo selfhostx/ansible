@@ -1,0 +1,33 @@
+---
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-dns.yml"
+
+- name: Install pwgen
+  ansible.builtin.package:
+    name: "pwgen"
+    state: present
+
+- name: Create zabbix script directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_scripts_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Update dns_query_check.sh
+  ansible.builtin.copy:
+    src: "dns_query_check.sh"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_dnscheck_script_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '0755'
+
+- name: Copy userparameters for dns check
+  ansible.builtin.template:
+    src: "userparameter_dns_checks.conf.j2"
+    dest: "{{ zabbix_userparameter_dnscheck_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent

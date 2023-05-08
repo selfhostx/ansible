@@ -1,0 +1,15 @@
+---
+# handlers file for zabbix
+
+- name: Restart zabbix-agent
+  ansible.builtin.service: "name={{ zabbix_agent_service if not zabbix_agent2 else zabbix_agent2_service }} state=restarted"
+
+- name: Start zabbix-agent
+  ansible.builtin.service: "name={{ zabbix_agent_service if not zabbix_agent2 else zabbix_agent2_service }} state=started"
+
+- name: Stop zabbix-agent
+  ansible.builtin.service: "name={{ zabbix_agent_service if not zabbix_agent2 else zabbix_agent2_service }} state=stopped"
+
+- name: Stop start zabbix-agent
+  ansible.builtin.service: "name={{ zabbix_agent_service if not zabbix_agent2 else zabbix_agent2_service }} state=stopped"
+  notify: Start zabbix-agent

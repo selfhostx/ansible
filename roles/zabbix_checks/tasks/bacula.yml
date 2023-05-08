@@ -1,0 +1,58 @@
+---
+# template for zabbix: https://raw.githubusercontent.com/khony/zabbix-bacula/master/templates/zbx_export_templates.xml
+# possible improvement: sudo run only as bacula (sudo -u bacula), chmod 755 on scripts dir, chgrp bacula on scripts.
+
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-bacula.yml"
+
+- name: Copy userparameters for bacula
+  ansible.builtin.template:
+    src: "userparameter_bacula.conf.j2"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_bacula_userparameter_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent
+
+- name: Create zabbix scripts directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_scripts_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy check job script for bacula template
+  ansible.builtin.copy:
+    src: "{{ zabbix_bacula_script_check_job_filename }}"
+    dest: "{{ zabbix_bacula_script_check_job_dest }}"
+    # root owns it because sudo:
+    owner: "root"
+    group: "{{ zabbix_group }}"
+    mode: '0750'
+
+- name: Copy discovery script for bacula template
+  ansible.builtin.copy:
+    src: "{{ zabbix_bacula_script_bacula_discovery_filename }}"
+    dest: "{{ zabbix_bacula_script_bacula_discovery_dest }}"
+    # root owns it because sudo:
+    owner: "root"
+    group: "{{ zabbix_group }}"
+    mode: '0750'
+
+- name: Add zabbix user to bacula group (access to /etc/bacula/bconsole.conf)
+  ansible.builtin.user:
+    name: "{{ zabbix_user }}"
+    groups: "{{ zabbix_bacula_group }}"
+    append: yes
+    # restart is not enough for gid change:
+  notify: Stop start zabbix-agent
+
+- name: sudo without password for zabbix for bacula commands
+  ansible.builtin.template:
+    src: "bacula_sudoers.j2"
+    dest: "{{ zabbix_bacula_sudoers_filename }}"
+    # owner: "root"
+    # group: "root"
+    mode: 0440
+    validate: 'visudo -cf %s'

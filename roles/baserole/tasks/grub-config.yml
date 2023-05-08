@@ -7,7 +7,7 @@
     path: "{{ baserole_grub_default_file }}"
     regexp: '^GRUB_CMDLINE_LINUX='
     line: 'GRUB_CMDLINE_LINUX="{{ baserole_grub_commandline }}"'
-    backup: yes
+    backup: true
   notify: Update Grub Config
   when:
     - baserole_grub_commandline is defined
@@ -18,7 +18,7 @@
     path: "{{ baserole_grub_default_file }}"
     regexp: '^GRUB_CMDLINE_LINUX='
     line: 'GRUB_CMDLINE_LINUX="{{ baserole_grub_commandline }}"'
-    backup: yes
+    backup: true
   notify: Update Grub Config
   when:
     - baserole_grub_commandline is defined

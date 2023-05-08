@@ -1,0 +1,47 @@
+---
+- name: Install ansible semaphore
+  hosts: semaphore.DOMAIN.TLD
+  roles:
+     - { role: selfhostx.ansible.baserole, tags: baserole }
+     - geerlingguy.git
+     - geerlingguy.pip
+     - { role: selfhostx.certbot }
+     - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+     - geerlingguy.mysql
+     - stefanux.mysqlbackup
+     # https://github.com/stefanux/ansible-role-semaphore
+     - { role: stefanux.semaphore, tags: semaphore }
+
+  vars_files:
+    - YOUR-vault.yml
+
+  vars:
+    semaphore_hostname: "semaphore.DOMAIN.TLD"
+
+    # letsencrypt:
+    certbot_create_method: nginx
+    certbot_certs:
+      - domains:
+        - "{{ semaphore_hostname }}"
+    certbot_auto_renew_minute: 17
+    certbot_auto_renew_hour: 3
+    certbot_admin_email: mail@DOMAIN.TLD
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+
+    # semaphore vars:
+    # semaphore_version:
+    # semaphore_download_checksum
+    semaphore_default_user: admin
+    semaphore_default_user_make_admin: true
+    semaphore_default_user_name: "Admin"
+    # semaphore_default_user_password: "-> vault"
+    # semaphore_default_user_mail: "support@stefanux.net"
+    semaphore_default_user_mail: "mail@DOMAIN.TLD"
+    # semaphore_mysql_password: "-> vault"
+
+    semaphore_mysql_install: false
+
+    semaphore_nginx_remove_default_config: true
+    # if nginx_common is used:
+    # semaphore_nginx_use_nginx_common_snippet: true

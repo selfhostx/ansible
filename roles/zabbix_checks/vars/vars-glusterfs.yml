@@ -1,0 +1,5 @@
+---
+zabbix_script_full_path: "{{ zabbix_scripts_dir }}/gluster-monitoring.pl"
+zabbix_userparameter_glusterfs_filename: "userparameter_glusterfs.conf"
+zabbix_sudoers_glusterfs_filename: "/etc/sudoers.d/20_zabbix-glusterfs-sudoers"
+zabbix_glusterfs_dependencies: "libswitch-perl"

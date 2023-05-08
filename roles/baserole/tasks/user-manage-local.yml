@@ -2,7 +2,7 @@
   # conditions for user-tasks:
   - name: No Conditions set for skipping
     ansible.builtin.set_fact:
-      skip_this_user: False
+      skip_this_user: false
     when:
       - item.conditional_hostgroup is undefined
       - item.conditional_var_name_exists is undefined
@@ -17,7 +17,7 @@
 
   - name: Set Condition Skip
     ansible.builtin.set_fact:
-      skip_this_user: True
+      skip_this_user: true
     when:
       - item.conditional_hostgroup is defined
       - item.conditional_var_name_exists is defined
@@ -32,7 +32,7 @@
 
   - name: Check if conditional_hostgroup is present
     ansible.builtin.set_fact:
-      skip_this_user: False
+      skip_this_user: false
     when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
     tags:
       - htop
@@ -45,10 +45,11 @@
 
   - name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
     ansible.builtin.set_fact:
-      skip_this_user: False
+      skip_this_user: false
     when:
       - lookup('vars', item.conditional_var_name_exists) is defined
-    ignore_errors: True
+    changed_when: false
+    ignore_errors: true
     tags:
       - htop
       - nano
@@ -61,7 +62,9 @@
   - name: Manage user accounts
     ansible.builtin.user:
       name:               '{{ item.user }}'
-      group:              '{{ item.group              | d(omit) }}'
+      group:              '{{ item.group_primary      | d(omit) }}'
+      groups:             '{{ item.group_secondary    | d(omit) }}'
+      append:             '{{ item.group_append_group | d(omit) }}'
       home:               '{{ item.home               | d(omit) }}'
       uid:                '{{ item.uid                | d(omit) }}'
       state:              '{{ item.state              | d("present") }}'
@@ -114,7 +117,7 @@
 
   - name: Set Skip if state (of user) is absent
     ansible.builtin.set_fact:
-      skip_this_user: True
+      skip_this_user: true
     when:
       - item.state is defined
       - item.state == "absent"
@@ -157,7 +160,7 @@
         src: "{{ item.ssh_authorizedkeys_file }}"
         dest: "/home/{{ item.user }}/.ssh/authorized_keys"
         owner: "{{ item.user }}"
-        group: "{{ item.group | default(item.user) }}"
+        group: "{{ item.group_primary | default(item.user) }}"
         mode: 0600
       when:
         - item.ssh_authorizedkeys_file is defined
@@ -199,6 +202,8 @@
       ansible.builtin.template:
         src: "{{ baserole_bashrc_template }}"
         dest: "/home/{{ item.user }}/.bashrc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_bashrc_configure
@@ -210,6 +215,8 @@
       ansible.builtin.template:
         src: "{{ baserole_vimrc_template }}"
         dest: "/home/{{ item.user }}/.vimrc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_vimrc_configure
@@ -221,6 +228,8 @@
       ansible.builtin.template:
         src: "{{ baserole_nanorc_template }}"
         dest: "/home/{{ item.user }}/.nanorc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_nanorc_configure
@@ -232,6 +241,8 @@
       ansible.builtin.file:
         path: "/home/{{ item.user }}/.config/htop"
         state: directory
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0750'
       when:
         - baserole_htoprc_configure
@@ -242,6 +253,8 @@
       ansible.builtin.template:
         src: "{{ baserole_htoprc_template }}"
         dest: "/home/{{ item.user }}/.config/htop/htoprc"
+        owner: "{{ item.user }}"
+        group: "{{ item.user }}"
         mode: '0600'
       when:
         - baserole_htoprc_configure

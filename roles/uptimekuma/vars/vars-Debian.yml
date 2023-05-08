@@ -1,0 +1,5 @@
+---
+# vars specific for Debian systems
+uptimekuma_nginx_default_config: "/etc/nginx/sites-enabled/default"
+uptimekuma_nginx_config_src_dir: "/etc/nginx/sites-available"
+uptimekuma_nginx_config_dst_dir: "/etc/nginx/sites-enabled"

@@ -1,0 +1,3 @@
+---
+zabbix_dnscheck_script_filename: "{{ zabbix_scripts_dir }}/dns_query_check.sh"
+zabbix_userparameter_dnscheck_filename: "userparameter_dns_checks.conf"

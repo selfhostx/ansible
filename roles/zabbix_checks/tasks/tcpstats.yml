@@ -1,0 +1,31 @@
+---
+# FIXME template source
+# needs command ss which is (usually) included in iproute2
+
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-tcpstats.yml"
+
+- name: Create zabbix Include directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    state: directory
+    mode: '0750'
+
+- name: Copy script for tcpstats template
+  ansible.builtin.template:
+    src: tcpstats.sh.j2
+    dest: "{{ zabbix_tcpstats_script_dir }}/{{ zabbix_tcpstats_script_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '0750'
+
+- name: Copy userparameters for tcpstats
+  ansible.builtin.template:
+    src: userparameter_tcpstats.conf.j2
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_tcpstats_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent

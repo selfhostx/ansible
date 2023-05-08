@@ -1,11 +1,11 @@
 galaxy_info:
-  author: selfhostix
+  author: selfhostx
   description: baserole
-  company: selfhostix
+  company: selfhostx
 
   license: GPL-3.0-or-later
 
-  min_ansible_version: 2.10
+  min_ansible_version: "2.10"
 
   platforms:
   - name: Debian

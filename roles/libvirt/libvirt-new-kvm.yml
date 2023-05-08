@@ -1,0 +1,76 @@
+---
+# needed packages on target-Host (depends on pytho3 or 2):
+# python3-libvirt / python-libvirt + python3-lxml / python-lxml
+# Error is "The `libvirt` module is not importable. Check the requirements" -> see var "libvirt_host_python3" in tcharl.ansible_role_libvirt_host
+- name: Ensure that Libvirt is configured
+  hosts: all
+  # roles:
+    # - role: stackhpc.libvirt-host
+    # - role: tcharl.ansible_role_libvirt_host
+  vars_prompt:
+    - name: libvirt_vm_hostname
+      prompt: "hostname (FQDN)? "
+      private: no
+    - name: libvirt_vm_memory_max
+      prompt: "Memory (in MiB)? "
+      default: 2048
+      private: no
+    - name: libvirt_vm_isofile
+      prompt: "mount which iso-file (alternatives: ubuntu-20.04.1-live-server-amd64.iso, ubuntu-20.04.1-desktop-amd64.iso; n = no iso) ? "
+      default: "debian-10.6.0-amd64-xfce-CD-1.iso"
+      private: no
+    - name: libvirt_vm_image_size
+      prompt: "size of Disk (GiB)? "
+      default: 20
+      private: no
+    - name: libvirt_vm_net_mac
+      prompt: "Define MAC for VM (default: no, example: 00:50:56:00:AA:BB)? "
+      default: ""
+      private: no
+    - name: libvirt_storage_class
+      prompt: "Storage: SSD or HDD (default: ssd)? "
+      default: "ssd"
+      private: no
+    - name: libvirt_vm_image_create
+      prompt: "Create Image/Disk thin (aka sparse, lazy allocated = fast) or thick (creates full file)? "
+      default: thin
+      private: no
+
+  vars:
+    libvirt_vm_basedir: "/srv/kvm/images"
+    libvirt_vm_isodir: "/srv/kvm/bootCD"
+    libvirt_vm_boot_from_iso: True
+    libvirt_vm_isopath: "{{ libvirt_vm_isodir }}/{{ libvirt_vm_isofile }}"
+    libvirt_vm_imagepath: "{{ libvirt_vm_basedir }}/{{ libvirt_storage_class }}/{{ libvirt_vm_hostname }}.img"
+    # libvirt_vm_memory_max: 8192
+    libvirt_vm_memory_current: "{{ libvirt_vm_memory_max }}"
+    libvirt_vm_cpu_cores: 2
+    libvirt_vm_net_bridge: "br_inet"
+
+  tasks:
+  - name: Define vm from xml and set autostart
+    virt:
+      command: define
+      xml: "{{ lookup('template', './vm_libvirt_template.xml.j2') }}"
+      autostart: yes
+
+  - name: Check that libvirt_vm_imagepath exists
+    stat:
+      path: "{{ libvirt_vm_imagepath }}"
+    register: libvirt_vm_image_exists
+
+  - name: Create Image (thick)
+    shell: dd if=/dev/zero of="{{ libvirt_vm_imagepath }}" bs=1G count="{{ libvirt_vm_image_size }}"
+    when: libvirt_vm_image_create == "thick" and not libvirt_vm_image_exists.stat.exists
+
+  - name: Create Image (thin)
+    shell: dd if=/dev/zero of="{{ libvirt_vm_imagepath }}" bs=1k seek="{{ libvirt_vm_image_size }}M" count=1
+    when: libvirt_vm_image_create == "thin" and not libvirt_vm_image_exists.stat.exists
+
+  - name: Skip Image Creation
+    debug:
+      msg: Skipping image creation (maybe invalid answer for libvirt_vm_image_create "{{ libvirt_vm_image_create }}")
+    when:
+    - not libvirt_vm_image_create == "thin"
+    - not libvirt_vm_image_create == "thick"
+    - not libvirt_vm_image_exists.stat.exists

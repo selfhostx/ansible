@@ -4,14 +4,14 @@
 # more information about mattermost config at https://about.mattermost.com/default-config-docs
 
 # required ===========
-# set at least the following variables (execution will fail when not set)
+# set at least the following variables (execution will fail when not set!)
 
-# mattermost_hostname: 
+# set to FQDN of host:
+# mattermost_hostname: my.server.tld
 
 # use any valid version here:
 # mattermost_version: "6.3.6"
 
-# recommended ======
 
 # 32-character salt for public links, current behaviour is to generate a new salt every time mattermost is restarted until it is set
 # https://docs.mattermost.com/configure/configuration-settings.html#public-link-salt :
@@ -25,7 +25,10 @@
 # cat /dev/urandom | tr -dc "a-z0-9" | fold -w ${1:-32} | head -n 1
 # pwgen -s 32 --no-capitalize
 
+# recommended ======
+
 mattermost_sitename: "mattermost"
+
 # possible values: mysql/postgres
 mattermost_db_type: "postgres"
 # mysql examples for mattermost_db_server:

@@ -1,0 +1,14 @@
+# source: https://github.com/MogiePete/zabbix-galera-template
+---
+
+- name: Include check-specific variables
+  ansible.builtin.include_vars: "vars-galera.yml"
+
+- name: Copy userparameters for galera
+  ansible.builtin.template:
+    src: "userparameter_galera.conf.j2"
+    dest: "{{ zabbix_agent_include_dir if not zabbix_agent2 else zabbix_agent2_include_dir }}/{{ zabbix_userparameter_galera_filename }}"
+    owner: "{{ zabbix_user }}"
+    group: "{{ zabbix_group }}"
+    mode: '{{ zabbix_agent_conf_mode }}'
+  notify: Restart zabbix-agent

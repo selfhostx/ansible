@@ -1,0 +1,3 @@
+# {{ ansible_managed }}
+#
+UserParameter=iostat[*],{{ zabbix_scripts_dir }}/{{ zabbix_iostat_script }} "none" "$1" "$2"
