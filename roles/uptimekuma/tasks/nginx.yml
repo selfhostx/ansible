@@ -4,7 +4,9 @@
     path: "{{ uptimekuma_nginx_default_config }}"
     state: absent
   notify: Restart nginx
-  when: uptimekuma_nginx_remove_default_config
+  when:
+    - uptimekuma_nginx_remove_default_config
+    - ansible_os_family == 'Debian'
 
 - name: Ensure nginx config is present
   ansible.builtin.template:
@@ -19,3 +21,5 @@
     dest: "{{ uptimekuma_nginx_config_dst_dir }}/{{ uptimekuma_nginx_config_filename }}"
     state: link
   notify: Restart nginx
+  when:
+    - ansible_os_family == 'Debian'
