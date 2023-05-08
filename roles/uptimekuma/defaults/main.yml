@@ -16,15 +16,18 @@ uptimekuma_install_dir: "/opt/uptimekuma"
 uptimekuma_git_repo_url: "https://github.com/louislam/uptime-kuma.git"
 
 # otional (which roles are defined in the vars below):
-# uptimekuma_role_git_import: true
-# uptimekuma_role_npm_import: true
-# uptimekuma_role_pm2_import: true
-
-# choose nvm or pm2
+uptimekuma_role_git_import: false
+# npm is being installed from packages or optionally a role is used:
+uptimekuma_role_npm_import: false
+# OR you choose nvm (which substitutes npm with a user-specific runtime which is independent from system packages):
 uptimekuma_use_nvm: true
+uptimekuma_nvm_nodejs_version: "lts"
+
+uptimekuma_role_pm2_import: false
 uptimekuma_use_pm2: false
 
 uptimekuma_role_git_name: "geerlingguy.git"
+uptimekuma_role_nvm_name: "morgangraphics.ansible_role_nvm"
 uptimekuma_role_npm_name: "robertdebock.npm"
 uptimekuma_role_pm2_name: "selfhostx.ansible.pm2"
 

@@ -16,10 +16,16 @@
     state: present
   become: true
 
-- name: Import role geerlingguy.git
+- name: Import role for git
   ansible.builtin.import_role:
     name: "{{ uptimekuma_role_git_name }}"
   when: uptimekuma_role_git_import
+
+- name: Install git
+  ansible.builtin.package:
+    name: git
+    state: present
+  when: not uptimekuma_role_git_import
 
 - name: Install tar for nvm
   ansible.builtin.package:
@@ -27,24 +33,31 @@
     state: present
   when:
   - uptimekuma_use_nvm
-  - not uptimekuma_role_npm_import
 
 - name: Import role for npm
   ansible.builtin.import_role:
     name: "{{ uptimekuma_role_npm_name }}"
-  become: true
-  become_user: "{{ uptimekuma_user }}"
-  vars:
-    nvm_profile: "/home/{{ uptimekuma_user }}/{{ uptimekuma_shell_config }}"
-    # morgangraphics.ansible_role_nvm
-    nodejs_version: "{{ uptimekuma_nodejs_version }}"
     # robertdebock.npm
     #npm_apt_repositories:
     #  - "deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
     #  - "deb-src https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main"
+  become: true
   when:
   - uptimekuma_role_npm_import
   - not uptimekuma_use_nvm
+
+- name: Import role for nvm
+  ansible.builtin.import_role:
+    name: "{{ uptimekuma_role_nvm_name }}"
+  become: true
+  become_user: "{{ uptimekuma_user }}"
+  vars:
+    # morgangraphics.ansible_role_nvm
+    nvm_profile: "/home/{{ uptimekuma_user }}/{{ uptimekuma_shell_config }}"
+    nodejs_version: "{{ uptimekuma_nvm_nodejs_version }}"
+  when:
+  - uptimekuma_use_nvm
+  - uptimekuma_role_nvm_name is defined
 
 #- name: Import role pm2
 #  ansible.builtin.import_role:
