@@ -68,7 +68,7 @@
     recurse: true
     state: directory
 
-- name: Clone uptime robot repo
+- name: Clone uptime kuma repo
   ansible.builtin.git:
     clone: true
     dest: "{{ uptimekuma_install_dir }}"
