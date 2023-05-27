@@ -66,6 +66,7 @@ Roadmap
   - [mattermost](roles/mattermost)
   - *matrix-synapse / element-web (if maintainer is found)*
   - *rocket.chat (if maintainer is found)*
+  - *zulip (if maintainer is found)*
 
 **Filesharing**
   - samba
@@ -129,21 +130,17 @@ Roadmap
     - p2p ( githubixx.ansible_role_wireguard https://github.com/githubixx/ansible-role-wireguard ? )
     - server/client
   - ipsec strongswan (2DO, but low prio because usually this is done on firewalls and wireguard is simpler)
-  - (stunnel -> needed?)
+  - *(stunnel -> needed?)*
 
 **DNS**
   - **self-hosted:**
     - recursive
-      - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync of certificates when letsencrypt is used, nginx-reverse-proxy for statuspage)
-      - bind (2DO -> maintainer needed)
-      - unbound (2DO -> maintainer needed)
+      - dnsdist (-> powerdns.dnsdist ) + powerDNS-recursor (-> powerdns.pdns_recursor) (clustering: keepalived, csync2-sync of certificates when letsencrypt is used, nginx-reverse-proxy for statuspage), including DoT (DNS over TLS)
+      - *bind (2DO -> maintainer needed)*
+      - *unbound (2DO -> maintainer needed)*
     - autoritative
-      - PowerDNS Authoritative (-> in progress)
-      - bind -> 2DO: maintainer needed
-    - DoT (DNS over TLS)
-      - powerdns
-      - bind? -> 2DO: maintainer needed
-    - DoH / dnscrypt (maintainer needed)
+      - PowerDNS Authoritative (-> powerdns.pdns )
+      - *bind -> 2DO: maintainer needed*
     - adfiltering
       - powerdns with filtering (lua-based) -> FIXME code commit
       - *pihole?*
@@ -172,16 +169,16 @@ Roadmap
   - *icinga(2) (maintainer needed)*
   - zabbix ( community.zabbix https://github.com/ansible-collections/community.zabbix -> active development, good code)
     - checks/templates: [see our role with various zabbix checks](roles/zabbix_checks)
-  - Uptime Kuma (for SoHo or extra monitoring - include simple statuspage) FIXMe code commit
-  - statuspages: Uptime Kuma, *cachet, cstate, ... -> need maintainers*
+  - Uptime Kuma (for SoHo or extra monitoring - include simple statuspage) -> [roles/uptimekuma](roles/uptimekuma)
+  - statuspages: Uptime Kuma, *[https://github.com/valeriansaliou/vigil](virgil), cachet, cstate, ... -> need maintainers*
 
 **User directory**
+  - keycloak
   - LDAP?
     - Samba
     - 389dir
     - UCS univention
     - SSSD integration on system
-  - keycloak?
   - ...?
 
 **Firewall**
@@ -214,7 +211,7 @@ Roadmap
     - rpm: FIXME
 
 **Log-aggregation**
-  - grafana loki
+  - grafana loki (FIXME release code)
   - graylog
 
 **Python**
