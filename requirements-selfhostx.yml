@@ -15,6 +15,7 @@ roles:
   - src: geerlingguy.php-versions
   - src: geerlingguy.pip
   - src: geerlingguy.postgresql
+  - src: geerlingguy.repo-epel
   - src: jnv.unattended-upgrades
   - src: powerdns.pdns_recursor
   - src: powerdns.dnsdist
