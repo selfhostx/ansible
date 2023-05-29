@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+version: '3'
+
+services:
+  vaultwarden:
+    image: {{ vaultwarden_image }}:{{ vaultwarden_version | default('latest') }}
+    container_name: {{ vaultwarden_container_name }}
+    restart: always
+    environment:
+      - WEBSOCKET_ENABLED=true
+      - ADMIN_TOKEN={{ vaultwarden_admin_token_argon2.stdout }}
+    volumes:
+      - ./data:/data
+    ports:
+      - "{{ vaultwarden_listen }}:80"

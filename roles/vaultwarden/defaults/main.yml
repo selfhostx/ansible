@@ -1,0 +1,43 @@
+---
+# defaults for vaultwarden
+
+# vaultwarden_version: '1.28.1'
+
+# Token for the admin interface (will be hashed with argon2). If not set, the admin panel is disabled.
+# preferably use a long random string: openssl rand -base64 48
+# example (DONT USE this value):
+# vaultwarden_admin_token: "MHQTX+2xhRoIbh55VpmmbA7vbCg6GUwwsp7NBSysjEYPNP85hbow7MZHPxIsFtAN"
+
+vaultwarden_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+
+vaultwarden_project_src: "/opt/vaultwarden"
+vaultwarden_git_src: "https://github.com/dani-garcia/vaultwarden.git"
+vaultwarden_docker_template: "docker-compose.j2"
+
+vaultwarden_image: "vaultwarden/server"
+vaultwarden_container_name: "vaultwarden"
+vaultwarden_listen: "127.0.0.1:8080"
+
+vaultwarden_epel_include_role: true
+vaultwarden_epel_rolename: "geerlingguy.repo-epel"
+
+# reverse-proxy-config, use nginx to make a ssl reverse-proxy-config:
+vaultwarden_nginx_deploy_reverseconfig: true
+vaultwarden_nginx_template: "nginx-vaultwarden.conf.j2"
+# only on debian:
+vaultwarden_nginx_remove_default_config: false
+# debian includes everything, centos only *.conf:
+vaultwarden_nginx_config_filename: vaultwarden.conf
+
+# if you use our nginx_common role, use "true" here:
+vaultwarden_nginx_use_nginx_common_snippet: false
+
+vaultwarden_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+vaultwarden_nginx_tls_hardening_snippet: "{{ vaultwarden_nginx_snippet_directory }}/tls-hardening.conf"
+# enable HSTS (not used when vaultwarden_nginx_use_nginx_common_snippet: true):
+vaultwarden_tls_hsts_enable: true
+vaultwarden_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+vaultwarden_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ vaultwarden_hostname }}/fullchain.pem"
+vaultwarden_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ vaultwarden_hostname }}/privkey.pem"

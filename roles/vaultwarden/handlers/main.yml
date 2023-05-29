@@ -1,0 +1,25 @@
+---
+# handlers file for roles/wiots.vaultwarden
+
+- name: Build vaultwarden
+  community.docker.docker_compose:
+    project_src: "{{ vaultwarden_project_src }}"
+#    build: true
+    restarted: true
+    state: present
+
+- name: Restart vaultwarden
+  community.docker.docker_compose:
+    project_src: "{{ vaultwarden_project_src }}"
+    restarted: true
+    state: present
+
+- name: Reload nginx
+  ansible.builtin.systemd:
+    state: reloaded
+    name: nginx
+
+- name: Restart nginx
+  ansible.builtin.systemd:
+    state: restarted
+    name: nginx
