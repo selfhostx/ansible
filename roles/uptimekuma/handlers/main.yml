@@ -3,15 +3,19 @@
 
 - name: Restart uptime kuma
   ansible.builtin.service: "name={{ uptimekuma_service_name }} state=restarted"
+  become: true
 
 - name: Start uptime kuma
   ansible.builtin.service: "name={{ uptimekuma_service_name }} state=started"
+  become: true
 
 - name: Stop uptime kuma
   ansible.builtin.service: "name={{ uptimekuma_service_name }} state=stopped"
+  become: true
 
 - name: Stop start uptime kuma
   ansible.builtin.service: "name={{ uptimekuma_service_name }} state=stopped"
+  become: true
   notify: Start uptime kuma
 
 - name: Reload systemd units  
@@ -22,3 +26,4 @@
   ansible.builtin.service:
     name: nginx
     state: restarted
+  become: true

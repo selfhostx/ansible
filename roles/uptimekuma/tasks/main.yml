@@ -67,6 +67,7 @@
     mode: '0750'
     recurse: true
     state: directory
+  become: true
 
 - name: Clone uptime kuma repo
   ansible.builtin.git:
@@ -97,12 +98,14 @@
     owner: "{{ uptimekuma_user }}"
     group: "{{ uptimekuma_group }}"
     mode: '0750'
+  become: true
   notify: Restart uptime kuma
 
 - name: Create systemd service file for uptime kuma
   ansible.builtin.template:
     src: "{{ uptimekuma_service_file_template }}"
     dest: "{{ uptimekuma_service_file_target }}"
+  become: true
   notify: Reload systemd units
 
 - name: Flush handlers
@@ -113,6 +116,7 @@
     name: "{{ uptimekuma_service_name }}"
     state: started
     enabled: true
+  become: true 
 
 - include_tasks: nginx.yml
   when: uptimekuma_nginx_deploy_reverseconfig
