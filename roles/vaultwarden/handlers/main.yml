@@ -1,5 +1,5 @@
 ---
-# handlers file for roles/wiots.vaultwarden
+# handlers file for vaultwarden
 
 - name: Build vaultwarden
   community.docker.docker_compose:
@@ -7,19 +7,23 @@
 #    build: true
     restarted: true
     state: present
+  become: true
 
 - name: Restart vaultwarden
   community.docker.docker_compose:
     project_src: "{{ vaultwarden_project_src }}"
     restarted: true
     state: present
+  become: true
 
 - name: Reload nginx
   ansible.builtin.systemd:
     state: reloaded
     name: nginx
+  become: true
 
 - name: Restart nginx
   ansible.builtin.systemd:
     state: restarted
     name: nginx
+  become: true

@@ -45,6 +45,7 @@
 - name: Install argon2 package
   ansible.builtin.package:
     name: argon2
+  become: true
 
 - name: Hash vaultwarden_admin_token into argon2 and escape for docker-compose
   ansible.builtin.shell: echo -n {{ vaultwarden_admin_token }} | argon2 {{ lookup('password', '/dev/null length=32 chars=ascii_letters') }} -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
