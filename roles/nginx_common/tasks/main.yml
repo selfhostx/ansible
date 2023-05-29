@@ -52,10 +52,12 @@
     community.crypto.openssl_dhparam:
       path: "{{ nginx_dh_filename }}"
       size: "{{ nginx_dh_size }}"
+    when: nginx_dh_enable|bool
 
-  - name: Generate DH Parameters
+  - name: Set permissions for DH Parameters
     ansible.builtin.file:
       path: "{{ nginx_dh_filename }}"
       owner: root
       group: root
       mode: "0600"
+    when: nginx_dh_enable|bool

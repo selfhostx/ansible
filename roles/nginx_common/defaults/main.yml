@@ -12,6 +12,8 @@ nginx_group: nginx
 nginx_snippet_directory: "/etc/nginx/snippets"
 nginx_tls_hardening_snippet: "{{ nginx_snippet_directory }}/tls-hardening.conf"
 nginx_ssl_private_directory: "/etc/ssl/private"
+# you might want to disable DH-generation in some cases (takes too much time):
+nginx_dh_enable: true
 nginx_dh_filename: "{{ nginx_ssl_private_directory }}/dhparam.pem"
 nginx_dh_size: 4096
 
