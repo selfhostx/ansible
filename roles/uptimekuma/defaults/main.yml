@@ -34,8 +34,9 @@ uptimekuma_service_name: "uptime-kuma"
 # use nginx to make a ssl reverse-proxy-config:
 uptimekuma_nginx_deploy_reverseconfig: true
 uptimekuma_nginx_template: "nginx-uptime-kuma.j2"
-uptimekuma_nginx_remove_default_config: true
-uptimekuma_nginx_config_filename: uptimekuma
+uptimekuma_nginx_remove_default_config: false
+# debian includes everything, centos only *.conf:
+uptimekuma_nginx_config_filename: uptimekuma.conf
 
 # if you use our nginx_common role, use "true" here:
 uptimekuma_nginx_use_nginx_common_snippet: false
