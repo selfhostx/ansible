@@ -230,7 +230,7 @@ Roadmap
   - Netbox (IPAM/IT Asset Management)
   - Piwik (2DO)
   - passwordmanager
-    - vaultwarden (FIXME code commit)
+    - [vaultwarden](roles/vaultwarden)
     - *hashicorp vault (2DO maintainer needed)?*
     - *privacyIDEA (2DO maintainer needed)*
   - roundcube webmail (2DO)

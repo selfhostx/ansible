@@ -30,6 +30,7 @@ Roles
 [nginx (common)](roles/nginx_common)                          | nginx common role
 [PHP](https://github.com/geerlingguy/ansible-role-php)        | PHP-role (geerlingguy)
 [samba (standalone)](roles/samba_standalone)                  | samba fileserver (standalone, without AD)
+[vaultwarden](roles/vaultwarden)                              | vaultwarden is a good zero-knowledge passwordmanager (compatible to bitwarden)
 [zabbix_checks](roles/zabbix_checks)                          | a couple of useful templates and userparameters for zabbix (monitoring system)
 
 more planned, see [Roadmap](ROADMAP.md)
