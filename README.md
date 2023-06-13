@@ -17,7 +17,9 @@ supported distributions:
 Roles
 -----
 
- Roles (includes recommendations)                             | Description 
+list of our roles, see more in [Roadmap](ROADMAP.md).
+
+Roles (includes recommendations)                              | Description
 --------------------------------------------------------------|-------------------
 [apache](https://github.com/selfhostx/ansible-role-apache)    | apache webserver
 [bacula](roles/bacula)                                        | backup system
@@ -32,8 +34,6 @@ Roles
 [samba (standalone)](roles/samba_standalone)                  | samba fileserver (standalone, without AD)
 [vaultwarden](roles/vaultwarden)                              | vaultwarden is a good zero-knowledge passwordmanager (compatible to bitwarden)
 [zabbix_checks](roles/zabbix_checks)                          | a couple of useful templates and userparameters for zabbix (monitoring system)
-
-more planned, see [Roadmap](ROADMAP.md)
 
 
 Requirements
