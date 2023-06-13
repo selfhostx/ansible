@@ -241,6 +241,7 @@ Roadmap
 
 **candidates**
   - Guacamole (remote desktop gateway)
+  - Rustdesk (remote control)
   - doodle-clones (dudle, framadate, ...)
   - etherpad
   - jellyfin / emby?
