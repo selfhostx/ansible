@@ -10,6 +10,25 @@
       - ansible_os_family == "RedHat"
       - baserole_dns_resolver_daemon == "systemd-resolved"
 
+  - name: Determine if /etc/resolv.conf is a link
+    ansible.builtin.stat:
+      path: "/etc/resolv.conf"
+    register: baserole_dns_resolv_conf_link_status
+
+  - name: debug
+    ansible.builtin.debug:
+      msg: "Path exists and is a symlink"
+    when: baserole_dns_resolv_conf_link_status.stat.exists and baserole_dns_resolv_conf_link_status.stat.islnk
+
+  - name: Remove /etc/resolv.conf if symlink (baserole_dns_resolv_conf_link_remove is true)
+    ansible.builtin.file:
+      path: /etc/resolv.conf
+      state: absent
+    when:
+      - baserole_dns_resolv_conf_link_status.stat.islnk is defined and baserole_dns_resolv_conf_link_status.stat.islnk
+      - baserole_dns_resolver_daemon == "glibc"
+      - baserole_dns_resolv_conf_link_remove|bool
+
   - name: Write resolv.conf
     ansible.builtin.template:
       src: "{{ baserole_dns_template_resolv_conf }}"

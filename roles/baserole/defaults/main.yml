@@ -74,6 +74,8 @@ baserole_dns_systemd_resolved_config_target: "/etc/systemd/resolved.conf"
 baserole_dns_systemd_resolved_config_owner: "systemd-resolve"
 baserole_dns_systemd_resolved_config_group: "systemd-resolve"
 baserole_dns_systemd_resolved_servicename: "systemd-resolved.service"
+# remove /etc/resolv.conf-symlink if glibc is used:
+baserole_dns_resolv_conf_link_remove: false
 
 
 # systemd-timesyncd ====

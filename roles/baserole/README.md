@@ -125,6 +125,7 @@ DNS (Name-resolution) configuration.
 | baserole_dns_nameservers_fallback | defined fallback dns (systemd_resolved only!) | list of secondary dns servers | no | 1.1.1.1 |
 | baserole_dns_searchdomains | searchdomain (try to find a host under this domains) Example: "domain1.tld domain2.tld" | searchdomain (text) | no | not defined | 
 | baserole_dns_template_resolv_conf | overwrite template | text | no | resolv.conf.j2 |
+| baserole_dns_resolv_conf_link_remove | remove the symlink to /etc/resolv.conf instead of following and writing into it (only enabled when baserole_dns_resolver_daemon is glibc) | boolean (true, false) | false |
 | baserole_dns_resolver_daemon | which dns-resolver-daemon to use? | glibc, systemd-resolved | yes | glibc |
 | baserole_dns_template_systemd_resolved_package_name | name of the systemd-resolved packages | text | systemd-resolved |
 | baserole_dns_systemd_resolved_config_template | Name of the template | text | yes | systemd-resolved.conf.j2 |
@@ -132,7 +133,6 @@ DNS (Name-resolution) configuration.
 | baserole_dns_systemd_resolved_config_owner | Config file-owner | text | yes |systemd-resolve |
 | baserole_dns_systemd_resolved_config_group | Config file-group | text | yes | systemd-resolve |
 | baserole_dns_systemd_resolved_servicename | Name of the systemd service | text |yes | systemd-resolved.service |
-
 
 v4 only:
 ```
