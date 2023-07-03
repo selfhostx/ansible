@@ -1,6 +1,7 @@
 # ansible-role-bacula
 
-This Role can install any component of the backup system "bacula".
+This Role installs any component of the backup system "bacula" AND configures everything (including agent configs like filesets for all systems) so you can use bacula gitops-style (aka do everything from ansible).
+
 
 ## quick bacula introduction
 
