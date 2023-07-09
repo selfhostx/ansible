@@ -69,9 +69,56 @@
     state: directory
   become: true
 
+- name: Get installed tag
+  command: git describe --tags --abbrev=0
+  args:
+    chdir: "{{ uptimekuma_install_dir }}"
+  become: true
+  become_user: "{{ uptimekuma_user }}"
+  register: git_tag_result
+  failed_when: git_tag_result.rc != 0
+  changed_when: false
+
+- name: Debug installed tag
+  debug:
+    var: git_tag_result.stdout
+
+- name: Set 'uptimekuma_update' fact
+  set_fact:
+    uptimekuma_update: true
+  when: git_tag_result.stdout != uptimekuma_version
+
+- name: Debug 'uptimekuma_update' fact
+  debug:
+    var: uptimekuma_update
+
+- name: Set 'uptimekuma_install' fact
+  set_fact:
+    uptimekuma_install: true
+  when: git_tag_result.stdout is not defined or git_tag_result.stdout == ''
+      
+- name: Debug 'uptimekuma_install' fact
+  debug:
+    var: uptimekuma_install
+    
+
 - name: Clone uptime kuma repo
   ansible.builtin.git:
     clone: true
+    dest: "{{ uptimekuma_install_dir }}"
+    force: true
+    repo: "{{ uptimekuma_git_repo_url }}"
+    update: false
+    version: '{{ uptimekuma_version | default(omit) }}'
+  become: true
+  become_user: "{{ uptimekuma_user }}"
+  register: uptimekuma_cloned
+  when:
+    - uptimekuma_install == true
+    
+- name: update uptime kuma repo
+  ansible.builtin.git:
+    clone: false
     dest: "{{ uptimekuma_install_dir }}"
     force: true
     repo: "{{ uptimekuma_git_repo_url }}"
@@ -79,7 +126,9 @@
     version: '{{ uptimekuma_version | default(omit) }}'
   become: true
   become_user: "{{ uptimekuma_user }}"
-  register: uptimekuma_cloned
+  register: uptimekuma_updated
+  when:
+    - uptimekuma_update == true
 
 - name: Install uptime kuma
   ansible.builtin.shell: bash -ilc 'npm run setup'
@@ -89,7 +138,26 @@
   become_user: "{{ uptimekuma_user }}"
   args:
     chdir: "{{ uptimekuma_install_dir }}"
-  when: uptimekuma_cloned.changed
+  when: 
+    - uptimekuma_cloned.changed
+    - uptimekuma_install == true
+    
+- name: update uptime kuma
+  ansible.builtin.shell: 
+    cmd: "{{ item }}"
+  #args:
+ #   executable: "{{ uptimekuma_shell_bin }}"
+  become: true
+  become_user: "{{ uptimekuma_user }}"
+  args:
+    chdir: "{{ uptimekuma_install_dir }}"
+  loop:
+    - bash -ilc 'npm install --production'
+    - bash -ilc 'npm run download-dist'
+  when: 
+    - uptimekuma_updated.changed
+    - uptimekuma_update == true
+  notify: Restart uptime kuma
 
 - name: Create uptime kuma start skript
   ansible.builtin.template:
