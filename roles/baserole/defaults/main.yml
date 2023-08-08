@@ -43,8 +43,12 @@ baserole_grub_default_file: "/etc/default/grub"
 # hosts ===
 baserole_manage_hosts_file: false
 baserole_manage_hostname: true
+baserole_check_a_record: true
+baserole_check_aaaa_record: true
+# hostname_a_record_not_default_ip_ignore: true
+hostname_a_record_not_default_ip_ignore: false
 baserole_check_reverserecord: true
-
+hostname_reverserecord_not_default_ip_ignore: true
 
 # override hosts-template (if needed):
 baserole_manage_hosts_template: "hosts.j2"
@@ -74,6 +78,7 @@ baserole_dns_systemd_resolved_config_target: "/etc/systemd/resolved.conf"
 baserole_dns_systemd_resolved_config_owner: "systemd-resolve"
 baserole_dns_systemd_resolved_config_group: "systemd-resolve"
 baserole_dns_systemd_resolved_servicename: "systemd-resolved.service"
+
 # remove /etc/resolv.conf-symlink if glibc is used:
 baserole_dns_resolv_conf_link_remove: false
 
