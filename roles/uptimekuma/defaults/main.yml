@@ -50,3 +50,6 @@ uptimekuma_tls_hsts_time: 31536000
 # path to ssl certificates, defaults to letsencrypt paths:
 uptimekuma_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ uptimekuma_hostname }}/fullchain.pem"
 uptimekuma_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ uptimekuma_hostname }}/privkey.pem"
+
+uptimekuma_update: false
+uptimekuma_install: false
