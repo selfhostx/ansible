@@ -1,5 +1,5 @@
 ---
-- name: Install systemd-resolved (Redhat-family)
+- name: Install systemd-timesyncd (Redhat-family)
   ansible.builtin.yum:
     name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     state: present
