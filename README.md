@@ -133,6 +133,7 @@ app-installer:
 - bitnami (aquired by vmware)
 - turnkey (own scripts)
 - pikapods (based on docker)
+- CapRover (based on docker, nginx)
 
 organizations supporting hosting:
 - https://docs.codeberg.org/getting-started/what-is-codeberg/#what-is-codeberg-e.v.%3F
