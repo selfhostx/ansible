@@ -10,6 +10,15 @@
       - ansible_os_family == "RedHat"
       - baserole_dns_resolver_daemon == "systemd-resolved"
 
+  - name: Install systemd-resolved (Debian 12)
+    ansible.builtin.package:
+      name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
+      state: present
+    when:
+      - ansible_os_family == "Debian"
+      - ansible_distribution_major_version == "12"
+      - baserole_dns_resolver_daemon == "systemd-resolved"
+
   - name: Determine if /etc/resolv.conf is a link
     ansible.builtin.stat:
       path: "/etc/resolv.conf"
