@@ -9,6 +9,15 @@
     - baserole_ntp_daemon == "systemd-timesyncd"
   notify: "Enable systemd-timesyncd"
 
+- name: Install systemd-timesyncd (Debian-family)
+  ansible.builtin.apt:
+    name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
+    state: present
+    update_cache: true
+  when:
+    - ansible_os_family == "Debian"
+    - baserole_ntp_daemon == "systemd-timesyncd"
+
 - name: Configure systemd-timesyncd
   ansible.builtin.template:
     src: "{{ baserole_ntp_systemd_timesyncd_template }}"
@@ -20,9 +29,9 @@
   when:
     - baserole_ntp_daemon == "systemd-timesyncd"
 
-- name: Start and Enable systemd-resolved.service
+- name: Start and Enable systemd-timesyncd.service
   ansible.builtin.systemd:
-    name: "{{ baserole_dns_systemd_resolved_servicename }}"
+    name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     enabled: true
     masked: no
     state: started
