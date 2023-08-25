@@ -9,6 +9,7 @@
       - ca-certificates
       - lsb-release
       - gpg
+    cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
     - ansible_os_family == "Debian"
 

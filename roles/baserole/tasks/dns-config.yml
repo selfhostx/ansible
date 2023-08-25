@@ -11,9 +11,10 @@
       - baserole_dns_resolver_daemon == "systemd-resolved"
 
   - name: Install systemd-resolved (Debian 12)
-    ansible.builtin.package:
+    ansible.builtin.apt:
       name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
       state: present
+      cache_valid_time: "{{ baserole_package_cache_valid_time }}"
     when:
       - ansible_os_family == "Debian"
       - ansible_distribution_major_version == "12"

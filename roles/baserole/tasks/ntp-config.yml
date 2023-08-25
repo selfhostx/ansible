@@ -13,7 +13,7 @@
   ansible.builtin.apt:
     name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     state: present
-    update_cache: true
+    cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
     - ansible_os_family == "Debian"
     - baserole_ntp_daemon == "systemd-timesyncd"
