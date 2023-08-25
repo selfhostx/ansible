@@ -61,6 +61,9 @@ Roadmap
       - optional management tools:
         - portainer
         - traefik
+  - Cloud provider:
+    - hetzner
+    - digitalocean: https://github.com/jasonheecs/ansible-digitalocean-sample-playbook
 
 **Instant messenger**
   - [mattermost](roles/mattermost)
@@ -72,7 +75,11 @@ Roadmap
   - samba
     - standalone (2DO: merge shadowcopy + fruit from bashclub + ZFS) geerlingguy.samba / https://github.com/stefanux/ansible-role-samba.git
     - AD-member "zmb-member" https://github.com/bashclub/zamba-lxc-toolbox
-  - nextcloud (-> https://github.com/JGoutin/ansible_home/tree/master/roles/nextcloud ?)
+  - nextcloud (2DO: choose role)
+    - https://github.com/JGoutin/ansible_home/tree/master/roles/nextcloud
+    - https://galaxy.ansible.com/aalaesar/install_nextcloud / https://github.com/aalaesar/install_nextcloud
+    - https://gitlab.com/mejo-/ansible-role-nextcloud
+    - https://git.coop/webarch/nextcloud
   - S3
     - minio
     - ceph RGW
