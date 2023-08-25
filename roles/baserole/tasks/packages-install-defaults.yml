@@ -11,8 +11,10 @@
       - ansible_os_family == "Debian"
 
   - name: Install Standard-packages (Redhat)
-    ansible.builtin.yum:
+    ansible.builtin.dnf:
       name: "{{ baserole_package_defaults_redhat }}"
+      state: present
+      install_weak_deps: false
     when:
       - ansible_os_family == "RedHat"
 
@@ -28,7 +30,7 @@
       - "'machine_is_metal' in group_names"
 
   - name: Install Baremetal tools (RedHat)
-    ansible.builtin.yum:
+    ansible.builtin.dnf:
       name: "{{ baserole_package_baremetal_redhat }}"
     when:
       - ansible_os_family == "RedHat"
@@ -65,8 +67,9 @@
     - baserole_package_unwanted_packages_remove_enabled
 
   - name: De-Install unwanted packages (RedHat)
-    ansible.builtin.yum:
-      name: "{{ baserole_package_baremetal_redhat }}"
+    ansible.builtin.dnf:
+      state: absent
+      name: "{{ baserole_package_unwanted_packages_redhat }}"
     when:
     - ansible_os_family == "RedHat"
     - baserole_package_unwanted_packages_remove_enabled

@@ -243,7 +243,7 @@ Installs a list of default packages, of course this is highly subjective so chan
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
 | baserole_package_install_default_enable | Enable install of default packages (in general) | boolean (true, false) | yes | True |
-| baserole_package_cache_valid_time | Do net refresh when packagelist is not older than time | time in seconds | yes | 86400 |
+| baserole_package_cache_valid_time | Do net refresh when packagelist is not older than time (works only on Debian-family) | time in seconds | yes | 86400 |
 | baserole_package_defaults_debian | List of default packages (Debian) for virtual systems | text (list) | yes | bzip2, curl, dnsutils, ethtool, gpg, gpg-agent, htop, iftop, iotop, iputils-ping, less, lsof, lsscsi, mc, net-tools, pciutils, psmisc, rsync, sudo, sysstat, traceroute, unzip |
 | baserole_package_defaults_redhat | List of default packages (Redhat) for virtual systems | text (list) | yes | bind-utils, bzip2, curl, epel-release, ethtool, gpg, iotop, iputils, less, lsof, net-tools, pciutils, rsync, sudo, sysstat, tcpdump, traceroute, unzip |
 | baserole_package_extra_baremetal_enable | Enable install of default packages on baremetal | boolean (true, false) | yes | True |

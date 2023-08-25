@@ -16,7 +16,7 @@
       - ansible_os_family == "Debian"
 
   - name: Upgrade packages (redhat family)
-    ansible.builtin.yum:
+    ansible.builtin.dnf:
       name: '*'
       state: latest # noqa package-latest
       update_cache: true

@@ -121,7 +121,7 @@
 
   block:
   - name: Pre-reqs (RedHat)
-    ansible.builtin.yum:
+    ansible.builtin.dnf:
       name: ["libselinux-python"]
       state: present
     register: result

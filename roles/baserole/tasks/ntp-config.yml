@@ -1,9 +1,8 @@
 ---
 - name: Install systemd-timesyncd (Redhat-family)
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     state: present
-    update_cache: true
   when:
     - ansible_os_family == "RedHat"
     - baserole_ntp_daemon == "systemd-timesyncd"
