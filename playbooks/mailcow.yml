@@ -1,0 +1,29 @@
+---
+- name: Install mailcow (Debian)
+  # hosts: mailcow
+  hosts: all
+  roles:
+     # - { role: selfhostx.ansible.baserole, tags: baserole }
+     - geerlingguy.git
+     - { role: geerlingguy.docker, tags: docker }
+     - { role: mailcow.mailcow, tags: mailcow }
+    # does not work on debian10 ("GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.secrets was not provided by any .service files")
+
+  vars:
+    # mailcow__hostname: -> defaults to inventory_hostname (which is a sane default), should be a FQDN!
+    mailcow__timezone: Europe/Berlin
+    mailcow__redirect_http_to_https: true
+    mailcow__config_acme_contact: "mail@YOUR-DOMAIN.TLD"
+    mailcow__config_skip_lets_encrypt: n
+    mailcow__config_enable_ssl_sni: y
+
+    # ----> default Login is "admin" and "moohoo"
+
+  pre_tasks:
+    - name: Install package requirements (Debian)
+      ansible.builtin.apt:
+        cache_valid_time: "86400"
+        name: python3-docker
+        state: present
+      when:
+        - ansible_os_family == "Debian"
