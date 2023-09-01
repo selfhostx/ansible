@@ -1,79 +1,79 @@
 ---
-  - name: Populate service facts
-    ansible.builtin.service_facts:
+- name: Populate service facts
+  ansible.builtin.service_facts:
 
-  - name: Install systemd-resolved (Redhat-family)
-    ansible.builtin.package:
-      name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
-      state: present
-    when:
-      - ansible_os_family == "RedHat"
-      - baserole_dns_resolver_daemon == "systemd-resolved"
+- name: Install systemd-resolved (Redhat-family)
+  ansible.builtin.package:
+    name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
+    state: present
+  when:
+    - ansible_os_family == "RedHat"
+    - baserole_dns_resolver_daemon == "systemd-resolved"
 
-  - name: Install systemd-resolved (Debian 12)
-    ansible.builtin.apt:
-      name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
-      state: present
-      cache_valid_time: "{{ baserole_package_cache_valid_time }}"
-    when:
-      - ansible_os_family == "Debian"
-      - ansible_distribution_major_version == "12"
-      - baserole_dns_resolver_daemon == "systemd-resolved"
+- name: Install systemd-resolved (Debian 12)
+  ansible.builtin.apt:
+    name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
+    state: present
+    cache_valid_time: "{{ baserole_package_cache_valid_time }}"
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_distribution_major_version == "12"
+    - baserole_dns_resolver_daemon == "systemd-resolved"
 
-  - name: Determine if /etc/resolv.conf is a link
-    ansible.builtin.stat:
-      path: "/etc/resolv.conf"
-    register: baserole_dns_resolv_conf_link_status
+- name: Determine if /etc/resolv.conf is a link
+  ansible.builtin.stat:
+    path: "/etc/resolv.conf"
+  register: baserole_dns_resolv_conf_link_status
 
-  - name: debug
-    ansible.builtin.debug:
-      msg: "Path exists and is a symlink"
-    when: baserole_dns_resolv_conf_link_status.stat.exists and baserole_dns_resolv_conf_link_status.stat.islnk
+- name: debug
+  ansible.builtin.debug:
+    msg: "Path exists and is a symlink"
+  when: baserole_dns_resolv_conf_link_status.stat.exists and baserole_dns_resolv_conf_link_status.stat.islnk
 
-  - name: Remove /etc/resolv.conf if symlink (baserole_dns_resolv_conf_link_remove is true)
-    ansible.builtin.file:
-      path: /etc/resolv.conf
-      state: absent
-    when:
-      - baserole_dns_resolv_conf_link_status.stat.islnk is defined and baserole_dns_resolv_conf_link_status.stat.islnk
-      - baserole_dns_resolver_daemon == "glibc"
-      - baserole_dns_resolv_conf_link_remove|bool
+- name: Remove /etc/resolv.conf if symlink (baserole_dns_resolv_conf_link_remove is true)
+  ansible.builtin.file:
+    path: /etc/resolv.conf
+    state: absent
+  when:
+    - baserole_dns_resolv_conf_link_status.stat.islnk is defined and baserole_dns_resolv_conf_link_status.stat.islnk
+    - baserole_dns_resolver_daemon == "glibc"
+    - baserole_dns_resolv_conf_link_remove|bool
 
-  - name: Write resolv.conf
-    ansible.builtin.template:
-      src: "{{ baserole_dns_template_resolv_conf }}"
-      dest: /etc/resolv.conf
-      owner: root
-      group: root
-      mode: '0644'
-      follow: true
+- name: Write resolv.conf
+  ansible.builtin.template:
+    src: "{{ baserole_dns_template_resolv_conf }}"
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'
+    follow: true
 
-  - name: Configure systemd-resolved (native config)
-    ansible.builtin.template:
-      src: "{{ baserole_dns_systemd_resolved_config_template }}"
-      dest: "{{ baserole_dns_systemd_resolved_config_target }}"
-      owner: "{{ baserole_dns_systemd_resolved_config_owner }}"
-      group: "{{ baserole_dns_systemd_resolved_config_group }}"
-      mode: '0644'
-    when:
-      - baserole_dns_resolver_daemon == "systemd-resolved"
-    notify: Restart systemd-resolved
+- name: Configure systemd-resolved (native config)
+  ansible.builtin.template:
+    src: "{{ baserole_dns_systemd_resolved_config_template }}"
+    dest: "{{ baserole_dns_systemd_resolved_config_target }}"
+    owner: "{{ baserole_dns_systemd_resolved_config_owner }}"
+    group: "{{ baserole_dns_systemd_resolved_config_group }}"
+    mode: '0644'
+  when:
+    - baserole_dns_resolver_daemon == "systemd-resolved"
+  notify: Restart systemd-resolved
 
-  - name: Start and Enable systemd-resolved.service
-    ansible.builtin.systemd:
-      name: "{{ baserole_dns_systemd_resolved_servicename }}"
-      enabled: true
-      state: started
-    when:
-      - baserole_dns_resolver_daemon == "systemd-resolved"
+- name: Start and Enable systemd-resolved.service
+  ansible.builtin.systemd:
+    name: "{{ baserole_dns_systemd_resolved_servicename }}"
+    enabled: true
+    state: started
+  when:
+    - baserole_dns_resolver_daemon == "systemd-resolved"
 
-  - name: Stop and Disable systemd-resolved.service
-    ansible.builtin.systemd:
-      name: "{{ baserole_dns_systemd_resolved_servicename }}"
-      enabled: false
-      state: stopped
-    when:
-      - baserole_dns_resolver_daemon == "glibc"
-      - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['status'] is defined
-      - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['state'] is defined
-      - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['status'] == 'enabled' or ansible_facts.services[baserole_dns_systemd_resolved_servicename]['state'] == 'running'
+- name: Stop and Disable systemd-resolved.service
+  ansible.builtin.systemd:
+    name: "{{ baserole_dns_systemd_resolved_servicename }}"
+    enabled: false
+    state: stopped
+  when:
+    - baserole_dns_resolver_daemon == "glibc"
+    - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['status'] is defined
+    - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['state'] is defined
+    - ansible_facts.services[baserole_dns_systemd_resolved_servicename]['status'] == 'enabled' or ansible_facts.services[baserole_dns_systemd_resolved_servicename]['state'] == 'running'
