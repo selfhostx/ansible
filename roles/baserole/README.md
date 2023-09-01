@@ -334,7 +334,6 @@ baserole_root_ssh_key_file_content: |+
 
 ## USER management
 
-
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
 | baserole_usercreate_local: True
@@ -498,6 +497,22 @@ Note: set values for journald itself with "quotes", otherwise ansible will conve
 
 Note: some distributions (like Debian 12) have removed traditional (r)syslog in favor of systemd-journald, if you want to reverse that behaviour: use baserole_journald_forwardtosyslog: "yes" and add your favorite syslog-daemon (like rsyslog) to the list of default packages (see section "Package defaults install").
 Additionally you might want to limit the usage with "baserole_journald_systemmaxuse".
+
+## CA trusted (for SSL/TLS)
+
+Add custom CAs into trust-store.
+
+|Variable|Description|possible values|required|default|
+|---|---|---|---|---|
+| baserole_ca_config_enable | desc | boolean (false, true) | no | false |
+| baserole_ca_files | List of CA-files (PEM-format) to copy into the target and update trust | yes (if "baserole_ca_config_enable: true") | not set |
+
+Example: CA1.crt and CA2.crt from folder ./certs/internal-ca (relative to playbook):
+
+baserole_ca_files
+- ./certs/internal-ca/CA1.crt
+- ./certs/internal-ca/CA2.crt
+
 
 
 License

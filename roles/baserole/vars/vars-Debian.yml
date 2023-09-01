@@ -1,4 +1,8 @@
 ---
-# Tasks specific for Debian/Ubuntu Systems
+# Vars specific for Debian/Ubuntu Systems
 
 baserole_openssh_sftp_subsystem_path: "/usr/lib/openssh/sftp-server"
+
+baserole_ca_package_name: "ca-certificates"
+baserole_ca_path: "/usr/local/share/ca-certificates"
+baserole_ca_update_command: "/usr/sbin/update-ca-certificates"

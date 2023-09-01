@@ -1,0 +1,20 @@
+---
+# source: https://blog.confirm.ch/adding-a-new-trusted-certificate-authority/
+
+- name: Install CA package
+  ansible.builtin.package:
+    name: "{{ baserole_ca_package_name }}"
+    state: present
+
+- name: Copy certificate authorities to trusted ca path of the OS
+  ansible.builtin.copy:
+    src: '{{ item }}'
+    dest: '{{ baserole_ca_path }}/'
+    owner: root
+    group: root
+    mode: '0644'
+  #with_fileglob:
+  #  - files/ca/*
+  with_fileglob: "{{ baserole_ca_files }}"
+  notify:
+    - Update trusted CA

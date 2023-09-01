@@ -413,3 +413,10 @@ baserole_journald_template: "journald.conf.j2"
 #baserole_journald_linemax: 48K
 #baserole_journald_readkmsg: "yes"
 #baserole_journald_audit: "no"
+
+# CA trusted (SSL/TLS) ===
+baserole_ca_config_enable: false
+# define CA-files, Example:
+#baserole_ca_files:
+#- ca1.crt
+#- ca2.crt

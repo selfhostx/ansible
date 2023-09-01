@@ -38,3 +38,6 @@
   ansible.builtin.systemd:
     name: systemd-journald
     state: restarted
+
+- name: Update trusted CA
+  ansible.builtin.shell: "{{ baserole_ca_update_command }}"
