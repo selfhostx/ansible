@@ -295,7 +295,7 @@ baserole_package_defaults_debian:
 | baserole_openssh_template | Override template | text | yes | sshd_template.j2 |
 | baserole_openssh_skip_include | Skip include directive when True | boolean (true, false) | yes | False |
 | baserole_openssh_permitrootlogin | Defines how user "root" is able to login | text: yes, no, prohibit-password, forced-commands-only | not set (usually defaults to "without-password") |
-| baserole_openssh_tcpkeepalive | TCP-keepalive | boolean (yes, no) | yes | yes (recommended: "baserole_openssh_tcpkeepalive: no" and "baserole_openssh_clientaliveinterval: 180" ClientAliveInterval is more stable and secure than "TCPKeepAlive yes" |
+| baserole_openssh_tcpkeepalive | TCP-keepalive | text ("yes", "no") | yes | yes (recommended: "baserole_openssh_tcpkeepalive: no" and "baserole_openssh_clientaliveinterval: 180" ClientAliveInterval is more stable and secure than "TCPKeepAlive yes" |
 | baserole_openssh_permituserenvironment| PermitUserEnvironment (usually not needed,  | boolean (true, false) | yes | False|
 | baserole_openssh_sshrc_enable | Enable sshrc config | boolean (true, false) | yes | False |
 | baserole_openssh_sshrc_template | Override template | boolean (true, false) | yes | "sshrc.j2" |
@@ -459,13 +459,15 @@ Generate a random machine-id (useful for cloned systems).
 see journald.conf(5) for details or https://www.freedesktop.org/software/systemd/man/journald.conf.html
 If variables are not set, config-file will show commented out variable with default.
 
+Note: set values for journald itself with "quotes", otherwise ansible will convert values into true and false (which journald does not like, it expects yes or no)!
+
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
 | baserole_journald_configure | Enable systemd-journald feature | boolean (true, false) | yes | True
 | baserole_journald_template | yes | journald.conf.j2 |
 | baserole_journald_storage | Controls where to store journal data | text, one of "volatile", "persistent", "auto" and "none" | no | auto |
-| baserole_journald_compress | If enabled; data objects that shall be stored in the journal and are larger than the default threshold of 512 bytes are compressed before they are written to the file system | boolean (yes, no) | no | enabled |
-| baserole_journald_seal | If enabled and a sealing key is available (as created by journalctl(1)'s --setup-keys command), Forward Secure Sealing (FSS) for all persistent journal files is enabled | boolean (yes, no) | no | yes | 
+| baserole_journald_compress | If enabled; data objects that shall be stored in the journal and are larger than the default threshold of 512 bytes are compressed before they are written to the file system | text (yes, no) | no | enabled |
+| baserole_journald_seal | If enabled and a sealing key is available (as created by journalctl(1)'s --setup-keys command), Forward Secure Sealing (FSS) for all persistent journal files is enabled | text ("yes", "no") | no | yes | 
 | baserole_journald_splitMode | Controls whether to split up journal files per user | text, "uid" or "none" | no | uid |
 | baserole_journald_syncintervalsec | The timeout before synchronizing journal files to disk | text (time-defintion with units: "s", "min", "h", "ms", "us") | no | 5m | 
 | baserole_journald_ratelimitintervalsec | Configures the rate limiting that is applied to all messages generated on the system | text (time-defintion) | no | 30s |
@@ -480,10 +482,10 @@ If variables are not set, config-file will show commented out variable with defa
 | baserole_journald_runtimemaxfiles | Control how many individual journal files to keep at most | int | no | 100 |
 | baserole_journald_maxretentionsec | The maximum time to store journal entries | time in seconds (0 to disable), may be suffixed with the units "year", "month", "week", "day", "h" or " m" | no | |
 | baserole_journald_maxfilesec | The maximum time to store entries in a single journal file before rotating to the next one | text (time-defintion) | no | 1month |
-| baserole_journald_forwardtosyslog | Control whether log messages received by the journal daemon shall be forwarded to a traditional syslog daemon | boolean (yes, no) | no | yes (or no depending on distribution) |
-| baserole_journald_forwardtokmsg | Control whether log messages received by the journal daemon shall be forwarded to the kernel log buffer (kmsg) | boolean (yes, no) | no | no |
-| baserole_journald_forwardtoconsole | Control whether log messages received by the journal daemon shall be sent to system console | boolean (yes, no) | no | no |
-| baserole_journald_forwardtowall | Control whether log messages received by the journal daemon shall be sent as wall messages to all logged-in users | boolean (yes, no) | no | yes |
+| baserole_journald_forwardtosyslog | Control whether log messages received by the journal daemon shall be forwarded to a traditional syslog daemon | text ("yes", "no") | no | "yes" (or "no" depending on distribution) |
+| baserole_journald_forwardtokmsg | Control whether log messages received by the journal daemon shall be forwarded to the kernel log buffer (kmsg) | text ("yes", "no") | no | no |
+| baserole_journald_forwardtoconsole | Control whether log messages received by the journal daemon shall be sent to system console | text ("yes", "no") | no | no |
+| baserole_journald_forwardtowall | Control whether log messages received by the journal daemon shall be sent as wall messages to all logged-in users | text ("yes", "no") | no | yes |
 | baserole_journald_ttypath | Change the console TTY  | text | no | /dev/console |
 | baserole_journald_maxlevelstore | Controls the maximum log level of messages that are stored in the journal or forwarded | text | no | debug |
 | baserole_journald_maxlevelsyslog | Controls the maximum log level of messages that are stored in the journal or forwarded | text | | no | debug |
@@ -491,10 +493,11 @@ If variables are not set, config-file will show commented out variable with defa
 | baserole_journald_maxlevelconsole | Controls the maximum log level of messages that are stored in the journal or forwarded | text | no | info |
 | baserole_journald_maxlevelwall | Controls the maximum log level of messages that are stored in the journal or forwarded | text | no | emerg |
 | baserole_journald_linemax | The maximum line length to permit when converting stream logs into record logs | text | no | 48K |
-| baserole_journald_readkmsg | If enabled systemd-journal processes /dev/kmsg messages generated by the kernel| boolean (yes, no) | no | yes |
-| baserole_journald_audit | If enabled systemd-journal will turn on kernel auditing on start-up | boolean (yes, no) | no |no |
+| baserole_journald_readkmsg | If enabled systemd-journal processes /dev/kmsg messages generated by the kernel| text ("yes", "no") | no | yes |
+| baserole_journald_audit | If enabled systemd-journal will turn on kernel auditing on start-up | text ("yes", "no") | no |no |
 
-Note: some distributions (like Debian 12) have removed traditional (r)syslog in favor of systemd-journald, if you want to reverse that behaviour: use "baserole_journald_forwardtosyslog: yes" and add your favorite syslog-daemon (like rsyslog) to the list of default packages (see section "Package defaults install"). Additionally you might want to limit the usage with "baserole_journald_systemmaxuse".
+Note: some distributions (like Debian 12) have removed traditional (r)syslog in favor of systemd-journald, if you want to reverse that behaviour: use baserole_journald_forwardtosyslog: "yes" and add your favorite syslog-daemon (like rsyslog) to the list of default packages (see section "Package defaults install").
+Additionally you might want to limit the usage with "baserole_journald_systemmaxuse".
 
 
 License
