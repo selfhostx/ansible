@@ -32,7 +32,7 @@
   ansible.builtin.systemd:
     name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     enabled: true
-    masked: no
+    masked: false
     state: started
   when:
     - baserole_ntp_daemon == "systemd-timesyncd"

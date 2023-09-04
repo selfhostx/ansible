@@ -28,7 +28,7 @@
     filename: "{{ item.filename }}"
     repo: "{{ item.deb_line }}"
     state: "{{ item.state | default(omit) }}"
-    update_cache: yes
+    update_cache: true
   when:
     - item.repotype == "deb"
     - ansible_os_family == "Debian"

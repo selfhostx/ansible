@@ -40,9 +40,9 @@
   ansible.builtin.include_tasks:
     file: "fqdn-hosts.yml"
   tags:
-  - hostsfile
-  - fqdn
-  - network
+    - hostsfile
+    - fqdn
+    - network
 
 - name: Include dns-config.yml
   ansible.builtin.include_tasks:

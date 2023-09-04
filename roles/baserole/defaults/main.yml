@@ -31,7 +31,7 @@ baserole_sysctl_config: true
 
 # optional vars:
 # baserole_sysctl_path: "/etc/sysctl.d/99-my-settings" -> set a path for the config (module default is: /etc/sysctl.conf)
-# baserole_sysctl_ignoreerrors: yes|no (default: no) -> use this option to ignore errors about unknown keys.
+# baserole_sysctl_ignoreerrors: true|false (default: false) -> use this option to ignore errors about unknown keys.
 
 # GRUB ===
 baserole_grub_config_enable: false
@@ -58,14 +58,15 @@ baserole_manage_hosts_template: "hosts.j2"
 baserole_dns_config_enable: true
 # most glibc-clients cannot user more than 3 nameserver, when v6 only add more v6-servers
 baserole_dns_nameservers:
-- 8.8.4.4
-- 9.9.9.9
-- 2001:4860:4860::8888
+  - 8.8.4.4
+  - 9.9.9.9
+  - 2001:4860:4860::8888
+
 # systemd_resolved only:
 baserole_dns_nameservers_fallback:
-- 1.1.1.1
-# baserole_dns_searchdomains: "domain1.tld domain2.tld"
+  - 1.1.1.1
 
+# baserole_dns_searchdomains: "domain1.tld domain2.tld"
 baserole_dns_template_resolv_conf: "resolv.conf.j2"
 
 # which dns-resolver to use? choices: glibc|systemd-resolved
@@ -237,13 +238,13 @@ baserole_openssh_gen_keys: false
 baserole_openssh_force_gen_keys: false
 
 baserole_openssh_host_key:
-- /etc/ssh/ssh_host_rsa_key
-- /etc/ssh/ssh_host_ecdsa_key
-- /etc/ssh/ssh_host_ed25519_key
+  - /etc/ssh/ssh_host_rsa_key
+  - /etc/ssh/ssh_host_ecdsa_key
+  - /etc/ssh/ssh_host_ed25519_key
 baserole_openssh_key_types:
-- rsa
-- ecdsa
-- ed25519
+  - rsa
+  - ecdsa
+  - ed25519
 
 baserole_openssh_template: "sshd_template.j2"
 baserole_openssh_skip_include: false

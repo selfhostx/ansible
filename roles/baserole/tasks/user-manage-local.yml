@@ -1,132 +1,132 @@
 ---
-  # conditions for user-tasks:
-  - name: No Conditions set for skipping
-    ansible.builtin.set_fact:
-      skip_this_user: false
-    when:
-      - item.conditional_hostgroup is undefined
-      - item.conditional_var_name_exists is undefined
-    tags:
-      - htop
-      - nano
-      - pubkey
-      - ssh
-      - sudo
-      - userlocal
-      - vim
+# conditions for user-tasks:
+- name: No Conditions set for skipping
+  ansible.builtin.set_fact:
+    skip_this_user: false
+  when:
+    - item.conditional_hostgroup is undefined
+    - item.conditional_var_name_exists is undefined
+  tags:
+    - htop
+    - nano
+    - pubkey
+    - ssh
+    - sudo
+    - userlocal
+    - vim
 
-  - name: Set Condition Skip
-    ansible.builtin.set_fact:
-      skip_this_user: true
-    when:
-      - item.conditional_hostgroup is defined
-      - item.conditional_var_name_exists is defined
-    tags:
-      - htop
-      - nano
-      - pubkey
-      - ssh
-      - sudo
-      - userlocal
-      - vim
+- name: Set Condition Skip
+  ansible.builtin.set_fact:
+    skip_this_user: true
+  when:
+    - item.conditional_hostgroup is defined
+    - item.conditional_var_name_exists is defined
+  tags:
+    - htop
+    - nano
+    - pubkey
+    - ssh
+    - sudo
+    - userlocal
+    - vim
 
-  - name: Check if conditional_hostgroup is present
-    ansible.builtin.set_fact:
-      skip_this_user: false
-    when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
-    tags:
-      - htop
-      - nano
-      - pubkey
-      - ssh
-      - sudo
-      - userlocal
-      - vim
+- name: Check if conditional_hostgroup is present
+  ansible.builtin.set_fact:
+    skip_this_user: false
+  when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
+  tags:
+    - htop
+    - nano
+    - pubkey
+    - ssh
+    - sudo
+    - userlocal
+    - vim
 
-  - name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
-    ansible.builtin.set_fact:
-      skip_this_user: false
-    when:
-      - lookup('vars', item.conditional_var_name_exists) is defined
-    changed_when: false
-    ignore_errors: true
-    tags:
-      - htop
-      - nano
-      - pubkey
-      - ssh
-      - sudo
-      - userlocal
-      - vim
+- name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
+  ansible.builtin.set_fact:
+    skip_this_user: false
+  when:
+    - lookup('vars', item.conditional_var_name_exists) is defined
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - htop
+    - nano
+    - pubkey
+    - ssh
+    - sudo
+    - userlocal
+    - vim
 
-  - name: Manage user accounts
-    ansible.builtin.user:
-      name:               '{{ item.user }}'
-      group:              '{{ item.group_primary      | d(omit) }}'
-      groups:             '{{ item.group_secondary    | d(omit) }}'
-      append:             '{{ item.group_append_group | d(omit) }}'
-      home:               '{{ item.home               | d(omit) }}'
-      uid:                '{{ item.uid                | d(omit) }}'
-      state:              '{{ item.state              | d("present") }}'
-      comment:            '{{ item.comment            | d(omit) }}'
-      password:           '{{ item.password           | d("*") }}'
-      update_password:    '{{ item.update_password    | d("on_create") }}'
-      system:             '{{ item.system             | d(omit) }}'
-      shell:              '{{ item.shell              | d(omit) }}'
-      create_home:        '{{ item.create_home        | d(omit) }}'
-      move_home:          '{{ item.move_home          | d(omit) }}'
-      skeleton:           '{{ item.skeleton           | d(omit) }}'
-      expires:            '{{ item.expires            | d(omit) }}'
-      remove:             '{{ item.remove             | d(omit) }}'
-      force:              '{{ item.force              | d(omit) }}'
-      non_unique:         '{{ item.non_unique         | d(omit) }}'
-      generate_ssh_key:   '{{ item.generate_ssh_key   | d(omit) }}'
-      ssh_key_bits:       '{{ item.ssh_key_bits       | d(omit) }}'
-      ssh_key_comment:    '{{ item.ssh_key_comment    | d(omit) }}'
-      ssh_key_file:       '{{ item.ssh_key_file_name  | d(omit) }}'
-      ssh_key_passphrase: '{{ item.ssh_key_passphrase | d(omit) }}'
-      ssh_key_type:       '{{ item.ssh_key_type       | d(omit) }}'
-    when:
-      - not skip_this_user
+# yamllint disable rule:colons
+- name: Manage user accounts
+  ansible.builtin.user:
+    name:               '{{ item.user }}'
+    group:              '{{ item.group_primary      | d(omit) }}'
+    groups:             '{{ item.group_secondary    | d(omit) }}'
+    append:             '{{ item.group_append_group | d(omit) }}'
+    home:               '{{ item.home               | d(omit) }}'
+    uid:                '{{ item.uid                | d(omit) }}'
+    state:              '{{ item.state              | d("present") }}'
+    comment:            '{{ item.comment            | d(omit) }}'
+    password:           '{{ item.password           | d("*") }}'
+    update_password:    '{{ item.update_password    | d("on_create") }}'
+    system:             '{{ item.system             | d(omit) }}'
+    shell:              '{{ item.shell              | d(omit) }}'
+    create_home:        '{{ item.create_home        | d(omit) }}'
+    move_home:          '{{ item.move_home          | d(omit) }}'
+    skeleton:           '{{ item.skeleton           | d(omit) }}'
+    expires:            '{{ item.expires            | d(omit) }}'
+    remove:             '{{ item.remove             | d(omit) }}'
+    force:              '{{ item.force              | d(omit) }}'
+    non_unique:         '{{ item.non_unique         | d(omit) }}'
+    generate_ssh_key:   '{{ item.generate_ssh_key   | d(omit) }}'
+    ssh_key_bits:       '{{ item.ssh_key_bits       | d(omit) }}'
+    ssh_key_comment:    '{{ item.ssh_key_comment    | d(omit) }}'
+    ssh_key_file:       '{{ item.ssh_key_file_name  | d(omit) }}'
+    ssh_key_passphrase: '{{ item.ssh_key_passphrase | d(omit) }}'
+    ssh_key_type:       '{{ item.ssh_key_type       | d(omit) }}'
+  when:
+    - not skip_this_user
+# yamllint enable rule:colon
 
+- name: Remove sudoers file (with password)
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
+    state: absent
+  when:
+    - item.sudo_pass is defined
+    - item.sudo_pass
+    - not item.sudo_nopass
+    - item.state is defined
+    - item.state == "absent"
+  tags:
+    - sudo
 
-  - name: Remove sudoers file (with password)
-    ansible.builtin.file:
-      path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
-      state: absent
-    when:
-      - item.sudo_pass is defined
-      - item.sudo_pass
-      - not item.sudo_nopass
-      - item.state is defined
-      - item.state == "absent"
-    tags:
-      - sudo
+- name: Remove sudoers file (without password)
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
+    state: absent
+  when:
+    - item.sudo_nopass is defined
+    - item.sudo_nopass
+    - item.state is defined
+    - item.state == "absent"
+  tags:
+    - sudo
 
-  - name: Remove sudoers file (without password)
-    ansible.builtin.file:
-      path: "/etc/sudoers.d/{{ item.sudofilename | default(item.user) }}"
-      state: absent
-    when:
-      - item.sudo_nopass is defined
-      - item.sudo_nopass
-      - item.state is defined
-      - item.state == "absent"
-    tags:
-      - sudo
+- name: Set Skip if state (of user) is absent
+  ansible.builtin.set_fact:
+    skip_this_user: true
+  when:
+    - item.state is defined
+    - item.state == "absent"
 
-  - name: Set Skip if state (of user) is absent
-    ansible.builtin.set_fact:
-      skip_this_user: true
-    when:
-      - item.state is defined
-      - item.state == "absent"
-
-  - name: User Create block
-    when:
-      - not skip_this_user
-    block:
-
+- name: User Create block
+  when:
+    - not skip_this_user
+  block:
     - name: Create .ssh dir
       ansible.builtin.file:
         path: "/home/{{ item.user }}/.ssh"

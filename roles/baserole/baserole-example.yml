@@ -2,7 +2,7 @@
 - name: Run baserole
   hosts: all
   roles:
-    - { role: selfhostx.ansible.baserole }
+    - { role: selfhostx.ansible.baserole, tags: baserole }
 
   vars:
     baserole_openssh_tcpkeepalive: "no"

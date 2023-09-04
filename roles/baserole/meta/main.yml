@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: selfhostx
   description: baserole
@@ -8,15 +9,15 @@ galaxy_info:
   min_ansible_version: "2.10"
 
   platforms:
-  - name: Debian
-    versions:
-    - 10
-    - 11
-    - 12
-  - name: Ubuntu
-    versions:
-    - 20.04
-    - 22.04
+    - name: Debian
+      versions:
+        - 10
+        - 11
+        - 12
+    - name: Ubuntu
+      versions:
+        - 20.04
+        - 22.04
 
   galaxy_tags: []
 

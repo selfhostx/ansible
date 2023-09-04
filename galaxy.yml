@@ -5,12 +5,19 @@ name: ansible
 version: 1.3.0
 readme: README.md
 authors:
-- selfhostx
-description: ansible-Collection for selhosters
+  - selfhostx
+description: ansible-Collection for selfhosters
 license_file: LICENSE
-# tags:
+tags:
+  - selfhostx
 repository: https://github.com/selfhostx/ansible.git
 documentation: https://github.com/selfhostx/ansible.git
 homepage: https://github.com/selfhostx/ansible
 issues: https://github.com/selfhostx/ansible/issues
-# dependencies:
+# FIXME
+dependencies:
+  # ansible.windows: "*"
+  ansible.posix: "*"
+  community.general: "*"
+  community.mysql: "*"
+  community.postgresql: "*"

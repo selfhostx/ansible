@@ -29,7 +29,7 @@
 - name: Enable systemd-timesyncd
   ansible.builtin.service:
     name: "{{ baserole_ntp_systemd_timesyncd_servicename }}"
-    enabled: yes
+    enabled: true
 
 - name: Update Grub Config
   ansible.builtin.command: update-grub
@@ -40,4 +40,4 @@
     state: restarted
 
 - name: Update trusted CA
-  ansible.builtin.shell: "{{ baserole_ca_update_command }}"
+  ansible.builtin.command: "{{ baserole_ca_update_command }}"
