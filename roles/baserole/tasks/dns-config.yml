@@ -25,10 +25,13 @@
     path: "/etc/resolv.conf"
   register: baserole_dns_resolv_conf_link_status
 
-- name: debug
+- name: Debug
   ansible.builtin.debug:
     msg: "Path exists and is a symlink"
-  when: baserole_dns_resolv_conf_link_status.stat.exists and baserole_dns_resolv_conf_link_status.stat.islnk
+  when:
+    - baserole_dns_resolv_conf_link_status.stat.exists
+    - baserole_dns_resolv_conf_link_status.stat.islnk
+    - baserole_debug_mode_enable
 
 - name: Remove /etc/resolv.conf if symlink (baserole_dns_resolv_conf_link_remove is true)
   ansible.builtin.file:
