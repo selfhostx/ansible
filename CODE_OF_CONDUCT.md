@@ -56,9 +56,7 @@ further defined and clarified by project maintainers.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported by contacting one of the project maintainers at:
-* d3defi@gmail.com
-* sky.jokerxx@gmail.com
-* github@werner-dijkerman.nl
+* support@stefanux.net
 
 Or Ansible project directly at codeofconduct@ansible.com.
 
