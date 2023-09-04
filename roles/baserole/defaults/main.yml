@@ -332,6 +332,15 @@ baserole_usercreate_local: true
 #    password: $6$normaluser_hash
 #    shell: /bin/bash
 
+baserole_authorizedkeys: []
+
+# minimal example (see README.md for more details)
+#baserole_authorizedkeys:
+#  - username: root
+#    state: present
+#    pubkeys:
+#      - pub1
+#      - pub2
 
 baserole_default_editor: vim
 

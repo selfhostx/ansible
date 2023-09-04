@@ -66,7 +66,7 @@
       - pubkey
       - ssh
 
-  - name: Copy pubkeys to authorized_keys for root
+  - name: Copy pubkeys from file to authorized_keys (for root)
     ansible.builtin.template:
       src: "{{ baserole_root_authorizedkeys }}"
       dest: "/root/.ssh/authorized_keys"
@@ -75,6 +75,22 @@
       mode: '0600'
     when:
       - baserole_root_authorizedkeys is defined
+    tags:
+      - pubkey
+      - ssh
+      - userlocal
+
+  - name: Add or remove public keys in authorized_hosts (for root)
+    ansible.posix.authorized_key:
+      user: "{{ item.0.username }}"
+      state: "{{ item.0.state | default('present') }}"
+      key: "{{ item.1 }}"
+      key_options: "{{ item.0.key_options | default(omit) }}"
+      exclusive: "{{ item.0.exclusive | default(omit) }}"
+      comment: "{{ item.0.comment | default(omit) }}"
+    when:
+      - item.0.username == 'root'
+    loop: "{{ baserole_authorizedkeys | subelements('pubkeys', 'skip_missing=true') }}"
     tags:
       - pubkey
       - ssh

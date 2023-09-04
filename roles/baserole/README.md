@@ -367,7 +367,7 @@ see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_mod
 | force | The behavior is the same as `userdel --force` | boolean (yes, no) | no | no |
 | non_unique | this option allows to change the user ID to a non-unique value | boolean (yes, no) | no | no |
 | generate_ssh_key | Generate SSH-key for this user | boolean (yes, no) | no | no |
-| ssh_authorizedkeys_file | local/path/to/authorized-keyfile to upload authorizedkeys | text | no | no |
+| ssh_authorizedkeys_file | path to file to upload as a authorizedkeys (as a whole file). If you just want to add/remove pubkeys (and keep the rest of file untouched: see var "baserole_authorizedkeys" instead) | text | no | no |
 | ssh_key_bits | Specify number of bits in SSH key to create | integer | no | default set by ssh-keygen, 4096 for rsa recommended |
 | ssh_key_comment | Comment-block for ssh-pubkey (i.e. email-address, computername etc.) | text | no | no |
 | ssh_key_file_content | Content of keyfile | jinja-multine-string (contains the private key, see "baserole_root_ssh_key_file_content" as example), if provided ssh_key_file_name must be defined too! | no | no |
@@ -397,6 +397,42 @@ baserole_userlist_local:
     password: $6$normaluser_hash
     shell: /bin/bash
 ```
+
+### Add/Remove pubkeys in file authorized_keys:
+
+instead of uploading a whole file (via ssh_authorizedkeys_file in baserole_userlist_local) there is also the possibility to add/remove specific pubkeys. (using both option might not make sense since the file might be changed on every run if both methods overwrite each others changes).
+
+```
+baserole_authorizedkeys:
+  - username: root
+    # list of pubkeys to be present for root
+    state: present
+    # remove all other keys? (optional)
+    exclusive: false
+    # options for SSH? (optional)
+    key_options: 'no-port-forwarding,from="1.2.3.4"'
+    pubkeys:
+      - needed_pubkey1
+      - needed_pubkey2
+  - username: root
+    # list of pubkeys to be removed for root
+    state: absent
+    pubkeys:
+       - unwanted_pubkey1
+  - username: my_user
+    # list of pubkeys to be present for my_user
+    pubkeys:
+       - pub1
+```
+
+a pubkey definition could be from:
+- string like "ssh-rsa AAAAB3NzaC1y... my_comment"
+- url: "{{ lookup('url', 'https://github.com/charlie.keys', split_lines=false) }}"
+- file: "{{ lookup('file', '/home/charlie/.ssh/id_rsa.pub') }}"
+- from ENV: "{{ lookup('env','MY_PUBKEY') }}"
+- file and ENV combined: "lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+more Information for the module ansible.posix.authorized_key: https://docs.ansible.com/ansible/latest/collections/ansible/posix/authorized_key_module.html
 
 
 ### Options for users
