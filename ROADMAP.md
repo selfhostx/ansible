@@ -110,14 +110,14 @@ Roadmap
     - vaulted files via sops https://github.com/mozilla/sops ? 2DO)
   - internal CAs:
     - creates certs for hosts) -> 2DO
-    - distribute CAs (will be implemented in baserole)
+    - distribute CAs ([is implemented in baserole](https://github.com/selfhostx/ansible/commit/b9be736aae11c9d183bead6afa27e25466483f66))
 
 **E-Mail**
   - mailserver
     - dovecot + postfix (2DO)
       - stand-alone
       - backends like LDAP
-    - mailcow (FIXME, Code ready, publish)
+    - mailcow (-> mailcow.mailcow [Example playbook](https://github.com/selfhostx/ansible/blob/main/playbooks/mailcow.yml)) easy-to-use-package with dovecot, postfix, SOGo, rspamd, clamav and supports DKIM
     - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
   - groupware
     - kopano (maintainer needed)
