@@ -2,6 +2,8 @@
 # defaults file for uptime kuma
 
 uptimekuma_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+# define version to install ("latest" is default)
+# uptimekuma_version: 1.23.1
 
 uptimekuma_user: "uptimekuma"
 uptimekuma_group: "uptimekuma"
@@ -51,5 +53,4 @@ uptimekuma_tls_hsts_time: 31536000
 uptimekuma_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ uptimekuma_hostname }}/fullchain.pem"
 uptimekuma_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ uptimekuma_hostname }}/privkey.pem"
 
-uptimekuma_update: false
-uptimekuma_install: false
+uptimekuma_debug: false

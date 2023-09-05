@@ -22,6 +22,11 @@
   ansible.builtin.systemd:
     daemon_reload: true
 
+- name: Test nginx and restart
+  ansible.builtin.command: nginx -t
+  notify: Restart nginx
+  become: true
+
 - name: Restart nginx
   ansible.builtin.service:
     name: nginx

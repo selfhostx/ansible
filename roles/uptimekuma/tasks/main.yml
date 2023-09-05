@@ -82,6 +82,26 @@
 - name: Debug installed tag
   debug:
     var: git_tag_result.stdout
+  when: uptimekuma_debug|bool
+
+- name: Get uptime kuma release info from github
+  ansible.builtin.uri:
+    url: 'https://api.github.com/repos/louislam/uptime-kuma/releases/latest'
+    return_content: true
+  register: 'uptimekuma_version_github'
+  when: uptimekuma_version is not defined or uptimekuma_version == "latest"
+
+- name: Determine current uptime kuma release version
+  ansible.builtin.set_fact:
+    uptimekuma_version: "{{ uptimekuma_version_github['json']['tag_name'] }}"
+  when: uptimekuma_version is not defined or uptimekuma_version == "latest"
+
+- name: Debug uptimekuma_version fact
+  debug:
+    var: uptimekuma_version
+  when:
+    - uptimekuma_version is defined
+    - uptimekuma_debug|bool
 
 - name: Set 'uptimekuma_update' fact
   set_fact:
@@ -91,6 +111,9 @@
 - name: Debug 'uptimekuma_update' fact
   debug:
     var: uptimekuma_update
+  when:
+    - uptimekuma_update is defined
+    - uptimekuma_debug|bool
 
 - name: Set 'uptimekuma_install' fact
   set_fact:
@@ -100,7 +123,9 @@
 - name: Debug 'uptimekuma_install' fact
   debug:
     var: uptimekuma_install
-    
+  when:
+    - uptimekuma_install is defined
+    - uptimekuma_debug|bool
 
 - name: Clone uptime kuma repo
   ansible.builtin.git:
@@ -114,7 +139,8 @@
   become_user: "{{ uptimekuma_user }}"
   register: uptimekuma_cloned
   when:
-    - uptimekuma_install == true
+    - uptimekuma_install is defined
+    - uptimekuma_install|bool
     
 - name: update uptime kuma repo
   ansible.builtin.git:
@@ -128,7 +154,8 @@
   become_user: "{{ uptimekuma_user }}"
   register: uptimekuma_updated
   when:
-    - uptimekuma_update == true
+    - uptimekuma_update is defined
+    - uptimekuma_update|bool
 
 - name: Install uptime kuma
   ansible.builtin.shell: bash -ilc 'npm run setup'
@@ -140,7 +167,7 @@
     chdir: "{{ uptimekuma_install_dir }}"
   when: 
     - uptimekuma_cloned.changed
-    - uptimekuma_install == true
+    - uptimekuma_install|bool
     
 - name: update uptime kuma
   ansible.builtin.shell: 
@@ -156,7 +183,7 @@
     - bash -ilc 'npm run download-dist'
   when: 
     - uptimekuma_updated.changed
-    - uptimekuma_update == true
+    - uptimekuma_update|bool
   notify: Restart uptime kuma
 
 - name: Create uptime kuma start skript

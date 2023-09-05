@@ -1,19 +1,20 @@
 ---
-- name: Remove default config (when enabled)
+- name: Remove default nginx config (when enabled)
   ansible.builtin.file:
     path: "{{ uptimekuma_nginx_default_config }}"
     state: absent
   become: true
-  notify: Restart nginx
+  notify: Test nginx and restart
   when:
     - uptimekuma_nginx_remove_default_config
     - ansible_os_family == 'Debian'
 
-- name: Ensure nginx config is present
+- name: Create nginx config
   ansible.builtin.template:
     dest: "{{ uptimekuma_nginx_config_src_dir }}/{{ uptimekuma_nginx_config_filename }}"
     mode: "0644"
     src: "{{ uptimekuma_nginx_template }}"
+    validate: nginx -t -c %s
   become: true
   notify: Restart nginx
 
@@ -23,6 +24,6 @@
     dest: "{{ uptimekuma_nginx_config_dst_dir }}/{{ uptimekuma_nginx_config_filename }}"
     state: link
   become: true
-  notify: Restart nginx
+  notify: Test nginx and restart
   when:
     - ansible_os_family == 'Debian'
