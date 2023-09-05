@@ -69,9 +69,9 @@ active maintainers!
 Dependencies
 ------------
 
-FIXME Link requirements-file
-FIXME list all include_role in requirements-file
-
+the following two files contains all roles and collections which are referenced in example and/or recommended for usage:
+- [role requirements](roles/requirements.yml)
+- [collection requirements](collections/requirements.yml)
 
 License
 -------
