@@ -1,2 +1,23 @@
 ---
 # handlers file
+- name: Test nginx and restart
+  ansible.builtin.command: nginx -t
+  notify: Restart nginx   
+  become: true
+
+- name: Test nginx and reload
+  ansible.builtin.command: nginx -t
+  notify: Reload nginx   
+  become: true
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted 
+  become: true
+
+- name: Reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded 
+  become: true

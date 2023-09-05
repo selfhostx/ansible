@@ -70,7 +70,7 @@
   become: true
 
 - name: Get installed tag
-  command: git describe --tags --abbrev=0
+  ansible.builtin.command: git describe --tags --abbrev=0 # noqa command-instead-of-module
   args:
     chdir: "{{ uptimekuma_install_dir }}"
   become: true
@@ -80,7 +80,7 @@
   changed_when: false
 
 - name: Debug installed tag
-  debug:
+  ansible.builtin.debug:
     var: git_tag_result.stdout
   when: uptimekuma_debug|bool
 
@@ -97,31 +97,31 @@
   when: uptimekuma_version is not defined or uptimekuma_version == "latest"
 
 - name: Debug uptimekuma_version fact
-  debug:
+  ansible.builtin.debug:
     var: uptimekuma_version
   when:
     - uptimekuma_version is defined
     - uptimekuma_debug|bool
 
-- name: Set 'uptimekuma_update' fact
-  set_fact:
+- name: Set uptimekuma_update fact
+  ansible.builtin.set_fact:
     uptimekuma_update: true
   when: git_tag_result.stdout != uptimekuma_version
 
-- name: Debug 'uptimekuma_update' fact
-  debug:
+- name: Debug uptimekuma_update fact
+  ansible.builtin.debug:
     var: uptimekuma_update
   when:
     - uptimekuma_update is defined
     - uptimekuma_debug|bool
 
-- name: Set 'uptimekuma_install' fact
-  set_fact:
+- name: Set uptimekuma_install fact
+  ansible.builtin.set_fact:
     uptimekuma_install: true
   when: git_tag_result.stdout is not defined or git_tag_result.stdout == ''
-      
-- name: Debug 'uptimekuma_install' fact
-  debug:
+
+- name: Debug uptimekuma_install fact
+  ansible.builtin.debug:
     var: uptimekuma_install
   when:
     - uptimekuma_install is defined
@@ -141,8 +141,8 @@
   when:
     - uptimekuma_install is defined
     - uptimekuma_install|bool
-    
-- name: update uptime kuma repo
+
+- name: Update uptime kuma repo
   ansible.builtin.git:
     clone: false
     dest: "{{ uptimekuma_install_dir }}"
@@ -158,19 +158,19 @@
     - uptimekuma_update|bool
 
 - name: Install uptime kuma
-  ansible.builtin.shell: bash -ilc 'npm run setup'
+  ansible.builtin.shell: bash -ilc 'npm run setup' # noqa command-instead-of-shell no-handler
   #args:
  #   executable: "{{ uptimekuma_shell_bin }}"
   become: true
   become_user: "{{ uptimekuma_user }}"
   args:
     chdir: "{{ uptimekuma_install_dir }}"
-  when: 
+  when:
     - uptimekuma_cloned.changed
     - uptimekuma_install|bool
-    
-- name: update uptime kuma
-  ansible.builtin.shell: 
+
+- name: Update uptime kuma
+  ansible.builtin.shell: # noqa command-instead-of-shell
     cmd: "{{ item }}"
   #args:
  #   executable: "{{ uptimekuma_shell_bin }}"
@@ -181,7 +181,7 @@
   loop:
     - bash -ilc 'npm install --production'
     - bash -ilc 'npm run download-dist'
-  when: 
+  when:
     - uptimekuma_updated.changed
     - uptimekuma_update|bool
   notify: Restart uptime kuma
@@ -211,7 +211,8 @@
     name: "{{ uptimekuma_service_name }}"
     state: started
     enabled: true
-  become: true 
+  become: true
 
-- include_tasks: nginx.yml
-  when: uptimekuma_nginx_deploy_reverseconfig
+- name: Include nginx tasks
+  ansible.builtin.include_tasks: nginx.yml
+  when: uptimekuma_nginx_deploy_reverseconfig|bool

@@ -1,7 +1,7 @@
 ---
 # defaults file for uptime kuma
 
-uptimekuma_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+uptimekuma_hostname: "{{ ansible_fqdn | default(inventory_hostname) }}"
 # define version to install ("latest" is default)
 # uptimekuma_version: 1.23.1
 

@@ -2,25 +2,34 @@
 # handlers file
 
 - name: Restart uptime kuma
-  ansible.builtin.service: "name={{ uptimekuma_service_name }} state=restarted"
+  ansible.builtin.service:
+    name: "{{ uptimekuma_service_name }}"
+    state: restarted
   become: true
 
 - name: Start uptime kuma
-  ansible.builtin.service: "name={{ uptimekuma_service_name }} state=started"
+  ansible.builtin.service:
+    name: "{{ uptimekuma_service_name }}"
+    state: restarted
   become: true
 
 - name: Stop uptime kuma
-  ansible.builtin.service: "name={{ uptimekuma_service_name }} state=stopped"
+  ansible.builtin.service:
+    name: "{{ uptimekuma_service_name }}"
+    state: stopped
   become: true
 
 - name: Stop start uptime kuma
-  ansible.builtin.service: "name={{ uptimekuma_service_name }} state=stopped"
+  ansible.builtin.service:
+    name: "{{ uptimekuma_service_name }}"
+    state: stopped
   become: true
   notify: Start uptime kuma
 
-- name: Reload systemd units  
+- name: Reload systemd units
   ansible.builtin.systemd:
     daemon_reload: true
+  become: true
 
 - name: Test nginx and restart
   ansible.builtin.command: nginx -t
