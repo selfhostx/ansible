@@ -1,9 +1,6 @@
 ---
 # Roles or collections we use in playbook
-
 # ansible-galaxy install -r requirements.yml --ignore-errors
-# ansible-galaxy collection install -r requirements.yml
-# needs recent version of ansible-galaxy (4.3?)!
 
 roles:
   - src: geerlingguy.apache
@@ -33,14 +30,3 @@ roles:
   - name: selfhostx.apache
     src: https://github.com/selfhostx/ansible-role-apache.git
     scm: git
-
-collections:
-  - name: https://github.com/selfhostx/ansible.git
-    type: git
-  - name: ansible.posix
-  - name: chocolatey.chocolatey
-  - name: community.crypto
-  - name: community.general
-  - name: community.libvirt
-  - name: community.mysql
-  - name: community.zabbix
