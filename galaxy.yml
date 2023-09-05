@@ -2,11 +2,11 @@
 ---
 namespace: selfhostx
 name: ansible
-version: 1.3.0
+version: 1.4.0
 readme: README.md
 authors:
   - selfhostx
-description: ansible-Collection for selfhosters
+description: ansible-Collection for selfhosters (focussed on infrastructure and oss-apps)
 license_file: LICENSE
 tags:
   - selfhostx
