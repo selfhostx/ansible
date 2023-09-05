@@ -73,6 +73,21 @@ the following two files contains all roles and collections which are referenced 
 - [role requirements](roles/requirements.yml)
 - [collection requirements](collections/requirements.yml)
 
+ansible setup
+-------------
+
+pip3 install ansible ansible-lint
+
+python3 (packages or pip)
+- dnspython
+- python3-pip (optional)
+- python3-mysqldb
+- python3-six 
+- python3-apt
+
+if pip is marked as externally managed it might need to use "--break-system-packages" (i.e. on debian12)
+
+
 License
 -------
 
