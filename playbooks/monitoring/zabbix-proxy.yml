@@ -1,0 +1,41 @@
+---
+- name: Install zabbix proxy
+  hosts: zabbix_proxy
+  roles:
+      - role: community.zabbix.zabbix_proxy
+
+  vars_files:
+    - my-vault.yml
+  vars:
+    zabbix_proxy_version: 6.0
+
+    zabbix_url: "https://SERVER.TLD/zabbix"
+    zabbix_api_user: APIUSER
+    # vault: zabbix_api_pass
+    zabbix_api_create_hosts: true
+    zabbix_update_host: no
+    zabbix_proxy_install_database_client: False
+    zabbix_proxy_database: mysql
+    zabbix_proxy_database_long: mysql
+    zabbix_proxy_dbport: 3306
+    zabbix_proxy_dbuser: "zabbix"
+    # zabbix_proxy_dbpassword: "-> vault"
+    zabbix_proxy_dbname: "zabbix"
+    zabbix_server_host: "SERVER.TLD"
+    # 0: active 1: passive
+    zabbix_proxy_mode: 0
+    zabbix_proxy_logfilesize: 10
+    zabbix_proxy_tlsconnect: psk
+    zabbix_proxy_tlsaccept: psk
+    zabbix_proxy_tlspsk_auto: true
+    # random psk from openssl (env)
+    # zabbix_proxy_tlspsk_secret: "{{ lookup('env', 'random_psk_from_env') }}"
+    # this needs to be undefined for zabbix_proxy_tlspsk_auto to work...
+    zabbix_proxy_tlspskfile: "/etc/zabbix/zabbix.psk"
+    zabbix_proxy_tlspskidentity: "{{ inventory_hostname }}"
+    zabbix_proxy_debuglevel: 1
+    zabbix_proxy_timeout: 10
+    zabbix_proxy_enableremotecommands: 1
+    zabbix_proxy_logremotecommands: 1
+    # fails on recent role-versions when already root and sudo asks for pw
+    zabbix_proxy_become_on_localhost: false

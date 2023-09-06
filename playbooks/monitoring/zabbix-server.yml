@@ -1,0 +1,54 @@
+---
+- name: Install zabbix server
+  hosts: all
+  roles:
+     - role: community.zabbix.zabbix_server
+     - role: community.zabbix.zabbix_web
+
+  vars_files:
+    - my_vault.yml
+
+  vars:
+    zabbix_agent_version: 6.0
+
+    # Server ====
+    zabbix_server_database: mysql
+    zabbix_server_database_long: mysql
+    zabbix_database_creation: true
+    zabbix_server_dbuser: zabbix-server
+    # zabbix_server_dbpassword: -> vault
+    selinux_allow_zabbix_can_network: true
+    selinux_allow_zabbix_can_http: true
+
+    # Web ====
+    zabbix_websrv: apache
+    zabbix_web_post_max_size: 16M
+    zabbix_web_upload_max_filesize: 16M
+
+    # AGENT ====
+    zabbix_url: "https://SERVER.TLD/zabbix"
+    zabbix_api_user: ansible
+    # taken from vault: zabbix_api_pass
+    zabbix_api_create_hosts: true
+    zabbix_update_host: no
+    zabbix_link_templates:
+      - Template OS Linux
+      - Template App SSH Service
+    zabbix_agent_server: "SERVER.TLD"
+    zabbix_agent_serveractive: "SERVER.TLD"
+    zabbix_agent_logfilesize: 10
+    zabbix_agent_tlsconnect: psk
+    zabbix_agent_tlsaccept: psk
+    zabbix_agent_tlspsk_auto: true
+    # random psk from openssl (env)
+    # zabbix_agent_tlspsk_secret: "{{ lookup('env', 'random_psk_from_env') }}"
+    # this needs to be undefined for zabbix_agent_tlspsk_auto to work...
+    # zabbix_agent_tlspskfile: "/etc/zabbix/zabbix.psk"
+    # nicht mehr nötig...
+    # zabbix_agent_tlspskidentity: "{{ inventory_hostname }}"
+    zabbix_agent_debuglevel: 1
+    zabbix_agent_timeout: 10
+    zabbix_agent_enableremotecommands: 1
+    zabbix_agent_logremotecommands: 1
+    # fails on recent role-versions when already root and sudo asks for pw
+    zabbix_agent_become_on_localhost: False
