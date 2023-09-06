@@ -1,6 +1,7 @@
 ---
 # configures grub boot loader
 # possibly settings a password is interesting too: https://github.com/hudecof/ansible_grub_password
+# FYI: GRUB_CMDLINE_LINUX is always used, GRUB_CMDLINE_LINUX_DEFAULT only in recovery mode
 
 - name: Configure grub (Debian-family)
   ansible.builtin.lineinfile:
