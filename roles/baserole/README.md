@@ -195,10 +195,20 @@ baserole_ntp_systemd_timesyncd_ntp_fallback: "0.debian.pool.ntp.org 1.debian.poo
 | baserole_package_proxy_template | Override template | text | no | apt-proxy-server.yml | 
 | baserole_package_proxy_target | Destination of Config-file | text | no | /etc/apt/apt.conf.d/02proxy-settings |
 | baserole_package_proxy_address (Example: "http://proxy.example.com:8080") | text | no | not defined |
-| baserole_package_proxy_direct | Do not use proxy for internal package-sources | text | no |  |
+| baserole_package_proxy_direct | Do not use proxy (from baserole_package_proxy_address) for internal package-sources (see example below) | string or list | no | empty |
 | baserole_package_no_recommends_and_suggestions_enabled | Install only necessary packages (no recommends and suggestions) | boolean (true, false) | yes | True | 
 | baserole_package_no_recommends_and_suggestions_target | Destination of Config-file |text | yes | /etc/apt/apt.conf.d/00-no-recommends-and-suggestions |
 
+Examples for baserole_package_proxy_direct:
+```
+baserole_package_proxy_address: "mirror.domain.tld"
+```
+or a list:
+```
+baserole_package_proxy_address:
+ - mirror.domain.tld
+ - another.mirror.domain.tld
+```
 
 ## Package Sources (currently Debian only)
 
