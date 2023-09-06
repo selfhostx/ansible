@@ -32,23 +32,31 @@
     - name: Gather A-Record
       ansible.builtin.set_fact:
         hostname_a_record: "{{ lookup('community.general.dig', '{{ inventory_hostname }}', 'qtype=A') }}"
-      when: baserole_check_a_record
+      when:
+        - baserole_check_a_record
+        - baserole_ipv4_enable
 
     - name: Gather AAAA-Record
       ansible.builtin.set_fact:
         hostname_aaaa_record: "{{ lookup('community.general.dig', '{{ inventory_hostname }}', 'qtype=AAAA') }}"
-      when: baserole_check_aaaa_record
+      when:
+        - baserole_check_aaaa_record
+        - baserole_ipv6_enable
 
     - name: Gather Reverse-Record (v4)
       ansible.builtin.set_fact:
         hostname_reverse_record_v4: "{{ lookup('community.general.dig', '{{ ansible_default_ipv4.address }}') }}"
-      when: baserole_check_reverserecord
+      when:
+        - baserole_check_reverserecord
+        - baserole_ipv4_enable
       ignore_errors: true
 
     - name: Gather Reverse-Record (v6)
       ansible.builtin.set_fact:
         hostname_reverse_record_v6: "{{ lookup('community.general.dig', '{{ ansible_default_ipv6.address }}') }}"
-      when: baserole_check_reverserecord
+      when:
+        - baserole_check_reverserecord
+        - baserole_ipv6_enable
       ignore_errors: true
 
     - name: Warn if domainname has no A-Record
@@ -56,6 +64,7 @@
         msg: "Warning - A-Record for does not exist for {{ inventory_hostname }}"
       when:
         - baserole_check_a_record
+        - baserole_ipv4_enable
         - hostname_a_record == "NXDOMAIN"
       ignore_errors: true
 
@@ -64,6 +73,7 @@
         msg: "A-Record for {{ inventory_hostname }} is set to {{ hostname_a_record }}"
       when:
         - baserole_check_a_record
+        - baserole_ipv4_enable
         - hostname_a_record is defined
         - hostname_a_record | length>0
         - ansible_default_ipv4.address is defined
@@ -77,7 +87,8 @@
         msg: "Warning - Reverse-Record is {{ hostname_reverse_record_v4 }}"
       when:
         - baserole_check_reverserecord
-        - hostname_reverse_record_v4 == "NXDOMAIN"
+        - baserole_ipv4_enable
+        - hostname_reverse_record_v4 is undefined or hostname_reverse_record_v4 == "NXDOMAIN"
       ignore_errors: true
 
     - name: Warn if host has no Reverse-Record (v6)
@@ -85,6 +96,7 @@
         msg: "Warning - Reverse-Record is {{ hostname_reverse_record_v6 }}"
       when:
         - baserole_check_reverserecord
+        - baserole_ipv6_enable
         - hostname_reverse_record_v6 == "NXDOMAIN"
       ignore_errors: true
 
@@ -93,6 +105,7 @@
         msg: "Warning - Reverse-Record is {{ hostname_reverse_record_v4 }}"
       when:
         - baserole_check_reverserecord
+        - baserole_ipv4_enable
         - hostname_reverse_record_v4 != inventory_hostname
         - not hostname_reverse_record_v4 == "NXDOMAIN"
       ignore_errors: true
@@ -102,6 +115,7 @@
         msg: "Warning - Reverse-Record is {{ hostname_reverse_record_v6 }}"
       when:
         - baserole_check_reverserecord
+        - baserole_ipv6_enable
         - hostname_reverse_record_v6 != inventory_hostname
         - not hostname_reverse_record == "NXDOMAIN"
       ignore_errors: true
