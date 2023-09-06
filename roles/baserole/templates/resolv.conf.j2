@@ -1,9 +1,5 @@
 # {{ ansible_managed }}
 {% if baserole_dns_resolver_daemon == "glibc" %}
-{% if baserole_dns_searchdomains is defined and baserole_dns_searchdomains|length>0 %}
-search {{ baserole_dns_searchdomains }}
-{% endif %}
-
 {% for domain in baserole_dns_nameservers %}
 nameserver {{ domain }}
 {% endfor %}
@@ -26,7 +22,7 @@ nameserver {{ domain }}
 
 nameserver 127.0.0.53
 options edns0 trust-ad
+{% endif %}
 {% if baserole_dns_searchdomains is defined and baserole_dns_searchdomains|length>0 %}
 search {{ baserole_dns_searchdomains }}
-{% endif %}
 {% endif %}
