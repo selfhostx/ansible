@@ -1,0 +1,13 @@
+---
+# Roles or collections we use in playbooks:
+#
+# ansible-galaxy collection install -r collections/requirements.yml
+#
+# (needs recent version of ansible-galaxy ... 4.3+?)!
+
+collections:
+  - name: https://github.com/selfhostx/ansible.git
+    type: git
+  - name: community.crypto
+  - name: community.general
+  - name: community.windows

@@ -1,0 +1,21 @@
+---
+- name: Playbook for my role
+  hosts: all
+  roles:
+    - { role: selfhostx.ansible.baserole, tags: baserole }
+
+  vars:
+    #
+
+  pre_tasks:
+    - name: Install python for Ansible (Debian only)
+      ansible.builtin.raw: test -e /usr/bin/python3 || (apt-get -y update && apt install -y python3)
+      register: output
+      changed_when: output.stdout | length > 0
+
+  tasks:
+    - name: Gathering Facts now
+      ansible.builtin.setup:
+
+  post_tasks:
+    #
