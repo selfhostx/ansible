@@ -53,15 +53,6 @@
   tags: dns
   when: baserole_dns_config_enable|bool
 
-- name: Include ntp-config.yml
-  ansible.builtin.include_tasks:
-    file: "ntp-config.yml"
-    apply:
-      tags:
-        - ntp
-  tags: ntp
-  when: baserole_ntp_config_enable|bool
-
 - name: Include ca-config.yml
   ansible.builtin.include_tasks:
     file: "ca-config.yml"
