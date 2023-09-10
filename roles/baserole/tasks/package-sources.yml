@@ -2,18 +2,20 @@
 # manages additional Package-sources (repositories)
 # current only debian-repositories are implemented
 
-- name: Install required packages
+- name: Install required packages (Debian Family)
   ansible.builtin.apt:
-    name:
-      - apt-transport-https
-      - ca-certificates
-      - lsb-release
-      - gpg
+    name: "{{ baserole_package_manager_dependencies }}"
     cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
     - ansible_os_family == "Debian"
 
-- name: Add gpg-keys of repository
+- name: Install required packages (Redhat Family)
+  ansible.builtin.dnf:
+    name: "{{ baserole_package_manager_dependencies }}"
+  when:
+    - ansible_os_family == "RedHat"
+
+- name: Add gpg-keys of repository (Debian Family)
   ansible.builtin.apt_key:
     id: "{{ item.pgp_id | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
@@ -23,7 +25,7 @@
     - item.repotype == "deb"
     - ansible_os_family == "Debian"
 
-- name: Configure package source
+- name: Configure package source (Debian Family)
   ansible.builtin.apt_repository:
     filename: "{{ item.filename }}"
     repo: "{{ item.deb_line }}"

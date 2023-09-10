@@ -1,6 +1,12 @@
 ---
 # Vars specific for Debian/Ubuntu Systems
 
+baserole_package_manager_dependencies:
+  - apt-transport-https
+  - ca-certificates
+  - lsb-release
+  - gpg
+
 baserole_openssh_sftp_subsystem_path: "/usr/lib/openssh/sftp-server"
 
 baserole_ca_package_name: "ca-certificates"
