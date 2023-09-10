@@ -1,6 +1,7 @@
 ---
 # Vars specific for Debian/Ubuntu Systems
 
+# requirements for add package sources:
 baserole_package_manager_dependencies:
   - apt-transport-https
   - ca-certificates

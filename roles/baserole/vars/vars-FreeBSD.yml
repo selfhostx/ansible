@@ -1,4 +1,5 @@
 ---
 # Vars specific for FreeBSD
 
+# requirements for add package sources:
 baserole_package_manager_dependencies: []

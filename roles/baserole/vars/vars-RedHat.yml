@@ -1,6 +1,7 @@
 ---
 # Vars specific for RedHat systems
 
+# requirements for add package sources:
 baserole_package_manager_dependencies: []
 
 baserole_openssh_sftp_subsystem_path: "/usr/libexec/openssh/sftp-server"
