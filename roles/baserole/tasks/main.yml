@@ -173,7 +173,7 @@
       tags:
         - ssh
   tags: ssh
-  when: baserole_sshd_conf_enable|bool
+  when: baserole_sshd_config_enable|bool
 
 - name: Regenerate machine-id (if enabled)
   ansible.builtin.copy:

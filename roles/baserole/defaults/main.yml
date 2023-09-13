@@ -224,7 +224,7 @@ baserole_package_unwanted_packages_redhat: []
 baserole_package_upgrade_enable: true
 
 # SSHD =================
-baserole_sshd_conf_enable: true
+baserole_sshd_config_enable: true
 
 baserole_openssh_servicename: "ssh"
 

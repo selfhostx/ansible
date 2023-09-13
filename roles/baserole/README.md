@@ -294,7 +294,7 @@ baserole_package_defaults_debian:
 
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
-| baserole_sshd_conf_enable| Enable SSHD configuration | boolean (true, false) | yes | True |
+| baserole_sshd_config_enable | Enable SSHD configuration | boolean (true, false) | yes | True |
 | baserole_openssh_use_template | Use template for /etc/ssh/sshd.conf (or includes via baserole_openssh_sshd_opts) | boolean (true, false) | yes | True |
 | baserole_openssh_sshd_opts | List of sshd-options to be included in /etc/default/ssh | text | yes | "-o TCPKeepAlive=no -o ClientAliveInterval=180 -o DebianBanner=no" |
 | baserole_openssh_include_pattern | Specify Include-Pattern | text | yes | "/etc/ssh/sshd_config.d/*.conf" |
