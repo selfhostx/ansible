@@ -347,7 +347,7 @@ baserole_root_ssh_key_file_content: |+
 
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
-| baserole_usercreate_local: True
+| baserole_usercreate_config_enable | Enable Usermanagement configuration | boolean (true, false) | no | True |
 | baserole_users_remove_userdata_when_state_absent | Remove user-data (home-dir etc.) when state is set to "absent" | boolean (true, false) | yes | False |
 | baserole_userlist_local | Defines local Users to be managed on target system | dictionary (see Examples below) | no | not defined |
 

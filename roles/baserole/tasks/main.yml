@@ -136,7 +136,7 @@
         - userlocal
   loop: "{{ baserole_userlist_local }}"
   when:
-    - baserole_usercreate_local|bool
+    - baserole_usercreate_config_enable|bool
     - baserole_userlist_local is defined
     - baserole_userlist_local|length>0
   # ssh-private-keys could be shown:

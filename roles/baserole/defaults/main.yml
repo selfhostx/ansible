@@ -282,7 +282,7 @@ baserole_openssh_send_mail_to: root
 
 
 # USER management ===========================
-baserole_usercreate_local: true
+baserole_usercreate_config_enable: true
 
 # see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html
 
