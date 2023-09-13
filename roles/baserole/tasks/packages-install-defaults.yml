@@ -1,5 +1,6 @@
 ---
 # python3-apt is installed on current debian (9+)
+# python3-dnf might be necessary
 
 - name: Install standard-packages (Debian)
   ansible.builtin.apt:
