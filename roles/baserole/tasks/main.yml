@@ -110,9 +110,9 @@
   tags: packages
   when: baserole_package_upgrade_enable|bool
 
-- name: Include proxy_config.yml
+- name: Include proxy-config.yml
   ansible.builtin.include_tasks:
-    file: "proxy_config.yml"
+    file: "proxy-config.yml"
     apply:
       tags:
         - proxy
