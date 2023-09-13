@@ -1,7 +1,7 @@
 ---
 - name: Restart SSHD
   ansible.builtin.service:
-    name: sshd
+    name: "{{ baserole_openssh_servicename }}"
     state: restarted
 
 - name: Manage Qemu Guest Agent
