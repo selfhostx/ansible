@@ -1,8 +1,5 @@
 Ansible Role: Dokuwiki
-=========
-
-Build status for this role: [![Build Status](https://travis-ci.org/PeterMosmans/ansible-role-dokuwiki.svg)](https://travis-ci.org/PeterMosmans/ansible-role-dokuwiki)
-
+======================
 
 This role installs, configures, hardens and/or upgrades Dokuwiki on a server.
 The main focus is on provisioning Dokuwiki instances in a repeatable and secure
@@ -238,4 +235,4 @@ welcome.
 
 Contributions by @onny @n0emis @stefanux
 
-Original: https://github.com/PeterMosmans/ansible-role-dokuwiki
+my fork: https://github.com/stefanux/ansible-role-dokuwiki from original: https://github.com/PeterMosmans/ansible-role-dokuwiki
