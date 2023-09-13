@@ -101,6 +101,8 @@ baserole_ntp_systemd_timesyncd_ntp_fallback: "0.debian.pool.ntp.org 1.debian.poo
 # baserole_ntp_systemd_timesyncd_pollintervalmaxsec: 2048
 
 # define system proxy ===
+
+baserole_proxy_config_enable: true
 # baserole_proxy_http_server: ""
 # you can use it for all protocolls:
 # baserole_proxy_https_server: "{{ baserole_proxy_http_server }}"

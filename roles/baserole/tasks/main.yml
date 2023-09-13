@@ -117,6 +117,7 @@
       tags:
         - proxy
   tags: proxy
+  when: baserole_proxy_config_enable|bool
 
 - name: Include user-root.yml
   ansible.builtin.include_tasks:

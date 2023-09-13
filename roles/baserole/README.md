@@ -180,6 +180,7 @@ baserole_ntp_systemd_timesyncd_ntp_fallback: "0.debian.pool.ntp.org 1.debian.poo
 
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
+| baserole_ntp_config_enable | Enable Proxy config (otherwise skip) | boolean (true, false) | no | true |
 | baserole_proxy_http_server | Define proxy for HTTP | string, example: http://user:pass@1.2.3.4:8080/ | no | empty (skip) |
 | baserole_proxy_https_server | Define proxy for HTTPS | string, example: http://user:pass@1.2.3.4:8080/ | no | empty (skip) |
 | baserole_proxy_ftp_server | Define proxy for FTP | string, example: http://user:pass@1.2.3.4:8080/ | no | empty (skip) |
