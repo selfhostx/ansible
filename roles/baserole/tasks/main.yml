@@ -84,9 +84,9 @@
     - baserole_packagesources is defined
     - baserole_packagesources|length>0
 
-- name: Include packages-apt-preferences.yml
+- name: Include package-manager-config.yml
   ansible.builtin.include_tasks:
-    file: "packages-apt-preferences.yml"
+    file: "package-manager-config.yml"
     apply:
       tags:
         - packages
