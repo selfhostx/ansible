@@ -509,7 +509,7 @@ Note: set values for journald itself with "quotes", otherwise ansible will conve
 
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
-| baserole_journald_configure | Enable systemd-journald feature | boolean (true, false) | yes | True
+| baserole_journald_config_enable | Enable systemd-journald feature | boolean (true, false) | yes | True
 | baserole_journald_template | yes | journald.conf.j2 |
 | baserole_journald_storage | Controls where to store journal data | text, one of "volatile", "persistent", "auto" and "none" | no | auto |
 | baserole_journald_compress | If enabled; data objects that shall be stored in the journal and are larger than the default threshold of 512 bytes are compressed before they are written to the file system | text (yes, no) | no | enabled |

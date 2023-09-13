@@ -394,7 +394,7 @@ baserole_machine_id_filename: "/etc/machine-id"
 
 # Journald =================
 
-baserole_journald_configure: true
+baserole_journald_config_enable: true
 baserole_journald_template: "journald.conf.j2"
 # see journald.conf(5) for details or https://www.freedesktop.org/software/systemd/man/journald.conf.html
 #baserole_journald_storage: auto
