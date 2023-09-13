@@ -185,9 +185,9 @@
   tags: uuidgen
   when: baserole_machine_id_regenerate|bool
 
-- name: Include journald.yml
+- name: Include systemd-journald.yml
   ansible.builtin.include_tasks:
-    file: "journald.yml"
+    file: "systemd-journald.yml"
     apply:
       tags:
         - journald
