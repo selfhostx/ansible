@@ -1,7 +1,7 @@
 ---
 - name: Template SSHD Config (template)
   ansible.builtin.template:
-    src: "{{ baserole_openssh_template }}"
+    src: "{{ baserole_openssh_template_sshd }}"
     dest: "/etc/ssh/sshd_config"
     owner: root
     group: root
@@ -13,7 +13,7 @@
 
 - name: Template default SSHD Config (template)
   ansible.builtin.template:
-    src: sshd_default_template.j2
+    src: "{{ baserole_openssh_template_default }}"
     dest: "/etc/default/ssh"
     backup: true
     owner: root

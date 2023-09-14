@@ -296,6 +296,8 @@ baserole_package_defaults_debian:
 |---|---|---|---|---|
 | baserole_sshd_config_enable | Enable SSHD configuration | boolean (true, false) | yes | True |
 | baserole_openssh_use_template | Use template for /etc/ssh/sshd.conf (or includes via baserole_openssh_sshd_opts) | boolean (true, false) | yes | True |
+| baserole_openssh_template_sshd | Optional override of template for main SSHD config | text | yes | sshd_template.j2 |
+| baserole_openssh_template_default | Optional override of template for sourced options | text | yes | "sshd_default_template.j2" |
 | baserole_openssh_sshd_opts | List of sshd-options to be included in /etc/default/ssh | text | yes | "-o TCPKeepAlive=no -o ClientAliveInterval=180 -o DebianBanner=no" |
 | baserole_openssh_include_pattern | Specify Include-Pattern | text | yes | "/etc/ssh/sshd_config.d/*.conf" |
 | baserole_openssh_port | TCP-Portnumber of SSH | integer (valid ports are 1-65535) | yes | 22 |
@@ -303,7 +305,6 @@ baserole_package_defaults_debian:
 | baserole_openssh_force_gen_keys | Force regeneration of host_keys, useful for cloned systems (needs "baserole_openssh_gen_keys: True" too!) | boolean (true, false) | False |
 | baserole_openssh_host_key | List of hostkeys (see example below) | list | yes | /etc/ssh/ssh_host_rsa_key, /etc/ssh/ssh_host_ecdsa_key, /etc/ssh/ssh_host_ed25519_key |
 | baserole_openssh_key_types | List of keytypes (see example below) | list | yes | rsa, ecdsa, ed25519 |
-| baserole_openssh_template | Override template | text | yes | sshd_template.j2 |
 | baserole_openssh_skip_include | Skip include directive when True | boolean (true, false) | yes | False |
 | baserole_openssh_permitrootlogin | Defines how user "root" is able to login | text: yes, no, prohibit-password, forced-commands-only | not set (usually defaults to "without-password") |
 | baserole_openssh_tcpkeepalive | TCP-keepalive | text ("yes", "no") | yes | yes (recommended: "baserole_openssh_tcpkeepalive: no" and "baserole_openssh_clientaliveinterval: 180" ClientAliveInterval is more stable and secure than "TCPKeepAlive yes" |

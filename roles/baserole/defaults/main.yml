@@ -250,7 +250,8 @@ baserole_openssh_key_types:
   - ecdsa
   - ed25519
 
-baserole_openssh_template: "sshd_template.j2"
+baserole_openssh_template_default: "sshd_default_template.j2"
+baserole_openssh_template_sshd: "sshd_template.j2"
 baserole_openssh_skip_include: false
 
 # baserole_openssh_permitrootlogin: yes|no|prohibit-password|forced-commands-only (default: not set)
