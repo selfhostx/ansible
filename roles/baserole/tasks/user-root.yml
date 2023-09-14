@@ -5,6 +5,9 @@
     password: '{{ baserole_root_password_hash | d("*") }}'
   tags:
     - userlocal
+  when:
+    - baserole_root_password_hash is defined
+    - baserole_root_password_hash|length > 0
 
 - name: Bashrc for root
   ansible.builtin.template:
