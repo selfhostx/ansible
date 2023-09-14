@@ -4,25 +4,25 @@
     path: "{{ baserole_proxy_config }}"
     regexp: '^http_proxy='
     line: 'http_proxy="{{ baserole_proxy_http_server }}"'
-  when: baserole_proxy_http_server is defined and baserole_proxy_http_server|length>0
+  when: baserole_proxy_http_server is defined and baserole_proxy_http_server|length > 0
 
 - name: Set https proxy (if defined)
   ansible.builtin.lineinfile:
     path: "{{ baserole_proxy_config }}"
     regexp: '^https_proxy='
     line: 'https_proxy="{{ baserole_proxy_https_server }}"'
-  when: baserole_proxy_https_server is defined and baserole_proxy_https_server|length>0
+  when: baserole_proxy_https_server is defined and baserole_proxy_https_server|length > 0
 
 - name: Set ftp proxy (if defined)
   ansible.builtin.lineinfile:
     path: "{{ baserole_proxy_config }}"
     regexp: '^https_proxy='
     line: 'ftp_proxy="{{ baserole_proxy_ftp_server }}"'
-  when: baserole_proxy_ftp_server is defined and baserole_proxy_ftp_server|length>0
+  when: baserole_proxy_ftp_server is defined and baserole_proxy_ftp_server|length > 0
 
 - name: Set no_proxy list (if defined)
   ansible.builtin.lineinfile:
     path: "{{ baserole_proxy_config }}"
     regexp: '^no_proxy='
     line: 'no_proxy="{{ baserole_no_proxy }}"'
-  when: baserole_no_proxy is defined and baserole_no_proxy|length>0
+  when: baserole_no_proxy is defined and baserole_no_proxy|length > 0

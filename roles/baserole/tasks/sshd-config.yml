@@ -22,7 +22,7 @@
   notify: Restart SSHD
   when:
     - baserole_openssh_sshd_opts is defined
-    - baserole_openssh_sshd_opts|length>0
+    - baserole_openssh_sshd_opts|length > 0
 
 # needs community.crypto:
 - name: Generate SSH host keys (when enabled and/or forced)

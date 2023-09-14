@@ -23,6 +23,6 @@ nameserver {{ domain }}
 nameserver 127.0.0.53
 options edns0 trust-ad
 {% endif %}
-{% if baserole_dns_searchdomains is defined and baserole_dns_searchdomains|length>0 %}
+{% if baserole_dns_searchdomains is defined and baserole_dns_searchdomains|length > 0 %}
 search {{ baserole_dns_searchdomains }}
 {% endif %}

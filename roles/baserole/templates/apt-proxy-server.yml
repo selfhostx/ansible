@@ -2,7 +2,7 @@
 Acquire {
     http {
         Proxy "{{ baserole_package_proxy_address }}";
-{% if baserole_package_proxy_direct is defined and baserole_package_proxy_direct|length>0 %}
+{% if baserole_package_proxy_direct is defined and baserole_package_proxy_direct|length > 0 %}
 {% if baserole_package_proxy_direct | type_debug == "list" %}
 {% for proxy_direct_list in baserole_package_proxy_direct %}
         Proxy::{{ proxy_direct_list }} "DIRECT";

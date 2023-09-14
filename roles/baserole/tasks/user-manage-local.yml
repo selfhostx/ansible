@@ -164,7 +164,7 @@
         mode: 0600
       when:
         - item.ssh_authorizedkeys_file is defined
-        - item.ssh_authorizedkeys_file|length>0
+        - item.ssh_authorizedkeys_file|length > 0
       tags:
         - pubkey
         - ssh
@@ -281,4 +281,4 @@
       when:
         - baserole_users_optional_tasks_enable
         - baserole_users_optional_tasks_template is defined
-        - baserole_users_optional_tasks_template|length>0
+        - baserole_users_optional_tasks_template|length > 0

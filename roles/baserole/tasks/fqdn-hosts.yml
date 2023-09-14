@@ -75,9 +75,9 @@
         - baserole_check_a_record
         - baserole_ipv4_enable
         - hostname_a_record is defined
-        - hostname_a_record | length>0
+        - hostname_a_record|length > 0
         - ansible_default_ipv4.address is defined
-        - ansible_default_ipv4.address | length>0
+        - ansible_default_ipv4.address|length > 0
         - hostname_a_record != ansible_default_ipv4.address
         - not hostname_a_record == "NXDOMAIN"
       ignore_errors: "{{ hostname_reverserecord_not_default_ip_ignore }}"
@@ -125,7 +125,7 @@
         msg: "Failing - FQDN is not set up properly"
       when:
         - ansible_hostname is not defined
-        - ansible_hostname | length = 0
+        - ansible_hostname|length = 0
         - ansible_hostname == none
         - ansible_hostname != inventory_hostname
       ignore_errors: true

@@ -25,7 +25,7 @@
   loop: "{{ baserole_sysctl_key_value }}"
   when:
     - baserole_sysctl_key_value is defined
-    - baserole_sysctl_key_value|length>0
+    - baserole_sysctl_key_value|length > 0
   tags: sysctl
 
 - name: Include grub-config.yml
@@ -83,7 +83,7 @@
   when:
     - baserole_package_source_enable|bool
     - baserole_packagesources is defined
-    - baserole_packagesources|length>0
+    - baserole_packagesources|length > 0
 
 - name: Include package-manager-config.yml
   ansible.builtin.include_tasks:
@@ -139,7 +139,7 @@
   when:
     - baserole_usercreate_config_enable|bool
     - baserole_userlist_local is defined
-    - baserole_userlist_local|length>0
+    - baserole_userlist_local|length > 0
   # ssh-private-keys could be shown:
   no_log: true
   # add all used tags from user-create.yml here:
@@ -162,7 +162,7 @@
   when:
     - baserole_groupcreate_local|bool
     - baserole_grouplist_local is defined
-    - baserole_grouplist_local|length>0
+    - baserole_grouplist_local|length > 0
   tags:
     - grouplocal
     - sudo
