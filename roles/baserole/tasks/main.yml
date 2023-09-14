@@ -1,5 +1,6 @@
 ---
 
+# Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
 - name: Include OS-specific variables
   ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
   tags:
