@@ -75,6 +75,7 @@
     mode: '0600'
   when:
     - baserole_root_authorizedkeys is defined
+    - baserole_root_authorizedkeys|length > 0
   tags:
     - pubkey
     - ssh
