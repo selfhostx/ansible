@@ -173,10 +173,11 @@ Roadmap
     - phpPgAdmin
 
 **Monitoring**
-  - *icinga(2) (maintainer needed)*
   - zabbix ( community.zabbix https://github.com/ansible-collections/community.zabbix -> active development, good code)
     - checks/templates: [see our role with various zabbix checks](roles/zabbix_checks)
   - Uptime Kuma (for SoHo or extra monitoring - include simple statuspage) -> [roles/uptimekuma](roles/uptimekuma)
+  - checkmk: [checkmk.general](https://github.com/Checkmk/ansible-collection-checkmk.general) -> 2DO testing
+  - *icinga(2) (maintainer needed)*
   - statuspages: Uptime Kuma, *[https://github.com/valeriansaliou/vigil](virgil), cachet, cstate, ... -> need maintainers*
 
 **User directory**
@@ -265,5 +266,3 @@ Roadmap
     - etcd
     - redis
 
-**removed from list**
-  - check_mk (freemium-model is ok in general, but currently no maintainer)
