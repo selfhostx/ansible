@@ -23,7 +23,7 @@
   ansible.builtin.apt:
     name: "{{ baserole_package_baremetal_debian }}"
     state: present
-    install_recommends: false
+    install_recommends: "{{ baserole_package_install_recommends_and_suggestions }}"
     cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
     - ansible_os_family == "Debian"

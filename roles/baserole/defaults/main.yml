@@ -122,7 +122,8 @@ baserole_package_proxy_filename: "02proxy-settings"
 # baserole_package_proxy_direct: "internal.package.source"
 
 # install only needed (NOT recommends and suggestions):
-baserole_package_no_recommends_and_suggestions_enabled: true
+baserole_package_install_recommends_and_suggestions: true
+# does not work on RedHat (filename needs to follow a specific value)
 baserole_package_no_recommends_and_suggestions_filename: "00-no-recommends-and-suggestions"
 
 
