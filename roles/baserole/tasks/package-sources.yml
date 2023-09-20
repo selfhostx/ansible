@@ -34,3 +34,13 @@
   when:
     - item.repotype == "deb"
     - ansible_os_family == "Debian"
+
+- name: Configure package source (RedHat Family)
+  ansible.builtin.dnf:
+    filename: "{{ item.filename }}"
+    repo: "{{ item.deb_line }}"
+    state: "{{ item.state | default(omit) }}"
+    update_cache: true
+  when:
+    - item.repotype == "rpm"
+    - ansible_os_family == "RedHat"
