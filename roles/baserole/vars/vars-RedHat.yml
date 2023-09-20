@@ -6,6 +6,9 @@ baserole_package_manager_dependencies: []
 
 baserole_openssh_sftp_subsystem_path: "/usr/libexec/openssh/sftp-server"
 
+baserole_package_no_recommends_and_suggestions_filename: "install_weak_deps"
+baserole_package_proxy_filename: "proxy"
+
 baserole_ca_package_name: "ca-certificates"
 baserole_ca_path: "/etc/pki/ca-trust/source/anchors"
 baserole_ca_update_command: "/bin/update-ca-trust"
