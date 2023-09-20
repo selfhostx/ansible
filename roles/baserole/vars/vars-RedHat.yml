@@ -4,6 +4,8 @@
 # requirements for add package sources:
 baserole_package_manager_dependencies: []
 
+baserole_package_vars_include_folder: "/etc/dnf/vars"
+
 baserole_openssh_sftp_subsystem_path: "/usr/libexec/openssh/sftp-server"
 
 baserole_ca_package_name: "ca-certificates"

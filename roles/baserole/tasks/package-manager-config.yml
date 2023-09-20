@@ -2,7 +2,7 @@
 - name: Apt preferences - no recommends and suggestions when installing packages (Debian)
   ansible.builtin.template:
     src: apt-only-essential-packages.j2
-    dest: "{{ baserole_package_include_folder }}/{{ baserole_package_no_recommends_and_suggestions_filename }}"
+    dest: "{{ baserole_package_vars_include_folder }}/{{ baserole_package_no_recommends_and_suggestions_filename }}"
     owner: root
     group: root
     mode: '0644'
@@ -13,7 +13,7 @@
 - name: Apt preferences - setting proxy for package manager (Debian)
   ansible.builtin.template:
     src: "{{ baserole_package_proxy_template }}"
-    dest: "{{ baserole_package_include_folder }}/{{ baserole_package_proxy_filename }}"
+    dest: "{{ baserole_package_vars_include_folder }}/{{ baserole_package_proxy_filename }}"
     owner: root
     group: root
     mode: '0644'

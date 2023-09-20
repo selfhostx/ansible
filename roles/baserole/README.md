@@ -194,11 +194,11 @@ baserole_ntp_systemd_timesyncd_ntp_fallback: "0.debian.pool.ntp.org 1.debian.poo
 |---|---|---|---|---|
 | baserole_package_proxy_enable | Enable proxy config for apt | boolean (true, false) | yes | False |
 | baserole_package_proxy_template | Override template | text | no | apt-proxy-server.yml | 
-| baserole_package_proxy_filename | Filename of config-file for proxy settings (destination is baserole_package_include_folder) | text | no | "02proxy-settings" |
+| baserole_package_proxy_filename | Filename of config-file for proxy settings (destination is baserole_package_vars_include_folder) | text | no | "02proxy-settings" |
 | baserole_package_proxy_address (Example: "http://proxy.example.com:8080") | text | no | not defined |
 | baserole_package_proxy_direct | Do not use proxy (from baserole_package_proxy_address) for internal package-sources (see example below) | string or list | no | empty |
 | baserole_package_no_recommends_and_suggestions_enabled | Install only necessary packages (no recommends and suggestions) | boolean (true, false) | yes | True | 
-| baserole_package_no_recommends_and_suggestions_filename | Filename of config-file for this settings (destination is baserole_package_include_folder ) | text | yes | "00-no-recommends-and-suggestions" |
+| baserole_package_no_recommends_and_suggestions_filename | Filename of config-file for this settings (destination is baserole_package_vars_include_folder ) | text | yes | "00-no-recommends-and-suggestions" |
 
 Examples for baserole_package_proxy_direct:
 ```

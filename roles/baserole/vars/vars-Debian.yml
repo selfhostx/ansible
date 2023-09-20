@@ -8,7 +8,7 @@ baserole_package_manager_dependencies:
   - lsb-release
   - gpg
 
-baserole_package_include_folder: "/etc/apt/apt.conf.d/"
+baserole_package_vars_include_folder: "/etc/apt/apt.conf.d/"
 
 baserole_openssh_sftp_subsystem_path: "/usr/lib/openssh/sftp-server"
 
