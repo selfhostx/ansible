@@ -1,5 +1,7 @@
 ---
 # defaults: https://github.com/selfhostx/ansible/blob/main/roles/nginx_common/defaults/main.yml
-- hosts: all
+
+- name: Install nginx_ common (blank nginx)
+  hosts: all
   roles:
     - selfhostx.ansible.nginx_common
