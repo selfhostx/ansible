@@ -6,7 +6,11 @@ Roadmap
     thulium_drake.ansible_semaphore / https://github.com/Thulium-Drake/ansible-role-ansible_semaphore (features package install)
   - rundeck
   - awx [manual instructions](instructions/awx-manual-install.txt)
-  - tower
+  - ansible automation platform (formerly: tower) -> provided by redhat
+
+**general *nix config**
+  - [our baserole](roles/baserole)
+  - https://github.com/willshersystems/ansible-sshd
 
 **Backup**
   - **bacula** https://github.com/selfhostx/ansible/blob/main/roles/bacula
