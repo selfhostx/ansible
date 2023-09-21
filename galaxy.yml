@@ -2,7 +2,7 @@
 ---
 namespace: selfhostx
 name: ansible
-version: 1.6.1
+version: 1.6.2
 readme: README.md
 authors:
   - selfhostx
