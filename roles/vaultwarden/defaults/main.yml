@@ -41,3 +41,7 @@ vaultwarden_tls_hsts_time: 31536000
 # path to ssl certificates, defaults to letsencrypt paths:
 vaultwarden_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ vaultwarden_hostname }}/fullchain.pem"
 vaultwarden_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ vaultwarden_hostname }}/privkey.pem"
+
+# hide nginx version number from server-header ("server: nginx" will still be present):
+# remove others vhosts to prevent leaking the version number from them (i.e. with var "vaultwarden_nginx_remove_default_config")
+vaultwarden_hide_nginx_version: true

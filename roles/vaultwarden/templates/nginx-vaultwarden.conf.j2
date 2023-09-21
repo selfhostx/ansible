@@ -3,6 +3,9 @@ server {
   listen [::]:80 {% if vaultwarden_nginx_remove_default_config %}default_server{% endif %};
   server_name {{ vaultwarden_hostname }};
 
+{% if vaultwarden_hide_nginx_version %}
+  server_tokens off;
+{% endif %}
   location / {
     # remember: 301 = moved permanently (search engines will react), 302 = moved temporarily (search engines will hold back)
     return 301 https://$server_name$request_uri;
@@ -29,6 +32,9 @@ server {
   ssl_certificate {{ vaultwarden_nginx_ssl_certificate }};
   ssl_certificate_key {{ vaultwarden_nginx_ssl_certificate_key }};
 
+{% if vaultwarden_hide_nginx_version %}
+  server_tokens off;
+{% endif %}
   location / {
     proxy_set_header Host      $host;
     proxy_set_header X-Real-IP $remote_addr;
