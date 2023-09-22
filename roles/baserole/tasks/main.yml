@@ -24,6 +24,7 @@
     ignoreerrors: "{{ baserole_sysctl_ignoreerrors | default(omit) }}"
   loop: "{{ baserole_sysctl_key_value }}"
   when:
+    - baserole_sysctl_config_enable|bool
     - baserole_sysctl_key_value is defined
     - baserole_sysctl_key_value|length > 0
   tags: sysctl

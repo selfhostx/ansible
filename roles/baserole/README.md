@@ -60,7 +60,7 @@ sysctl is configured via sysctl module: https://docs.ansible.com/ansible/latest/
 
 |Variable|Description|possible values|required|default|
 |---|---|---|---|---|
-| baserole_sysctl_config | Enable sysctl-config (otherwise skip) | | no | True |
+| baserole_sysctl_config_enable | Enable sysctl-config (otherwise skip) | boolean (true, false) | no | True |
 | baserole_sysctl_key_value | Sysctl-parameters | dictionary with key/values (see example below) | no, but if not defined module will do nothing | not defined |
 | baserole_sysctl_path | set a path for the config. Example: "/etc/sysctl.d/99-my-sysctl-settings" | text | no | /etc/sysctl.conf |
 | baserole_sysctl_ignoreerrors | ignore errors about unknown keys | bool (true, false) | no | no |

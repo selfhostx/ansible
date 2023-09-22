@@ -9,7 +9,7 @@ baserole_ipv6_enable: true
 baserole_debug_mode_enable: false
 
 # SYSCTL Config ===
-baserole_sysctl_config: true
+baserole_sysctl_config_enable: true
 # ansible sysctl module: https://docs.ansible.com/ansible/latest/collections/ansible/posix/sysctl_module.html
 
 # valid attributes in baserole_sysctl_key_value dictionary:
