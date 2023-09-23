@@ -32,9 +32,9 @@
   when:
     - baserole_ntp_daemon == "systemd-timesyncd"
 
-- name: Start and Enable systemd-timesyncd.service
+- name: Start and Enable systemd-timesyncd
   ansible.builtin.systemd:
-    name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
+    name: "{{ baserole_dns_systemd_resolved_servicename }}"
     enabled: true
     masked: false
     state: started
