@@ -1,4 +1,4 @@
 ---
 baserole_redhat_hosts_required_packages: "python3-libselinux"
 baserole_dns_template_systemd_resolved_package_name: "systemd-resolved"
-baserole_ntp_systemd_timesyncd_package_name: "systemd-timesyncd"
+baserole_ntp_systemd_timesyncd_package_name: ""
