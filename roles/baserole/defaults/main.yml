@@ -250,6 +250,7 @@ baserole_openssh_key_types:
 baserole_openssh_template_default: "sshd_default_template.j2"
 baserole_openssh_template_sshd: "sshd_template.j2"
 baserole_openssh_skip_include: false
+baserole_openssh_include_not_available: false
 
 # baserole_openssh_permitrootlogin: yes|no|prohibit-password|forced-commands-only (default: not set)
 
