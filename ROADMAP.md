@@ -50,6 +50,7 @@ Roadmap
   - proxmox (including cloud-init) -> see folder: [playbooks/proxmox](playbooks/proxmox)
     - VM management: https://github.com/mikaelflora/ansible-role-proxmox-vm
     - *LXC*
+    - [ansible dynamic inventory](https://github.com/xezpeleta/Ansible-Proxmox-inventory)
     - balancing:
       - PVE Balance: https://github.com/PLUTEX/pve_balance
       - proxmox_migrate.py: https://github.com/HeinleinSupport/proxmox-tools/blob/master/proxmox_migrate.py
