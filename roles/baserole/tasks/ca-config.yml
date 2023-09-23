@@ -16,5 +16,7 @@
   #with_fileglob:
   #  - files/ca/*
   with_fileglob: "{{ baserole_ca_files }}"
+  when:
+    - baserole_ca_files is defined
   notify:
     - Update trusted CA
