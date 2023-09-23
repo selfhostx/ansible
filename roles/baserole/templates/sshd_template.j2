@@ -8,8 +8,8 @@
 # default value.
 
 {% if not baserole_openssh_skip_include %}
-{% if ansible_distribution_release == 'buster' or ansible_distribution_release == 'bionic' %}
-# Include not supported, openssh 7.3p1 needed (Debian buster and Ubuntu bionic does not support it)
+{% if baserole_openssh_include_not_available %}
+# Include not supported, openssh 7.3p1 needed
 {% else %}
 Include {{ baserole_openssh_include_pattern }}
 {% endif %}

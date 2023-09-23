@@ -1,0 +1,4 @@
+---
+# Vars specific for Debian 7:
+baserole_openssh_servicename: "sshd"
+baserole_openssh_include_not_available: true
