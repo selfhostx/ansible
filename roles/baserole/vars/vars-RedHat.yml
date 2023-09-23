@@ -13,3 +13,4 @@ baserole_ca_path: "/etc/pki/ca-trust/source/anchors"
 baserole_ca_update_command: "/bin/update-ca-trust"
 
 baserole_redhat_hosts_required_packages: "libselinux-python"
+baserole_openssh_servicename: "sshd"

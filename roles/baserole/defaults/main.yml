@@ -225,8 +225,6 @@ baserole_package_upgrade_enable: true
 # SSHD =================
 baserole_sshd_config_enable: true
 
-baserole_openssh_servicename: "ssh"
-
 baserole_openssh_use_template: true
 # OR (and) you can configure options to be included in /etc/default/ssh
 # baserole_openssh_sshd_opts: "-o TCPKeepAlive=no -o ClientAliveInterval=180 -o DebianBanner=no"
