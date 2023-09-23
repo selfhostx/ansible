@@ -6,7 +6,7 @@
   ansible.builtin.apt:
     name: "{{ baserole_package_defaults_debian }}"
     state: present
-    install_recommends: false
+    install_recommends: "{{ baserole_package_install_recommends_and_suggestions }}"
     cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
     - ansible_os_family == "Debian"
@@ -15,7 +15,7 @@
   ansible.builtin.dnf:
     name: "{{ baserole_package_defaults_redhat }}"
     state: present
-    install_weak_deps: false
+    install_weak_deps: "{{ baserole_package_install_recommends_and_suggestions  }}"
   when:
     - ansible_os_family == "RedHat"
 
