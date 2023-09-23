@@ -102,7 +102,7 @@ MaxFileSec={{ baserole_journald_maxfilesec }}
 {% if baserole_journald_forwardtosyslog is defined %}
 ForwardToSyslog={{ baserole_journald_forwardtosyslog|lower }}
 {% else %}
-#ForwardToSyslog=yes
+#ForwardToSyslog=no
 {% endif %}
 {% if baserole_journald_forwardtokmsg is defined %}
 ForwardToKMsg={{ baserole_journald_forwardtokmsg|lower }}
