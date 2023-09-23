@@ -1,0 +1,2 @@
+---
+baserole_redhat_hosts_required_packages: "python3-libselinux"

@@ -11,3 +11,5 @@ baserole_openssh_sftp_subsystem_path: "/usr/libexec/openssh/sftp-server"
 baserole_ca_package_name: "ca-certificates"
 baserole_ca_path: "/etc/pki/ca-trust/source/anchors"
 baserole_ca_update_command: "/bin/update-ca-trust"
+
+baserole_redhat_hosts_required_packages: "libselinux-python"

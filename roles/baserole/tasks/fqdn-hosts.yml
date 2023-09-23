@@ -142,7 +142,7 @@
   block:
     - name: Pre-reqs (RedHat)
       ansible.builtin.dnf:
-        name: ["libselinux-python"]
+        name: "{{ baserole_redhat_hosts_required_packages }}"
         state: present
       register: result
       until: result is successful
@@ -150,9 +150,9 @@
         - ansible_os_family == "RedHat"
         - ansible_distribution != "Fedora"
 
-    - name: Pre-reqs (RedHat)
+    - name: Pre-reqs (Fedora)
       ansible.builtin.dnf:
-        name: ["libselinux-python"]
+        name: "{{ baserole_redhat_hosts_required_packages }}"
         state: present
       register: result
       until: result is successful
