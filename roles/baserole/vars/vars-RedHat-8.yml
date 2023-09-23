@@ -1,2 +1,5 @@
 ---
 baserole_redhat_hosts_required_packages: "python3-libselinux"
+# not available:
+baserole_dns_template_systemd_resolved_package_name: ""
+baserole_ntp_systemd_timesyncd_package_name: ""

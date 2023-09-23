@@ -7,6 +7,8 @@
     name: "{{ baserole_dns_template_systemd_resolved_package_name }}"
     state: present
   when:
+    - baserole_dns_template_systemd_resolved_package_name is defined
+    - baserole_dns_template_systemd_resolved_package_name | length > 0
     - ansible_os_family == "RedHat"
     - baserole_dns_resolver_daemon == "systemd-resolved"
 
@@ -16,6 +18,8 @@
     state: present
     cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
+    - baserole_dns_template_systemd_resolved_package_name is defined
+    - baserole_dns_template_systemd_resolved_package_name | length > 0
     - ansible_os_family == "Debian"
     - ansible_distribution_major_version == "12"
     - baserole_dns_resolver_daemon == "systemd-resolved"

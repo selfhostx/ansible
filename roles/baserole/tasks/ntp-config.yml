@@ -4,6 +4,8 @@
     name: "{{ baserole_ntp_systemd_timesyncd_package_name }}"
     state: present
   when:
+    - baserole_ntp_systemd_timesyncd_package_name is defined
+    - baserole_ntp_systemd_timesyncd_package_name | length > 0
     - ansible_os_family == "RedHat"
     - baserole_ntp_daemon == "systemd-timesyncd"
   notify: "Enable systemd-timesyncd"
@@ -14,6 +16,8 @@
     state: present
     cache_valid_time: "{{ baserole_package_cache_valid_time }}"
   when:
+    - baserole_ntp_systemd_timesyncd_package_name is defined
+    - baserole_ntp_systemd_timesyncd_package_name | length > 0
     - ansible_os_family == "Debian"
     - baserole_ntp_daemon == "systemd-timesyncd"
 

@@ -72,8 +72,6 @@ baserole_dns_template_resolv_conf: "resolv.conf.j2"
 # which dns-resolver to use? choices: glibc|systemd-resolved
 baserole_dns_resolver_daemon: "glibc"
 
-baserole_dns_template_systemd_resolved_package_name: "systemd-resolved"
-
 baserole_dns_systemd_resolved_config_template: "systemd-resolved.conf.j2"
 baserole_dns_systemd_resolved_config_target: "/etc/systemd/resolved.conf"
 baserole_dns_systemd_resolved_config_owner: "systemd-resolve"
