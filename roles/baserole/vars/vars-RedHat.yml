@@ -14,3 +14,6 @@ baserole_ca_update_command: "/bin/update-ca-trust"
 
 baserole_redhat_hosts_required_packages: "libselinux-python"
 baserole_openssh_servicename: "sshd"
+
+# FIXME not available (cent8+9):
+baserole_ntp_systemd_timesyncd_servicename: ""
