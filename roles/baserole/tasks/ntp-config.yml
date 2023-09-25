@@ -34,7 +34,7 @@
 
 - name: Start and Enable systemd-timesyncd
   ansible.builtin.systemd:
-    name: "{{ baserole_dns_systemd_resolved_servicename }}"
+    name: "{{ baserole_ntp_systemd_timesyncd_servicename }}"
     enabled: true
     masked: false
     state: started
