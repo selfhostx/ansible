@@ -78,10 +78,10 @@ ansible setup
 
 pip3 install ansible ansible-lint
 
-python3 (packages or pip)
+python3 (packages or pip):
 - dnspython
 - python3-pip (optional)
-- python3-mysqldb
+- python3-mysqldb (debian/ubuntu) or python3-mysqlclient (centos&redhat)
 - python3-six 
 - python3-apt
 
