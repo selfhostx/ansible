@@ -39,6 +39,13 @@ If you cloned a system, make sure ssh-keys and machine-id are regenerated (run t
 
 minimum ansible version: 2.10
 
+Tested Linux distributions are:
+- Debian: all (non-expired) LTS
+- Ubuntu: all (non-expired) LTS
+- Centos stream: 8, 9 (best effort)
+- RHEL: 8, 9 (best effort, not actively tested)
+
+
 # Dependencies
 
 None.
