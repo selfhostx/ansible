@@ -27,6 +27,7 @@
     update: true
     version: "{{ vaultwarden_version | default(omit) }}"
   notify:
+    - Create service vaultwarden
     - Build vaultwarden
 
 - name: Install Docker SDK for Python
@@ -34,8 +35,10 @@
     name:
       - docker
       - docker-compose
+    extra_args: --break-system-packages
 
 - name: Include Epel Role for RedHat-Family
+  # FIXME name changeable, optional
   ansible.builtin.include_role:
     name: geerlingguy.repo-epel
   when:
@@ -54,15 +57,26 @@
   register: vaultwarden_admin_token_argon2
   no_log: true
 
+- name: Template .env file
+  ansible.builtin.template:
+    src: "{{ vaultwarden_docker_env_template }}"
+    dest: "{{ vaultwarden_project_src }}/.env"
+    owner: root
+    group: root
+    mode: '0640'
+  notify:
+    - Restart vaultwarden
+
 - name: Template docker-compose file
   ansible.builtin.template:
+    src: "{{ vaultwarden_docker_compose_template }}"
     dest: "{{ vaultwarden_project_src }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0640'
-    src: "{{ vaultwarden_docker_template }}"
   notify:
     - Restart vaultwarden
+
 
 #- name: Link Dockerfile
 #  ansible.builtin.file:

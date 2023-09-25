@@ -1,6 +1,14 @@
 ---
 # handlers file for vaultwarden
 
+- name: Create service vaultwarden
+  community.docker.docker_compose:
+    project_src: "{{ vaultwarden_project_src }}"
+#    build: true
+    restarted: true
+    state: present
+  become: true
+
 - name: Build vaultwarden
   community.docker.docker_compose:
     project_src: "{{ vaultwarden_project_src }}"
