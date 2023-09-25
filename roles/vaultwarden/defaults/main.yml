@@ -12,7 +12,10 @@ vaultwarden_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
 
 vaultwarden_project_src: "/opt/vaultwarden"
 vaultwarden_git_src: "https://github.com/dani-garcia/vaultwarden.git"
-vaultwarden_docker_template: "docker-compose.j2"
+vaultwarden_docker_compose_template: "docker-compose.j2"
+vaultwarden_docker_env_template: "docker-env.j2"
+# filename or relative path to env-file:
+vaultwarden_docker_env_file: ".env"
 
 vaultwarden_image: "vaultwarden/server"
 vaultwarden_container_name: "vaultwarden"
@@ -45,3 +48,12 @@ vaultwarden_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ vaultwarden_hos
 # hide nginx version number from server-header ("server: nginx" will still be present):
 # remove others vhosts to prevent leaking the version number from them (i.e. with var "vaultwarden_nginx_remove_default_config")
 vaultwarden_hide_nginx_version: true
+
+# workaround for failed pip install docker-compose (failed build of dependency PyYAML with "AttributeError: cython_sources")
+# background: https://github.com/yaml/pyyaml/issues/736
+vaultwarden_install_docker_compose_via_pip: false
+vaultwarden_user_docker_compose_cmd: true
+
+# optional custom docker registry:
+# (more information: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_image_module.html#ansible-collections-community-docker-docker-image-module )
+# vaultwarden_docker_registy: "localhost:5000/centos"

@@ -6,9 +6,8 @@ services:
     image: {{ vaultwarden_image }}:{{ vaultwarden_version | default('latest') }}
     container_name: {{ vaultwarden_container_name }}
     restart: always
-    environment:
-      - WEBSOCKET_ENABLED=true
-      - ADMIN_TOKEN={{ vaultwarden_admin_token_argon2.stdout }}
+    env_file:
+      - {{ vaultwarden_docker_env_file }}
     volumes:
       - ./data:/data
     ports:

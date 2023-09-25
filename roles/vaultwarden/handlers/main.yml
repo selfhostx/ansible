@@ -4,7 +4,7 @@
 - name: Create service vaultwarden
   community.docker.docker_compose:
     project_src: "{{ vaultwarden_project_src }}"
-#    build: true
+    # build: true
     restarted: true
     state: present
   when:
@@ -12,11 +12,9 @@
   become: true
 
 - name: Create service vaultwarden command
-  community.docker.docker_compose:
-    cmd: docker compose up -d
+  ansible.builtin.command: "docker-compose up -d"
+  args:
     chdir: "{{ vaultwarden_project_src }}"
-    restarted: true
-    state: present
   when:
     - vaultwarden_user_docker_compose_cmd
   become: true
@@ -32,11 +30,9 @@
   become: true
 
 - name: Build vaultwarden command
-  community.docker.docker_compose:
-    cmd: docker-compose build
+  ansible.builtin.command: "docker-compose build"
+  args:
     chdir: "{{ vaultwarden_project_src }}"
-    restarted: true
-    state: present
   when:
     - vaultwarden_user_docker_compose_cmd
   become: true
@@ -51,8 +47,8 @@
   become: true
 
 - name: Restart vaultwarden command
-  ansible.builtin.shell:
-    cmd: docker-compose restart
+  ansible.builtin.shell: "docker-compose down && docker-compose up -d"
+  args:
     chdir: "{{ vaultwarden_project_src }}"
   when:
     - vaultwarden_user_docker_compose_cmd

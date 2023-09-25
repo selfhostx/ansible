@@ -1,13 +1,14 @@
 ---
 # tasks file for roles/vaultwarden
+
 - name: Include OS-family specific variables
   ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
   tags:
     - always
 
 # Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
-- name: Include distribution version specific variables (if present)
-  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+- name: Include distribution major version specific variables (if present)
+  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
   failed_when: false
   tags:
     - always
@@ -60,6 +61,15 @@
     - vaultwarden_epel_include_role|bool
     - ansible_os_family == 'RedHat'
 
+- name: Pull vaultwarden image
+  community.docker.docker_image:
+    name: "{{ vaultwarden_image }}:{{ vaultwarden_version | default('latest') }}"
+    repository: "{{ vaultwarden_docker_registy | default(omit) }}"
+    source: pull
+  notify:
+    - Restart vaultwarden
+    - Restart vaultwarden command
+
 - name: Install argon2 package
   ansible.builtin.package:
     name: argon2
@@ -75,7 +85,7 @@
 - name: Template .env file
   ansible.builtin.template:
     src: "{{ vaultwarden_docker_env_template }}"
-    dest: "{{ vaultwarden_project_src }}/.env"
+    dest: "{{ vaultwarden_project_src }}/{{ vaultwarden_docker_env_file }}"
     owner: root
     group: root
     mode: '0640'
@@ -91,6 +101,8 @@
     group: root
     mode: '0640'
   notify:
+    - Create service vaultwarden
+    - Create service vaultwarden command
     - Restart vaultwarden
     - Restart vaultwarden command
 
