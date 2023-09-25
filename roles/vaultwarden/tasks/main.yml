@@ -1,8 +1,14 @@
 ---
 # tasks file for roles/vaultwarden
-
-- name: Include OS-specific variables
+- name: Include OS-family specific variables
   ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+# Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
+- name: Include distribution version specific variables (if present)
+  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+  failed_when: false
   tags:
     - always
 
@@ -28,17 +34,26 @@
     version: "{{ vaultwarden_version | default(omit) }}"
   notify:
     - Create service vaultwarden
+    - Create service vaultwarden command
     - Build vaultwarden
+    - Build vaultwarden command
 
 - name: Install Docker SDK for Python
   ansible.builtin.pip:
     name:
       - docker
+    extra_args: "{{ vaultwarden_pip_extra_vars | default(omit) }}"
+
+- name: Install Docker compose for Python
+  ansible.builtin.pip:
+    name:
       - docker-compose
-    extra_args: --break-system-packages
+    extra_args: "{{ vaultwarden_pip_extra_vars | default(omit) }}"
+  when:
+    - vaultwarden_install_docker_compose_via_pip
 
 - name: Include Epel Role for RedHat-Family
-  # FIXME name changeable, optional
+  # FIXME make name changeable, optional
   ansible.builtin.include_role:
     name: geerlingguy.repo-epel
   when:
@@ -66,6 +81,7 @@
     mode: '0640'
   notify:
     - Restart vaultwarden
+    - Restart vaultwarden command
 
 - name: Template docker-compose file
   ansible.builtin.template:
@@ -76,7 +92,7 @@
     mode: '0640'
   notify:
     - Restart vaultwarden
-
+    - Restart vaultwarden command
 
 #- name: Link Dockerfile
 #  ansible.builtin.file:

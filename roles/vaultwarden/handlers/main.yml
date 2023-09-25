@@ -7,14 +7,38 @@
 #    build: true
     restarted: true
     state: present
+  when:
+    - not vaultwarden_user_docker_compose_cmd
+  become: true
+
+- name: Create service vaultwarden command
+  community.docker.docker_compose:
+    cmd: docker compose up -d
+    chdir: "{{ vaultwarden_project_src }}"
+    restarted: true
+    state: present
+  when:
+    - vaultwarden_user_docker_compose_cmd
   become: true
 
 - name: Build vaultwarden
   community.docker.docker_compose:
     project_src: "{{ vaultwarden_project_src }}"
-#    build: true
+    # build: true
     restarted: true
     state: present
+  when:
+    - not vaultwarden_user_docker_compose_cmd
+  become: true
+
+- name: Build vaultwarden command
+  community.docker.docker_compose:
+    cmd: docker-compose build
+    chdir: "{{ vaultwarden_project_src }}"
+    restarted: true
+    state: present
+  when:
+    - vaultwarden_user_docker_compose_cmd
   become: true
 
 - name: Restart vaultwarden
@@ -22,6 +46,16 @@
     project_src: "{{ vaultwarden_project_src }}"
     restarted: true
     state: present
+  when:
+    - not vaultwarden_user_docker_compose_cmd
+  become: true
+
+- name: Restart vaultwarden command
+  ansible.builtin.shell:
+    cmd: docker-compose restart
+    chdir: "{{ vaultwarden_project_src }}"
+  when:
+    - vaultwarden_user_docker_compose_cmd
   become: true
 
 - name: Reload nginx
