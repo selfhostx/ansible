@@ -27,13 +27,28 @@
     update: true
     version: "{{ vaultwarden_version | default(omit) }}"
   notify:
-    - Build vaultwarden
+    - Create Service vaultwarden
+    - Build vaultwarden command
 
 - name: Install Docker SDK for Python
   ansible.builtin.pip:
-    name:
-      - docker
-      - docker-compose
+    name: docker
+    extra_args: --break-system-packages
+
+#- name: Install Docker SDK for Python
+#  ansible.builtin.pip:
+#    name: docker-compose
+#    extra_args: --break-system-packages
+
+#- name: Install Docker SDK for Python
+#  community.general.pipx:
+#    name: docker
+#    install_deps: true
+
+#- name: Install Docker SDK for Python
+#  community.general.pipx:
+#    name: docker-compose
+#    install_deps: true
 
 - name: Include Epel Role for RedHat-Family
   ansible.builtin.include_role:
@@ -62,7 +77,7 @@
     mode: '0640'
     src: "{{ vaultwarden_docker_template }}"
   notify:
-    - Restart vaultwarden
+    - Restart vaultwarden command
 
 #- name: Link Dockerfile
 #  ansible.builtin.file:

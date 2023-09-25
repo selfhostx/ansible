@@ -1,6 +1,14 @@
 ---
 # handlers file for vaultwarden
 
+- name: Create Service vaultwarden
+  community.docker.docker_compose:
+    project_src: "{{ vaultwarden_project_src }}"
+#    build: true
+    restarted: true
+    state: present
+  become: true
+
 - name: Build vaultwarden
   community.docker.docker_compose:
     project_src: "{{ vaultwarden_project_src }}"
@@ -14,6 +22,28 @@
     project_src: "{{ vaultwarden_project_src }}"
     restarted: true
     state: present
+  become: true
+
+- name: Create vaultwarden command
+  community.docker.docker_compose:
+    cmd: docker compose up -d
+    chdir: "{{ vaultwarden_project_src }}"
+    restarted: true
+    state: present
+  become: true
+
+- name: Build vaultwarden command
+  community.docker.docker_compose:
+    cmd: docker-compose build
+    chdir: "{{ vaultwarden_project_src }}"
+    restarted: true
+    state: present
+  become: true
+
+- name: Restart vaultwarden command
+  ansible.builtin.shell:
+    cmd: docker-compose restart
+    chdir: "{{ vaultwarden_project_src }}"
   become: true
 
 - name: Reload nginx
