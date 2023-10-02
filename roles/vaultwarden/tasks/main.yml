@@ -81,6 +81,8 @@
     executable: /bin/bash
   register: vaultwarden_admin_token_argon2
   no_log: true
+  tags:
+    - env
 
 - name: Template .env file
   ansible.builtin.template:
@@ -92,6 +94,8 @@
   notify:
     - Restart vaultwarden
     - Restart vaultwarden command
+  tags:
+    - env
 
 - name: Template docker-compose file
   ansible.builtin.template:
