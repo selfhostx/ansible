@@ -74,8 +74,10 @@
   ansible.builtin.package:
     name: argon2
   become: true
+  tags:
+    - env
 
-- name: Hash vaultwarden_admin_token into argon2 and escape for docker-compose
+- name: Hash vaultwarden_admin_token into argon2 and escape for docker-compose (if not present)
   ansible.builtin.shell: echo -n {{ vaultwarden_admin_token }} | argon2 {{ lookup('password', '/dev/null length=32 chars=ascii_letters') }} -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
   args:
     executable: /bin/bash
@@ -83,6 +85,9 @@
   no_log: true
   tags:
     - env
+  # skip if a pre-hashed value is already set (to prevent "always changed" + handler-restart):
+  when:
+    - vaultwarden_admin_token_argon2_prehashed is not defined
 
 - name: Template .env file
   ansible.builtin.template:
