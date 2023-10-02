@@ -1,0 +1,68 @@
+---
+- name: Install vaultwarden
+  hosts: vaultwarden.DOMAIN.TLD
+  roles:
+    # - { role: selfhostx.ansible.baserole, tags: baserole }
+    - { role: geerlingguy.git, tags: git }
+    - { role: geerlingguy.pip, tags: pip }
+    - { role: geerlingguy.docker, tags: docker }
+    - { role: selfhostx.certbot, tags: certbot }
+    - { role: geerlingguy.mysql, tags: mysql }
+    # - { role: stefanux.mysqlbackup, tags: mysqlbackup }
+    - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+    - { role: selfhostx.ansible.vaultwarden, tags: vaultwarden }
+
+  vars_files:
+    - YOUR-vault.yml
+
+  vars:
+    # Token for the admin interface If not set, the admin panel is disabled
+    # preferably use a long random string: openssl rand -base64 48
+    # vaultwarden_admin_token: -> vault
+    
+    # optional certs:
+    # vaultwarden_nginx_ssl_certificate: "/root/ssl/domain.combined"
+    # vaultwarden_nginx_ssl_certificate_key: "/root/ssl/domain.key"
+
+    # when selfhostx.ansible.nginx_common is used:
+    vaultwarden_nginx_use_nginx_common_snippet: true
+    nginx_ssl_protocols: "TLSv1.3"
+
+    # letsencrypt:
+    certbot_create_method: nginx
+    # certbot_certs: -> host_vars
+    certbot_certs:
+      - domains:
+        - "{{ vaultwarden_hostname }}"
+    certbot_auto_renew_minute: 17
+    certbot_auto_renew_hour: 3
+    certbot_admin_email: mail@DOMAIN.TLD
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+
+    # mysql (connects to ansible_default_ipv4.address of host, db: vaultwarden, user: vaultwarden)
+    # vaultwarden_mysql_root_password: "-> vault"
+    # vaultwarden_mysql_user_password: "-> vault"
+
+    mysql_root_password: "{{ vaultwarden_mysql_root_password }}"
+    # mysql_root_password_update: true
+    # mysql_user_password_update: true
+
+    # https://github.com/dani-garcia/vaultwarden/wiki/Using-the-MariaDB-%28MySQL%29-Backend
+    mysql_databases:
+       - name: vaultwarden
+         collation: utf8mb4_unicode_ci
+         encoding: utf8mb4
+
+    mysql_users:
+       - name: vaultwarden
+         host: "%"
+         password: "{{ vaultwarden_mysql_user_password }}"
+         priv: "{{ vaultwarden_mysql_database }}.*:ALL"
+
+    # vaultwarden ENV
+    # manuell erzeugen: echo -n GEHEIM | argon2 $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c32) -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
+    # vaultwarden_admin_token_argon2_prehashed: "-> vault"
+
+    vaultwarden_env_extra: |
+      DATABASE_URL="mysql://vaultwarden:{{ vaultwarden_mysql_user_password }}@{{ ansible_default_ipv4.address }}/vaultwarden"
