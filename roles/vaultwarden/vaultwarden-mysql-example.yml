@@ -61,7 +61,7 @@
          priv: "{{ vaultwarden_mysql_database }}.*:ALL"
 
     # vaultwarden ENV
-    # manuell erzeugen: echo -n GEHEIM | argon2 $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c32) -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
+    # manual creation: echo -n SECRET | argon2 $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c32) -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
     # vaultwarden_admin_token_argon2_prehashed: "-> vault"
 
     vaultwarden_env_extra: |
