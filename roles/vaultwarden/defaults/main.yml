@@ -1,14 +1,26 @@
 ---
 # defaults for vaultwarden
 
+vaultwarden_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+
+# specify version or just leave blank for latest:
 # vaultwarden_version: '1.28.1'
 
 # Token for the admin interface (will be hashed with argon2). If not set, the admin panel is disabled.
 # preferably use a long random string: openssl rand -base64 48
-# example (DONT USE this value):
+# Example (DO NOT USE this value):
 # vaultwarden_admin_token: "MHQTX+2xhRoIbh55VpmmbA7vbCg6GUwwsp7NBSysjEYPNP85hbow7MZHPxIsFtAN"
 
-vaultwarden_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+# better way: you can provide a hashed argon2 admin-token to prevent re-hashing (and restarting of service) on every run:
+# just use output from diff-mode or manual creation from linux (need argon2 package installed):
+# echo -n YOUR_SECRET_PASSWORD | argon2 $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c32) -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
+# example output:
+# vaultwarden_admin_token_argon2_prehashed: "$$argon2id$$v=19$$m=65540,t=3,p=4$$ZUhGT2FLblBJYVdjWmhSY3dYRXlJaG9XUk5sUnFZbHk$$3kiP1DmMFL8TkkXYckCKiDZbecWpwOqiJ2ur1fXGVmE"
+
+# define all other vars here, Example:
+# vaultwarden_env_extra: |
+#   SIGNUPS_ALLOWED=false
+#   SIGNUPS_DOMAINS_WHITELIST=my-domain.tld
 
 vaultwarden_project_src: "/opt/vaultwarden"
 vaultwarden_git_src: "https://github.com/dani-garcia/vaultwarden.git"
@@ -49,8 +61,7 @@ vaultwarden_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ vaultwarden_hos
 # remove others vhosts to prevent leaking the version number from them (i.e. with var "vaultwarden_nginx_remove_default_config")
 vaultwarden_hide_nginx_version: true
 
-# workaround for failed pip install docker-compose (failed build of dependency PyYAML with "AttributeError: cython_sources")
-# background: https://github.com/yaml/pyyaml/issues/736
+# workaround for failed pip install docker-compose (failed build of dependency PyYAML with "AttributeError: cython_sources" https://github.com/yaml/pyyaml/issues/736 ):
 vaultwarden_install_docker_compose_via_pip: false
 vaultwarden_user_docker_compose_cmd: true
 
