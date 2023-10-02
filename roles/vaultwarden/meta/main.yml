@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: selfhostx
   description: vaultwarden role
@@ -15,22 +16,22 @@ galaxy_info:
   # - CC-BY-4.0
   license: BSD-3-Clause
 
-  min_ansible_version: 2.10
-
-  # If this a Container Enabled role, provide the minimum Ansible Container version.
-  # min_ansible_container_version:
+  min_ansible_version: "2.10"
 
   platforms:
-  - name: Debian
-    versions:
-    - 10
-    - 11
-  - name: Ubuntu
-    versions:
-    - 20.04
-    - 22.04
-  - name: EL
-    versions:
-    - 8
-    - 9
+    - name: Debian
+      versions:
+        - 10
+        - 11
+    - name: Ubuntu
+      versions:
+        - 20.04
+        - 22.04
+    - name: EL
+      versions:
+        - 8
+        - 9
+
   galaxy_tags: []
+
+dependencies: []
