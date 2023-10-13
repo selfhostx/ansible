@@ -1,5 +1,5 @@
 ---
-- name: Update package list and autoremove (debian family)
+- name: Update package list and autoremove (Debian family)
   ansible.builtin.apt:
     upgrade: false
     update_cache: true
@@ -15,7 +15,7 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: Upgrade packages (redhat family)
+- name: Update Cache and Upgrade packages (RedHat family)
   ansible.builtin.dnf:
     name: '*'
     state: latest # noqa package-latest
