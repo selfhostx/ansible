@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Stefan Schwarz
+  description: Ansible role to install/configure NetBox
+  license: MIT
+  min_ansible_version: 2.10
+  role_name: netbox
+  namespace: selfhostx
+
+  galaxy_tags:
+    - system
+    - network
+    - dcim
+
+dependencies: []

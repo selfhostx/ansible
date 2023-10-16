@@ -1,0 +1,119 @@
+---
+# defaults file for ansible-netbox
+
+netbox_hostname: "{{ ansible_fqdn}}"
+netbox_allowed_hosts: "{{ netbox_hostname }}"
+
+# Define url for NetBox API
+netbox_url: http://127.0.0.1:8080
+
+netbox_version: latest
+# example for a specific version:
+# netbox_version: 3.6.3
+
+netbox_user: netbox
+netbox_group: netbox
+
+netbox_install_dir: /opt
+netbox_home: "{{ netbox_install_dir + '/netbox' }}"
+netbox_app_path: "{{ netbox_home + '/netbox/netbox' }}"
+netbox_virtualenv: "{{ netbox_home + '/venv' }}"
+
+# netbox only support PostgreSQL:
+netbox_db_host: localhost
+netbox_db_password: netbox
+netbox_db_user: netbox
+netbox_db: netbox
+
+netbox_listen_address: 127.0.0.1
+netbox_listen_port: 8001
+
+# Expose Prometheus monitoring metrics at the HTTP endpoint '/metrics'
+netbox_metrics_enabled: false
+
+netbox_pri_domain: domain.tld
+
+# Redis configurations
+netbox_redis_host: localhost
+netbox_redis_password: ""
+netbox_redis_port: 6379
+
+# Please fill with your own value (50 chars minimum) REQUIRED:
+# example command: "head /dev/urandom | tr -dc a-zA-Z0-9 | head -c50"
+# netbox_secret_key: "secret"
+
+# Define your user token (exactly 40 hex chars) REQUIRED:
+# example command: "head /dev/urandom | tr -dc a-f0-9 | head -c40"
+# netbox_token: "secret"
+
+netbox_superuser_password: netbox
+netbox_superuser_username: netbox
+netbox_superuser_email: "netbox@{{ netbox_pri_domain }}"
+
+netbox_pid_file: "/var/tmp/netbox.pid"
+netbox_service_main_name: "netbox"
+netbox_service_main_file_template: "systemd-unit-netbox.j2"
+netbox_service_main_file_target: "/lib/systemd/system/netbox.service"
+
+netbox_service_housekeeping_name: "netbox-housekeeping"
+netbox_service_housekeeping_file_template: "systemd-unit-netbox-housekeeping.j2"
+netbox_service_housekeeping_file_target: "/etc/systemd/system/netbox-housekeeping.service"
+netbox_systemd_housekeeping_timer_name: "netbox-housekeeping"
+netbox_systemd_housekeeping_timer_template: "systemd-timer-housekeeping.j2"
+netbox_systemd_housekeeping_timer_target: "/etc/systemd/system/netbox-housekeeping.timer"
+netbox_service_rq_name: "netbox-rq"
+netbox_service_rq_file_template: "systemd-unit-netbox-rq.j2"
+netbox_service_rq_file_target: "/etc/systemd/system/netbox-rq.service"
+
+
+netbox_configuration_file_template: "configuration.py.j2"
+netbox_unicorn_configuration_file_template: "gunicorn.py.j2"
+
+# reverse-proxy-config, use nginx to make a ssl reverse-proxy-config:
+netbox_nginx_deploy_reverseconfig: true
+netbox_nginx_template: "nginx-netbox.conf.j2"
+# only on debian:
+netbox_nginx_remove_default_config: false
+# debian includes everything, centos only *.conf:
+netbox_nginx_config_filename: netbox.conf
+
+# if you use our nginx_common role, use "true" here:
+netbox_nginx_use_nginx_common_snippet: false
+
+netbox_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+netbox_nginx_tls_hardening_snippet: "{{ netbox_nginx_snippet_directory }}/tls-hardening.conf"
+# enable HSTS (not used when netbox_nginx_use_nginx_common_snippet: true):
+netbox_tls_hsts_enable: true
+netbox_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+netbox_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ netbox_hostname }}/fullchain.pem"
+netbox_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ netbox_hostname }}/privkey.pem"
+
+# hide nginx version number from server-header ("server: nginx" will still be present):
+# remove others vhosts to prevent leaking the version number from them (i.e. with var "netbox_nginx_remove_default_config")
+netbox_hide_nginx_version: true
+
+# https://github.com/lae/ansible-role-netbox/blob/master/vars/main.yml
+netbox_superuser_script: |
+  from django.contrib.auth.models import User
+  from base64 import b64decode
+  from users.models import Token
+  password = b64decode("{{ netbox_superuser_password | b64encode }}").decode("UTF-8")
+  query = User.objects.filter(username="{{ netbox_superuser_username }}")
+  if not query.exists():
+    User.objects.create_superuser("{{ netbox_superuser_username }}", "{{ netbox_superuser_email }}", password)
+    user = User.objects.get(username="{{ netbox_superuser_username }}")
+    Token.objects.create(user=user, key="{{ netbox_token }}")
+    print("changed")
+  else:
+    user = User.objects.get(username="{{ netbox_superuser_username }}")
+    if not user.is_superuser or user.email != "{{ netbox_superuser_email }}" or not user.check_password(password):
+      user.is_superuser = True
+      user.is_staff = True
+      user.email = "{{ netbox_superuser_email }}"
+      user.set_password(password)
+      user.save()
+      print("changed")
+
+

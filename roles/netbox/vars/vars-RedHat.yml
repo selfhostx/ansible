@@ -1,0 +1,15 @@
+---
+# Vars specific for RedHat systems
+netbox_package_requirements:
+  # - build-essential
+  # - python3-venv
+  - graphviz
+  - nginx
+  # - supervisor
+  - tar
+  - unzip
+  - python3-dnf
+
+netbox_nginx_default_config: "/etc/nginx/conf.d/default.conf"
+netbox_nginx_config_src_dir: "/etc/nginx/conf.d"
+netbox_nginx_config_dst_dir: "/etc/nginx/conf.d"

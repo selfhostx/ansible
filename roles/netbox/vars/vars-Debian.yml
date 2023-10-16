@@ -1,0 +1,14 @@
+---
+# Vars specific for Debian/Ubuntu Systems
+netbox_package_requirements:
+  - build-essential
+  - python3-venv
+  - graphviz
+  - nginx
+  - supervisor
+  - tar
+  - unzip
+
+netbox_nginx_default_config: "/etc/nginx/sites-enabled/default"
+netbox_nginx_config_src_dir: "/etc/nginx/sites-available"
+netbox_nginx_config_dst_dir: "/etc/nginx/sites-enabled"

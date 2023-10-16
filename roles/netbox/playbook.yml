@@ -1,0 +1,26 @@
+---
+- name: Example Playbook
+  hosts: all
+  vars:
+    postgresql_dbs:
+      - name: netbox
+        state: present
+    postgresql_users:
+      - name: netbox
+        db: netbox
+        password: netbox
+        state: present
+    pri_domain_name: test.vagrant.local
+  tasks:
+    - name: Include ansible-bootstrap-python
+      include_role:
+        name: ansible-bootstrap-python
+    - name: Include ansible-postgresql
+      include_role:
+        name: ansible-postgresql
+    - name: Include ansible-redis
+      include_role:
+        name: ansible-redis
+    - name: Include ansible-netbox
+      include_role:
+        name: ansible-netbox

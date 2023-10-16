@@ -1,0 +1,17 @@
+[Unit]
+Description=NetBox Housekeeping Service
+Documentation=https://docs.netbox.dev/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+User={{ netbox_user }}
+Group={{ netbox_group }}
+WorkingDirectory={{ netbox_home }}
+
+ExecStart={{ netbox_virtualenv }}/bin/python {{ netbox_app_path }}/manage.py housekeeping
+
+[Install]
+WantedBy=multi-user.target

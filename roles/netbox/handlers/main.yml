@@ -1,0 +1,56 @@
+---
+# handlers file for ansible-netbox
+
+- name: Enable systemd timer
+  service:
+    name: "{{ netbox_service_housekeeping_name }}"
+    state: restarted
+    enabled: true
+    masked: false
+    daemon_reload: true
+  become: true
+
+- name: Reload systemd units
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: true
+  become: true
+
+#- name: Restart supervisor
+#  service:
+#    name: supervisor
+#    state: restarted
+#    enabled: true
+#  become: true
+
+- name: Test nginx and restart
+  ansible.builtin.command: nginx -t
+  notify: Restart nginx
+  become: true
+
+- name: Restart netbox
+  service:
+    name: "{{ netbox_service_main_name }}"
+    state: restarted
+    enabled: true
+  become: true
+
+- name: Restart netbox-housekeeping
+  service:
+    name: "{{ netbox_service_housekeeping_name }}"
+    state: restarted
+    enabled: true
+  become: true
+
+- name: Restart netbox-rq
+  service:
+    name: "{{ netbox_service_rq_name }}"
+    state: restarted
+    enabled: true
+  become: true

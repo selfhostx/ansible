@@ -1,0 +1,52 @@
+server {
+  listen 80 {% if netbox_nginx_remove_default_config %}default_server{% endif %};
+  listen [::]:80 {% if netbox_nginx_remove_default_config %}default_server{% endif %};
+  server_name {{ netbox_hostname }};
+
+{% if netbox_hide_nginx_version %}
+  server_tokens off;
+{% endif %}
+  location / {
+    # remember: 301 = moved permanently (search engines will react), 302 = moved temporarily (search engines will hold back)
+    return 301 https://$server_name$request_uri;
+  }
+}
+
+server {
+  listen 443 ssl http2 {% if netbox_nginx_remove_default_config %}default_server{% endif %};
+  listen [::]:443 ssl http2 {% if netbox_nginx_remove_default_config %}default_server{% endif %};
+  server_name {{ netbox_hostname }};
+
+  client_max_body_size 25m;
+
+{% if netbox_nginx_use_nginx_common_snippet %}
+  include {{ netbox_nginx_tls_hardening_snippet }};
+{% else %}
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers CHACHA20:-AES:AESGCM:AESCCM:!kRSA:!PSK:!aECDSA:!aDSS:!aNULL:!eNULL:!SHA1:!MD5;
+  ssl_ecdh_curve X25519:secp521r1:secp384r1;
+{% if netbox_tls_hsts_enable %}
+  add_header Strict-Transport-Security "max-age={{ netbox_tls_hsts_time }}";
+{% endif %}
+{% endif %}
+
+  ssl_certificate {{ netbox_nginx_ssl_certificate }};
+  ssl_certificate_key {{ netbox_nginx_ssl_certificate_key }};
+
+{% if netbox_hide_nginx_version %}
+  server_tokens off;
+{% endif %}
+  location / {
+    proxy_pass http://{{ netbox_listen_address+':'+netbox_listen_port|string }};
+    proxy_set_header X-Forwarded-Host $server_name;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $http_host;
+    proxy_read_timeout 30;
+    add_header P3P 'CP="ALL DSP COR PSAa PSDa OUR NOR ONL UNI COM NAV"';
+  }
+  location /static/ {
+    alias {{ netbox_app_path + '/static/' }};
+  }
+}

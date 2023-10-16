@@ -1,0 +1,25 @@
+---
+sudo: required
+language: python
+services:
+  - docker
+before_install:
+  - sudo apt-get -qq update
+env:
+  # - molecule_distro=centos7
+  # - molecule_distro=centos8
+  # - molecule_distro=debian8
+  # - molecule_distro=debian9
+  - molecule_distro=debian10
+  # - molecule_distro=fedora
+  # - molecule_distro=ubuntu1604
+  - molecule_distro=ubuntu1804
+  # - molecule_distro=ubuntu2004
+install:
+- python -m pip install --upgrade pip
+- pip install -r requirements.txt -r requirements-dev.txt
+- pip install pre-commit
+script:
+  - molecule test --scenario-name "$molecule_distro"
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

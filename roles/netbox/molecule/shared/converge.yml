@@ -1,0 +1,32 @@
+---
+- name: Converge - Pre-req Roles
+  hosts: all
+  vars:
+    postgresql_dbs:
+      - name: netbox
+        state: present
+    postgresql_users:
+      - name: netbox
+        db: netbox
+        password: netbox
+        state: present
+    redis_bind_addresses:
+      - 0.0.0.0
+    redis_config_redis: true
+  tasks:
+    - name: Include ansible-bootstrap-python
+      include_role:
+        name: ansible-bootstrap-python
+    - name: Include ansible-postgresql
+      include_role:
+        name: ansible-postgresql
+    - name: Include ansible-redis
+      include_role:
+        name: ansible-redis
+
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Include ansible-netbox
+      include_role:
+        name: ansible-netbox

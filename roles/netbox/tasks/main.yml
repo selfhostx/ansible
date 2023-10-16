@@ -1,0 +1,232 @@
+---
+# Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
+- name: Include OS-family specific variables
+  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+
+- name: Include distribution major version specific variables (if present)
+  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+  failed_when: false
+
+- name: Fail if netbox_secret_key is not set (at least 50 chars needed)
+  ansible.builtin.fail:
+    msg: "Please set netbox_secret_key with a minimum of 50 chars"
+  when:
+    - netbox_secret_key is undefined
+
+- name: Fail if netbox_token is not set (exactly 40 hexchars needed)
+  ansible.builtin.fail:
+    msg: "Please set netbox_token with exactly 40 hex chars (0-9,a-f)"
+  when:
+    - netbox_token is undefined
+
+- name: Installing Pre-Reqs (Debian-family)
+  ansible.builtin.apt:
+    name: "{{ netbox_package_requirements }}"
+    state: present
+    cache_valid_time: '3600'
+  become: true
+  register: result
+  until: result is successful
+  when:
+    - ansible_os_family == "Debian"
+
+- name: Installing Pre-Reqs (RedHat-family)
+  ansible.builtin.dnf:
+    name: "{{ netbox_package_requirements }}"
+    state: present
+    update_cache: true
+  become: true
+  register: result
+  until: result is successful
+  when:
+    - ansible_os_family == "RedHat"
+
+- name: Ensuring {{ netbox_group }} Group Exists
+  ansible.builtin.group:
+    name: "{{ netbox_group }}"
+  become: true
+
+- name: Ensuring {{ netbox_user }} User Exists
+  ansible.builtin.user:
+    name: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    home: "{{ netbox_home }}"
+    shell: /bin/bash
+  become: true
+
+- name: Get netbox release info from github
+  ansible.builtin.uri:
+    url: 'https://api.github.com/repos/digitalocean/netbox/releases/latest'
+    return_content: true
+  register: 'netbox_version_github'
+  when: netbox_version is not defined or netbox_version == "latest"
+
+- name: Determine current netbox release version
+  ansible.builtin.set_fact:
+    netbox_version: "{{ netbox_version_github['json']['tag_name'] | regex_replace('v') }}"
+  when: netbox_version is not defined or netbox_version == "latest"
+
+- name: Downloading Netbox {{ netbox_version }}
+  ansible.builtin.unarchive:
+    src: "{{ 'https://github.com/netbox-community/netbox/archive/refs/tags/v' + netbox_version|string + '.tar.gz' }}"
+    dest: "{{ netbox_home }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    remote_src: true
+  become: true
+
+- name: Creating symlink to {{ netbox_version }}
+  ansible.builtin.file:
+    src: "{{ netbox_home + '/netbox-' + netbox_version|string }}"
+    dest: "{{ netbox_home }}/netbox"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    state: link
+  become: true
+
+- name: Creating {{ netbox_virtualenv }}
+  ansible.builtin.pip:
+    requirements: "{{ netbox_home + '/netbox/requirements.txt' }}"
+    virtualenv: "{{ netbox_virtualenv }}"
+    virtualenv_command: /usr/bin/python3 -m venv
+  become: true
+  become_user: "{{ netbox_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Installing gunicorn
+  ansible.builtin.pip:
+    name: gunicorn
+    virtualenv: "{{ netbox_virtualenv }}"
+  become: true
+  become_user: "{{ netbox_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Configuring Netbox
+  ansible.builtin.template:
+    src: "{{ netbox_configuration_file_template }}"
+    dest: "{{ netbox_app_path + '/netbox/configuration.py' }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+  become: true
+
+- name: Running Database Migrations
+  community.general.django_manage:
+    app_path: "{{ netbox_app_path }}"
+    command: migrate
+    virtualenv: "{{ netbox_virtualenv }}"
+  become: true
+  become_user: "{{ netbox_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+# https://github.com/lae/ansible-role-netbox/blob/master/tasks/deploy_netbox.yml
+- name: Create a super user for NetBox # noqa 306
+  ansible.builtin.shell: "printf '{{ netbox_superuser_script }}' |\
+    {{ netbox_virtualenv + '/bin/python' + ' ' + netbox_app_path + '/manage.py shell' }}"
+  register: _netbox_superuser_result
+  changed_when: "'changed' in _netbox_superuser_result.stdout"
+  become: true
+  become_user: "{{ netbox_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Collect Static Files
+  community.general.django_manage:
+    app_path: "{{ netbox_app_path }}"
+    command: collectstatic
+    virtualenv: "{{ netbox_virtualenv }}"
+  become: true
+  become_user: "{{ netbox_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Configuring gunicorn
+  ansible.builtin.template:
+    src: "{{ netbox_unicorn_configuration_file_template }}"
+    dest: "{{ netbox_home + '/gunicorn_config.py' }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+  become: true
+  notify:
+    - Restart netbox
+
+- name: Configuring systemd unit for netbox (main service)
+  ansible.builtin.template:
+    src: "{{ netbox_service_main_file_template }}"
+    dest: "{{ netbox_service_main_file_target }}"
+  become: true
+  notify:
+    - Reload systemd units
+    - Restart netbox
+
+- name: Configuring systemd unit for netbox (housekeeping)
+  ansible.builtin.template:
+    src: "{{ netbox_service_housekeeping_file_template }}"
+    dest: "{{ netbox_service_housekeeping_file_target }}"
+  become: true
+  notify:
+    - Reload systemd units
+    - Enable systemd timer
+    - Restart netbox-housekeeping
+
+- name: Configuring systemd timer for housekeeping
+  ansible.builtin.template:
+    src: "{{ netbox_systemd_housekeeping_timer_template }}"
+    dest: "{{ netbox_systemd_housekeeping_timer_target }}"
+  become: true
+
+- name: Enable systemd timer for housekeeping
+  ansible.builtin.command: systemctl enable --now {{ netbox_service_housekeeping_name }}.timer
+  become: true
+
+- name: Configuring systemd unit for netbox (request qeue)
+  ansible.builtin.template:
+    src: "{{ netbox_service_rq_file_template }}"
+    dest: "{{ netbox_service_rq_file_target }}"
+  become: true
+  notify:
+    - Reload systemd units
+    - Restart netbox-rq
+
+- name: Include nginx tasks
+  ansible.builtin.include_tasks: nginx.yml
+  when: netbox_nginx_deploy_reverseconfig|bool
+
+- name: Flushing Handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start netbox (main service) as systemd unit
+  ansible.builtin.systemd:
+    name: "{{ netbox_service_main_name }}"
+    state: started
+    enabled: true
+  become: true
+
+- name: Enable and start netbox (housekeeping) as systemd unit
+  ansible.builtin.systemd:
+    name: "{{ netbox_service_housekeeping_name }}"
+    state: started
+    enabled: true
+  become: true
+
+- name: Enable housekeeping timer as systemd unit
+  ansible.builtin.systemd:
+    name: "{{ netbox_systemd_housekeeping_timer_name }}"
+    state: started
+    enabled: true
+  become: true
+
+- name: Enable and start netbox (request qeue) as systemd unit
+  ansible.builtin.systemd:
+    name: "{{ netbox_service_rq_name }}"
+    state: started
+    enabled: true
+  become: true
+
+- name: Ensure NetBox is up
+  ansible.builtin.wait_for:
+    port: "{{ netbox_listen_port }}"
+    host: "{{ netbox_listen_address }}"
+    delay: 10
