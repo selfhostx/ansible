@@ -4,9 +4,8 @@ Roadmap
 **ansible frontends**
   - semaphore: [example playbook](playbook/semaphore.yml) https://github.com/stefanux/ansible-role-semaphore (forked from morbidick.semaphore) focussing on manual install
     thulium_drake.ansible_semaphore / https://github.com/Thulium-Drake/ansible-role-ansible_semaphore (features package install)
-  - rundeck
-  - awx [manual instructions](instructions/awx-manual-install.txt)
-  - ansible automation platform (formerly: tower) -> provided by redhat
+  - *rundeck* (maintainer needed)
+  - ansible automation platform (formerly: tower) -> provided by redhat for $$$, awx (opensource): [manual instructions](instructions/awx-manual-install.txt)
 
 **general *nix config**
   - [our baserole](roles/baserole)
@@ -18,8 +17,8 @@ Roadmap
   - *Borg+Borgmatic (if maintainer is found)*
   - *restic (if maintainer is found)*
   - mysql/mariadb (-> geerlingguy.mysql )
-    - fulldump (SQL commands):
-      - mysqlbackup https://github.com/stefanux/ansible-mysqlbackup
+    - fulldump (SQL statements):
+      - [mysqlbackup](https://github.com/stefanux/ansible-mysqlbackup)
     - other methods:
       - FIXME
   - proxmox backup server (FIXME checkin Code)
@@ -29,7 +28,7 @@ Roadmap
 
 **Git**
   - git (client) -> geerlingguy.git
-  - gitea https://github.com/stefanux/ansible-role-gitea ( -> maintainer needed)
+  - [gitea](https://github.com/stefanux/ansible-role-gitea) *( -> maintainer needed)*
   - gitlab -> geerlingguy.gitlab
 
 
@@ -59,8 +58,8 @@ Roadmap
   - Container
     - *k3s (if maintainer is found)*
     - *k8s (if maintainer is found)*
-    - docker (swarm)
-      - installation https://github.com/stefanux/ansible-role-docker -> substitute with upstream: https://github.com/geerlingguy/ansible-role-docker compare: https://github.com/stefanux/ansible-role-docker/compare/master...geerlingguy:master
+    - docker
+      - installation [geerlingguy.docker](https://github.com/geerlingguy/ansible-role-docker)
       - registry
         - ...?
       - optional management tools:
@@ -78,7 +77,7 @@ Roadmap
 
 **Filesharing**
   - samba
-    - standalone (2DO: merge shadowcopy + fruit from bashclub + ZFS) geerlingguy.samba / https://github.com/stefanux/ansible-role-samba.git
+    - [standalone](roles/samba_standalone) (2DO: merge shadowcopy + fruit from bashclub + ZFS) geerlingguy.samba
     - AD-member "zmb-member" https://github.com/bashclub/zamba-lxc-toolbox
   - nextcloud (2DO: choose role)
     - https://github.com/JGoutin/ansible_home/tree/master/roles/nextcloud
@@ -114,7 +113,7 @@ Roadmap
     - own certs (individual, wildcards) -> Code available
     - vaulted files via sops https://github.com/mozilla/sops ? 2DO)
   - internal CAs:
-    - creates certs for hosts) -> 2DO
+    - create certs for hosts -> 2DO
     - distribute CAs ([is implemented in baserole](https://github.com/selfhostx/ansible/commit/b9be736aae11c9d183bead6afa27e25466483f66))
 
 **E-Mail**
@@ -125,12 +124,13 @@ Roadmap
     - mailcow (-> mailcow.mailcow [Example playbook](https://github.com/selfhostx/ansible/blob/main/playbooks/mailcow.yml)) easy-to-use-package with dovecot, postfix, SOGo, rspamd, clamav and supports DKIM
     - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
   - groupware
-    - kopano (maintainer needed)
-    - ...?
+    - *kopano (maintainer needed)*
+    - *zimbra (maintainer needed)*
+    - nextcloud or mailcow have a basic functions
   - local mailrelay ("satellite")-setup for cron etc.
-    - postfix https://github.com/stefanux/ansible-postfix-mailrelay -> can use any SMTP-accounts (2DO include examples for microsoft365, google, a few common providers)
+    - [postfix mailrelay](https://github.com/stefanux/ansible-postfix-mailrelay) -> can use any SMTP-accounts (2DO include examples for microsoft365, google, a few common providers)
   - archiving
-    - (mail-)piler (maintainer needed)
+    - *(mail-)piler (maintainer needed)*
   - spamfiltering
     - rspamd (need redis)
     - spamassassin/policy-weightd/postgrey
@@ -269,5 +269,4 @@ Roadmap
   - distributed key/value stores
     - zookeeper
     - etcd
-    - redis
-
+    - redis [geerlingguy.postgresql](https://github.com/geerlingguy/ansible-role-redis)

@@ -17,21 +17,27 @@ supported distributions:
 Roles
 -----
 
-list of our roles, see more in [Roadmap](ROADMAP.md).
+list of own roles (see recommended roles in [Roadmap](ROADMAP.md) if you miss something).
 
-Roles (includes recommendations)                              | Description
+Roles                                                         | Description
 --------------------------------------------------------------|-------------------
 [apache](https://github.com/selfhostx/ansible-role-apache)    | apache webserver
+[ansible semaphore](https://github.com/stefanux/ansible-role-semaphore) | ansible semaphore (ansible GUI)
 [bacula](roles/bacula)                                        | backup system
-[baserole](roles/baserole)                                    | basic role for (new) systems
+[baserole](roles/baserole)                                    | basic role for (new) systems, starting point for new systems
 [certbot](https://github.com/selfhostx/ansible-role-certbot)  | certbot (letsencrypt)
 [dokuwiki](roles/dokuwiki)                                    | dokuwiki (PHP+file-based wiki)
+[gitea](https://github.com/stefanux/ansible-role-gitea)       | gitea (git server)
 [libvirt](roles/libvirt)                                      | simple virtualization via libvirt+KVM
 [mailrelay](roles/mailrelay)                                  | relay mails via postfix
 [mattermost](roles/mattermost)                                | mattermost (instant messenger)
+[mysql backup](https://github.com/stefanux/ansible-mysqlbackup) | simple mysqldump wrapper
+[netbox)](roles/netbox)                                       | netbox (documentation and IPAM functionality)
 [nginx (common)](roles/nginx_common)                          | nginx common role
-[PHP](https://github.com/geerlingguy/ansible-role-php)        | PHP-role (geerlingguy)
+[postfix mailrelay)](https://github.com/stefanux/ansible-postfix-mailrelay) | postfix mailrelaying
+[proxmox vm creation (including cloud-init)](playbooks/proxmox) | create VMs with cloud-init
 [samba (standalone)](roles/samba_standalone)                  | samba fileserver (standalone, without AD)
+[uptimekuma](roles/uptimekuma)                                | uptime kuma (monitoring and status page tool)
 [vaultwarden](roles/vaultwarden)                              | vaultwarden is a good zero-knowledge passwordmanager (compatible to bitwarden)
 [zabbix_checks](roles/zabbix_checks)                          | a couple of useful templates and userparameters for zabbix (monitoring system)
 
@@ -57,7 +63,7 @@ classify variables per role
 
 dependencies
 - other roles
-- neede pip-modules on target
+- needed pip-modules on target
 
 definition of variables and dependencies (see above) need to be machine-readable to enable automation/custom GUIs) -> 2DO define fileformat!
 
