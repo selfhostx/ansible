@@ -11,6 +11,10 @@ netbox_version: latest
 # example for a specific version:
 # netbox_version: 3.6.3
 
+# disable query of api.github.com (offline-mode or no v4-connectivity),
+# in this case you must define a version and cannot use "latest":
+netbox_disable_github_version_check: false
+
 netbox_user: netbox
 netbox_group: netbox
 

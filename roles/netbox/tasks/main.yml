@@ -59,12 +59,16 @@
     url: 'https://api.github.com/repos/digitalocean/netbox/releases/latest'
     return_content: true
   register: 'netbox_version_github'
-  when: netbox_version is not defined or netbox_version == "latest"
+  when:
+    - netbox_version is not defined or netbox_version == "latest"
+    - not netbox_disable_github_version_check
 
 - name: Determine current netbox release version
   ansible.builtin.set_fact:
     netbox_version: "{{ netbox_version_github['json']['tag_name'] | regex_replace('v') }}"
-  when: netbox_version is not defined or netbox_version == "latest"
+  when:
+    - netbox_version is not defined or netbox_version == "latest"
+    - not netbox_disable_github_version_check
 
 - name: Downloading Netbox {{ netbox_version }}
   ansible.builtin.unarchive:
