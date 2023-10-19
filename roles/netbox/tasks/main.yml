@@ -72,7 +72,7 @@
 
 - name: Downloading Netbox {{ netbox_version }}
   ansible.builtin.unarchive:
-    src: "{{ 'https://github.com/netbox-community/netbox/archive/refs/tags/v' + netbox_version|string + '.tar.gz' }}"
+    src: "{{ netbox_download_url | default('https://github.com/netbox-community/netbox/archive/refs/tags/v' + netbox_version|string + '.tar.gz') }}"
     dest: "{{ netbox_home }}"
     owner: "{{ netbox_user }}"
     group: "{{ netbox_group }}"

@@ -11,6 +11,11 @@ netbox_version: latest
 # example for a specific version:
 # netbox_version: 3.6.3
 
+# override download url (offline-mode or no v4-connectivity) with a local path
+# !important, filename needs to be: "netbox-v3.6.3.tar.gz" (example for version 3.6.3)
+# original download-url is https://github.com/netbox-community/netbox/archive/refs/tags/v3.6.3.tar.gz
+# netbox_download_url: /tmp/netbox-v3.6.3.tar.gz
+
 # disable query of api.github.com (offline-mode or no v4-connectivity),
 # in this case you must define a version and cannot use "latest":
 netbox_disable_github_version_check: false
