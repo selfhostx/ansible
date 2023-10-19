@@ -1,26 +1,80 @@
 ---
-- name: Example Playbook
-  hosts: all
+- name: Installing netbox (requires redis and postgres installed)
+  hosts: netbox.domain.tld
+  # only one host at a time:
+  # serial: 1
+
+  vars_files:
+    - my-vault.yml
+
   vars:
-    postgresql_dbs:
-      - name: netbox
-        state: present
+    netbox_pri_domain: "DOMAIN.TLD"
+    netbox_superuser_email: "root@DOMAIN.TLD"
+
+    # minimum: 50chars:
+    # netbox_secret_key: " -> vault" # generate: "head /dev/urandom | tr -dc a-zA-Z0-9 | head -c50"
+    # netbox_token: "-> vault"    # generate:"head /dev/urandom | tr -dc a-f0-9 | head -c40"
+    # Postgres >= 11 needed
+    # https://github.com/candlerb/netbox/blob/master/docs/installation/postgresql.md
+    # ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8';
+
+    netbox_db_host: localhost
+    # netbox_db_password: "-> vault"
+    netbox_db_user: netbox
+    netbox_db: netbox
+
+    postgresql_databases:
+      - name: "{{ netbox_db }}"
+        lc_collate: "C.UTF-8"
+        lc_ctype: "C.UTF-8"
+        encoding: "UTF8"
+        #login_host: "{{ netbox_db_host }}"
+        #login_password: "{{ netbox_db_password }}"
+        #login_user: "{{ netbox_db_user }}"
+        # owner: "{{ netbox_user }}"
+
     postgresql_users:
-      - name: netbox
-        db: netbox
-        password: netbox
-        state: present
-    pri_domain_name: test.vagrant.local
-  tasks:
-    - name: Include ansible-bootstrap-python
-      include_role:
-        name: ansible-bootstrap-python
-    - name: Include ansible-postgresql
-      include_role:
-        name: ansible-postgresql
-    - name: Include ansible-redis
-      include_role:
-        name: ansible-redis
-    - name: Include ansible-netbox
-      include_role:
-        name: ansible-netbox
+      - name: "{{ netbox_db_user }}"
+        db: "{{ netbox_db }}"
+        password: "{{ netbox_db_password }}"
+        # priv: "CONNECT/{{ netbox_db }}:ALL"
+        priv: ALL
+
+    # netbox_nginx_ssl_certificate: "/root/ssl/loki.combined"
+    # netbox_nginx_ssl_certificate_key: "/root/ssl/loki_opass.key"
+    nginx_ssl_protocols: "TLSv1.3"
+    netbox_nginx_remove_default_config: true
+
+    # letsencrypt:
+    certbot_create_method: nginx
+    certbot_certs:
+      - domains:
+        - "{{ ansible_fqdn }}"
+    certbot_auto_renew_minute: 17
+    certbot_auto_renew_hour: 3
+    certbot_admin_email: "root@DOMAIN.TLD"
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+
+  post_tasks:
+    # https://docs.netbox.dev/en/stable/installation/1-postgresql/
+    - name: GRANT CREATE ON SCHEMA public TO netbox;
+      community.postgresql.postgresql_privs:
+        db: "{{ netbox_db }}"
+        privs: CREATE
+        type: schema
+        objs: public
+        role: "{{ netbox_user }}"
+        # login_unix_socket: "{{ item.login_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
+      become: true
+      become_user: "{{ postgresql_user }}"
+      tags: postgresql
+
+  roles:
+    - { role: selfhostx.ansible.baserole, tags: baserole }
+    - { role: geerlingguy.pip, tags: pip }
+    - { role: geerlingguy.redis, tags: redis }
+    - { role: geerlingguy.postgresql, tags: postgresql }
+    - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+    - { role: selfhostx.certbot, tags: certbot,letsencrypt }
+    - { role: selfhostx.ansible.netbox, tags: netbox }
