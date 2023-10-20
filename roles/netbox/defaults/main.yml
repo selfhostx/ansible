@@ -55,8 +55,8 @@ netbox_redis_port: 6379
 # example command: "head /dev/urandom | tr -dc a-f0-9 | head -c40"
 # netbox_token: "secret"
 
-netbox_superuser_password: netbox
 netbox_superuser_username: netbox
+netbox_superuser_password: netbox
 netbox_superuser_email: "netbox@{{ netbox_pri_domain }}"
 
 netbox_pid_file: "/var/tmp/netbox.pid"
