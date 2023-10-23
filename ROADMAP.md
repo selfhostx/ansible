@@ -15,7 +15,7 @@ Roadmap
   - **bacula** https://github.com/selfhostx/ansible/blob/main/roles/bacula
   - bareos (veselahouba.bareos)
   - *Borg+Borgmatic (if maintainer is found)*
-  - *restic (if maintainer is found)*
+  - *restic (if maintainer is found, candidate: https://codeberg.org/ansible-galaxy/ansible-role-backup)*
   - mysql/mariadb (-> geerlingguy.mysql )
     - fulldump (SQL statements):
       - [mysqlbackup](https://github.com/stefanux/ansible-mysqlbackup)
@@ -23,7 +23,7 @@ Roadmap
       - FIXME
   - proxmox backup server (FIXME checkin Code)
   - pfsense config (2DO https://github.com/pfsensible/core ?)
-  - opensense config (2DO https://github.com/naturalis/ansible-opnsense ?)
+  - opensense config (2DO https://github.com/ansibleguy/collection_opnsense https://github.com/Rosa-Luxemburgstiftung-Berlin/ansible-opnsense ?)
   - *etckeeper (if maintainer is found)*
 
 **Git**
@@ -102,7 +102,7 @@ Roadmap
       - mod_php
       - php-fpm (2DO)
   - All-in-one-packages
-    - froxlor  (FIXME Code ready)
+    - froxlor  (FIXME Code ready or 2.0: https://codeberg.org/ansible-galaxy/ansible-role-froxlor)
     - *ispconfig (maintainer needed)*
 
 **TLS-cert + CA-management**
