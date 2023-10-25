@@ -43,8 +43,8 @@
         # priv: "CONNECT/{{ netbox_db }}:ALL"
         priv: ALL
 
-    # netbox_nginx_ssl_certificate: "/root/ssl/loki.combined"
-    # netbox_nginx_ssl_certificate_key: "/root/ssl/loki_opass.key"
+    # netbox_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ netbox_hostname }}/fullchain.pem"
+    # netbox_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ netbox_hostname }}/privkey.pem"
     nginx_ssl_protocols: "TLSv1.3"
     netbox_nginx_remove_default_config: true
 
