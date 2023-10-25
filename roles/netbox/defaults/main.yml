@@ -1,7 +1,7 @@
 ---
 # defaults file for ansible-netbox
 
-netbox_hostname: "{{ ansible_fqdn}}"
+netbox_hostname: "{{ ansible_fqdn }}"
 netbox_allowed_hosts: "{{ netbox_hostname }}"
 
 # Define url for NetBox API
@@ -124,5 +124,3 @@ netbox_superuser_script: |
       user.set_password(password)
       user.save()
       print("changed")
-
-
