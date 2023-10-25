@@ -1,0 +1,21 @@
+---
+# this builds the config of existing and new server on bacula. run whenever a new host is created.
+- name: Bacula server and config build
+  hosts: bacula-server
+  # create groups:
+  # - bacula
+  # - bacula_fd
+  # - bacula_sd
+  # - bacula_dir
+  # - bacula_console
+  roles:
+    - { role: geerlingguy.mysql }
+    - { role: stefanux.mysqlbackup, tags: mysqlbackup }
+    - { role: selfhostx.ansible.bacula, tags: bacula }
+
+  vars:
+    # see: https://github.com/selfhostx/ansible/blob/main/roles/bacula/defaults/main.yml
+    bacula_dir_db_engine: "mysql"
+
+  vars_files:
+    - my-vault.yml

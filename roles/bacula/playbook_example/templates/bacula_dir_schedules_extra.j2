@@ -1,0 +1,15 @@
+# example for additional Schedule:
+Schedule {
+  Name = "WeeklyCycle6timesADay"
+  Run = Full 1st sun at 01:00
+  Run = Differential 2nd sun at 01:00
+  Run = Full 3rd sun at 01:00
+  Run = Differential 4th sun at 01:00
+  Run = Differential 5th sun at 01:00
+  Run = Incremental mon-sat at 01:00
+  Run = Incremental mon-sun at 09:00
+  Run = Incremental mon-sun at 12:00
+  Run = Incremental mon-sun at 15:00
+  Run = Incremental mon-sun at 18:00
+  Run = Incremental mon-sun at 21:00
+}

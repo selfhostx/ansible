@@ -1,0 +1,16 @@
+bacula_dir_fqdn: "bacula.DOMAIN.TLD"
+bacula_sd_fqdn: "backup.DOMAIN.TLD"
+
+bacula_sd_pool_device_name: "Ringbuffer"
+bacula_sd_archive_device: "/srv/bacula-volumes"
+
+#bacula_dir_port: "59101"
+#bacula_fd_port: "59102"
+#bacula_sd_port: "59103"
+
+# Default: 60 days
+bacula_dir_pool_file_retention: "90 days"
+# Default: 6 months
+bacula_dir_pool_job_retention: "12 months"
+
+bacula_dir_max_jobs: 3

@@ -1,0 +1,12 @@
+bacula_dir_role: true
+
+bacula_dir_pool_max_volume_bytes: "50G"
+bacula_dir_pool_max_volumes: 100
+bacula_dir_pool_volume_rention: "3650 days"
+
+# define extra schedules in this file and put it in /templates:
+# bacula_dir_schedule_extra_template: "bacula_dir_schedules_extra.j2"
+
+# in case zabbix is used for monitoring
+# https://github.com/selfhostx/ansible/blob/main/roles/zabbix_checks/tasks/bacula.yml
+# zabbix_checks_bacula_enable: true
