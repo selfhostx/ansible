@@ -40,8 +40,6 @@ netbox_listen_port: 8001
 # Expose Prometheus monitoring metrics at the HTTP endpoint '/metrics'
 netbox_metrics_enabled: false
 
-netbox_pri_domain: domain.tld
-
 # Redis configurations
 netbox_redis_host: localhost
 netbox_redis_password: ""
@@ -57,7 +55,7 @@ netbox_redis_port: 6379
 
 netbox_superuser_username: netbox
 netbox_superuser_password: netbox
-netbox_superuser_email: "netbox@{{ netbox_pri_domain }}"
+netbox_superuser_email: "netbox@{{ netbox_hostname }}"
 
 netbox_pid_file: "/var/tmp/netbox.pid"
 netbox_service_main_name: "netbox"

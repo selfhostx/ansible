@@ -8,8 +8,6 @@
     - my-vault.yml
 
   vars:
-    netbox_pri_domain: "DOMAIN.TLD"
-
     netbox_superuser_username: YOUR_ADMINUSER
     # netbox_superuser_password: "-> Vault"
     netbox_superuser_email: "root@DOMAIN.TLD"
