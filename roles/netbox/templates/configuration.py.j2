@@ -132,8 +132,8 @@ EXEMPT_VIEW_PERMISSIONS = [
 LOGGING = {}
 
 # Setting this to True will permit only authenticated users to access any part of NetBox. By default, anonymous users
-# are permitted to access most data in NetBox (excluding secrets) but not make any changes.
-LOGIN_REQUIRED = False
+# are permitted to access most data in NetBox (excluding secrets) but not make any changes. FIXME -> var
+LOGIN_REQUIRED = True
 
 # The length of time (in seconds) for which a user will remain logged into the web UI before being prompted to
 # re-authenticate. (Default: 1209600 [14 days])
@@ -150,6 +150,7 @@ MAX_PAGE_SIZE = 1000
 # The file path where uploaded media such as image attachments are stored. A trailing slash is not needed. Note that
 # the default value of this setting is derived from the installed location.
 # MEDIA_ROOT = '/opt/netbox/netbox/media'
+MEDIA_ROOT = '{{ netbox_media_root }}'
 
 # By default uploaded media is stored on the local filesystem. Using Django-storages is also supported. Provide the
 # class path of the storage driver in STORAGE_BACKEND and any configuration options in STORAGE_CONFIG. For example:
@@ -206,20 +207,21 @@ REMOTE_AUTH_DEFAULT_PERMISSIONS = {}
 RELEASE_CHECK_TIMEOUT = 24 * 3600
 
 # This repository is used to check whether there is a new release of NetBox available. Set to None to disable the
-# version check or use the URL below to check for release in the official NetBox repository.
-RELEASE_CHECK_URL = None
-# RELEASE_CHECK_URL = 'https://api.github.com/repos/netbox-community/netbox/releases'
+# version check or use the URL below to check for release in the official NetBox repository. FIXME var
+# RELEASE_CHECK_URL = None
+RELEASE_CHECK_URL = 'https://api.github.com/repos/netbox-community/netbox/releases'
 
 # The file path where custom reports will be stored. A trailing slash is not needed. Note that the default value of
 # this setting is derived from the installed location.
 # REPORTS_ROOT = '/opt/netbox/netbox/reports'
+REPORTS_ROOT = '{{ netbox_reports_root }}'
 
 # Maximum execution time for background tasks, in seconds.
 RQ_DEFAULT_TIMEOUT = 300
 
 # The file path where custom scripts will be stored. A trailing slash is not needed. Note that the default value of
-# this setting is derived from the installed location.
-# SCRIPTS_ROOT = '/opt/netbox/netbox/scripts'
+# this setting is derived from the installed location. Default: /opt/netbox/netbox/scripts
+SCRIPTS_ROOT = '{{ netbox_scripts_root }}'
 
 # By default, NetBox will store session data in the database. Alternatively, a file path can be specified here to use
 # local file storage instead. (This can be useful for enabling authentication on a standby instance with read-only

@@ -86,6 +86,30 @@
     owner: "{{ netbox_user }}"
     group: "{{ netbox_group }}"
     state: link
+  notify:
+    - Restart netbox
+  become: true
+
+- name: Create data-dir
+  ansible.builtin.file:
+    path: "{{ netbox_data_dir }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: '0750'
+    state: directory
+  become: true
+
+- name: Create data-directories into netbox_data_dir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: '0750'
+    state: directory
+  with_items:
+    - "{{ netbox_media_root }}"
+    - "{{ netbox_reports_root }}"
+    - "{{ netbox_scripts_root }}"
   become: true
 
 - name: Creating {{ netbox_virtualenv }}

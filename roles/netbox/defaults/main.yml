@@ -28,6 +28,11 @@ netbox_home: "{{ netbox_install_dir + '/netbox' }}"
 netbox_app_path: "{{ netbox_home + '/netbox/netbox' }}"
 netbox_virtualenv: "{{ netbox_home + '/venv' }}"
 
+netbox_data_dir: "{{ netbox_home + '/netbox-data' }}"
+netbox_media_root: "{{ netbox_data_dir}}/media"
+netbox_reports_root: "{{ netbox_data_dir}}/reports }}"
+netbox_scripts_root: "{{ netbox_data_dir}}/scripts"
+
 # netbox only support PostgreSQL:
 netbox_db_host: localhost
 netbox_db_password: netbox
