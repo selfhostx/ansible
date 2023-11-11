@@ -16,7 +16,7 @@
 - name: Set ftp proxy (if defined)
   ansible.builtin.lineinfile:
     path: "{{ baserole_proxy_config }}"
-    regexp: '^https_proxy='
+    regexp: '^ftp_proxy='
     line: 'ftp_proxy="{{ baserole_proxy_ftp_server }}"'
   when: baserole_proxy_ftp_server is defined and baserole_proxy_ftp_server|length > 0
 
