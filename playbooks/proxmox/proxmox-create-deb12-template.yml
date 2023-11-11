@@ -7,15 +7,15 @@
     - MY_VAULT.yml
 
   vars:
-    # -> put into group_vars/proxmox.yml:
-    # proxmox_api_host: server1.domain.tld
-    # proxmox_create_node: server1
+    # override (defaults to ansible_hostname):
+    # proxmox_create_node: srv1
     # set if node name is not equal to ansible ssh-connection:
-    # proxmox_create_node_ansible: server1.domain.tld
-    
-    # -> vaulted vars:
+    # proxmox_create_node_ansible: NODE1.DOMAIN:TLD
+
+    # Proxmox:
     # proxmox_api_user: root@pam
-    # proxmox_api_pass: SECRET
+    # same as root:
+    # proxmox_api_pass: -> vault
 
     proxmox_vm_diskdevice: virtio0
     proxmox_vm_vga: qxl
@@ -23,9 +23,8 @@
     proxmox_net_config: "virtio,bridge=vmbr0"
     # destroy template (updating does not work)
     proxmox_destroy: True
-    # install pip?
-    proxmox_install_pip: True
     # install proxmoxer via pip?
+    proxmox_install_pip: True
     proxmox_install_proxmoxer: True
 
     cloudinit_download_folder: "/tmp/cloudinit"
@@ -42,6 +41,10 @@
         url: "https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2"
         hash_algorithm: sha512
         hash_checksum_file: "https://cdimage.debian.org/images/cloud/bullseye/latest/SHA512SUMS"
+      debian12:
+        url: "https://cdimage.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+        hash_algorithm: sha512
+        hash_checksum_file: "https://cdimage.debian.org/images/cloud/bookworm/latest/SHA512SUMS"
       ubuntu18_04:
         url: "https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img"
         hash_algorithm: sha256
@@ -58,11 +61,11 @@
   vars_prompt:
     - name: proxmox_vm_cloudinit_image
       prompt: "Name of the template (examples: template-cloudinit-deb11-latest, template-cloudinit-ubuntu22-04-latest): "
-      default: "template-cloudinit-deb11-latest"
+      default: "template-cloudinit-deb12-latest"
       private: no
     - name: cloudinit_vm_distribution
-      prompt: "which image do you want to use (debian10, debian11, ubuntu18_04, ubuntu20_04, ubuntu22_04): "
-      default: "debian11"
+      prompt: "which image do you want to use (debian10, debian11, debian12, ubuntu18_04, ubuntu20_04, ubuntu22_04): "
+      default: "debian12"
       private: no
     - name: proxmox_storage
       prompt: "Choose Storage: local, local-zfs "
