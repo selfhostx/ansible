@@ -200,6 +200,9 @@ Roadmap
   - hostfirewall
     - iptables/nftables -> geerlingguy.firewall (maybe iptables-persistent ?)
     - ufw
+**Proxy**
+  - tinyproxy [juju4.tinyproxy](https://galaxy.ansible.com/ui/standalone/roles/juju4/tinyproxy)
+  - *squid (maintainer needed)*
 
 **Clustering**
   - keepalived -> evrardjp.keepalived
