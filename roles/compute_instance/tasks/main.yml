@@ -1,0 +1,111 @@
+---
+# tasks file
+
+# include IPAM
+- name: Install requirements
+  ansible.builtin.include_tasks:
+    file: "install_requirements.yml"
+    apply:
+      tags:
+        - requirements
+  tags: requirements
+  when:
+    - compute_instance_install_requirements or compute_instance_install_pip
+
+- name: Include cloudinit-template-*.yml (when requested)
+  ansible.builtin.include_tasks:
+    file: "cloudinit-template-{{ compute_instance_virtualization_provider }}.yml"
+    apply:
+      tags:
+        - cloudinit_image_create
+  tags: cloudinit_image_create
+  when:
+    - cloudinit_image_create_enable
+
+# common tasks
+- name: Determine count of subdomains
+  ansible.builtin.set_fact:
+    my_levels: "{{ compute_instance_hostname.split('.') | length | int }}"
+
+- name: Sets fact dns zone
+  ansible.builtin.set_fact:
+    # split has optional parameter "maxsplit" which i use to substract the last two fields - domain and tld - from it. dont worry, my simple brain hurts too ;-)
+    my_dns_zone: "{{ compute_instance_hostname.split('.', lookup('ansible.builtin.vars', 'my_levels') | int - 2) | last }}"
+
+- name: Debug - Show Zone
+  ansible.builtin.debug:
+    msg: "compute_instance_hostname {{ compute_instance_hostname }} belongs to DNS-Zone: {{ my_dns_zone }}"
+  when: compute_instance_debug_mode_enable
+
+# include IPAM
+- name: Include ipam-*.yml
+  ansible.builtin.include_tasks:
+    file: "ipam-{{ compute_instance_ipam_provider }}.yml"
+    apply:
+      tags:
+        - compute
+  tags: compute
+  when:
+    - compute_instance_ipam_provider is defined
+
+# Debug
+- name: Print Debug info
+  when:
+    - compute_instance_debug_mode_enable
+    - compute_instance_virtualization_provider == "proxmox"
+  block:
+
+    - name: Show used IPv4 (proxmox)
+      ansible.builtin.debug:
+        msg: "assigned ipv4: {{ proxmox_network_ip_v4_prefixed }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - proxmox_network_ip_v4_prefixed is defined
+        - compute_instance_virtualization_provider == "proxmox"
+
+    - name: Show used IPv6 (proxmox)
+      ansible.builtin.debug:
+        msg: "assigned ipv6: {{ proxmox_network_ip_v6_prefixed }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - proxmox_network_ip_v6_prefixed is defined
+        - compute_instance_virtualization_provider == "proxmox"
+
+    - name: Show IPv4 gateway (proxmox)
+      ansible.builtin.debug:
+        msg: "{{ proxmox_network_gateway_v4 }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - proxmox_network_gateway_v4 is defined
+        - compute_instance_virtualization_provider == "proxmox"
+
+    - name: Show IPv6 gateway (proxmox)
+      ansible.builtin.debug:
+        msg: "{{ proxmox_network_gateway_v6 }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - proxmox_network_gateway_v6 is defined
+        - compute_instance_virtualization_provider == "proxmox"
+
+# instances
+- name: Include compute-*.yml
+  ansible.builtin.include_tasks:
+    file: "compute-{{ compute_instance_virtualization_provider }}.yml"
+    apply:
+      tags:
+        - dns
+  tags: compute
+  when:
+    - compute_instance_virtualization_provider is defined
+
+# DNS
+- name: Include dns-*.yml
+  ansible.builtin.include_tasks:
+    file: "dns-{{ compute_instance_dns_provider }}.yml"
+    apply:
+      tags:
+        - dns
+  tags: dns
+  when:
+    - dns_entry_create_enable
+    - compute_instance_dns_provider is defined

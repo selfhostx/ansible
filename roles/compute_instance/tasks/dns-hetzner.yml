@@ -1,0 +1,26 @@
+---
+- name: DNS (Hetzner) - set A-Record
+  community.dns.hetzner_dns_record_set:
+    state: present
+    zone: "{{ my_dns_zone }}"
+    prefix: "{{ compute_instance_hostname | replace('.' + my_dns_zone, '') }}"
+    type: A
+    ttl: "{{ compute_instance_dns_ttl }}"
+    value: "{{ proxmox_network_ip_v4_prefixed | ansible.utils.ipaddr('address') }}"
+    on_existing: replace
+    hetzner_token: "{{ compute_instance_hetzner_dns_api_token }}"
+  when:
+    - compute_instance_ip_v4 is defined and compute_instance_ip_v4 != "no"
+
+- name: DNS (Hetzner) - set AAAA-Record
+  community.dns.hetzner_dns_record_set:
+    state: present
+    zone: "{{ my_dns_zone }}"
+    prefix: "{{ compute_instance_hostname | replace('.' + my_dns_zone, '') }}"
+    type: AAAA
+    ttl: "{{ compute_instance_dns_ttl }}"
+    value: "{{ proxmox_network_ip_v6_prefixed | ansible.utils.ipaddr('address') }}"
+    on_existing: replace
+    hetzner_token: "{{ compute_instance_hetzner_dns_api_token }}"
+  when:
+    - compute_instance_ip_v6 is defined and compute_instance_ip_v6 != "no"

@@ -1,0 +1,19 @@
+---
+
+- name: Include role for pip
+  ansible.builtin.include_role:
+    name: "{{ compute_instance_install_pip_role }}"
+  when:
+    - compute_instance_install_pip
+
+- name: Install proxmoxer via pip
+  ansible.builtin.pip:
+    name: pynetbox
+  when:
+    - compute_instance_ipam_provider == "netbox"
+
+- name: Install proxmoxer via pip
+  ansible.builtin.pip:
+    name: proxmoxer
+  when:
+    - compute_instance_virtualization_provider == "proxmox"

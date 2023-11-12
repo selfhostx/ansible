@@ -1,0 +1,157 @@
+---
+# Defaults
+
+# valid choices: proxmox, vmware (stub)
+compute_instance_virtualization_provider: proxmox
+# valid choices: netbox, infobloxx (stub)
+compute_instance_ipam_provider: netbox
+# valid choices: hetzner, inwx
+compute_instance_dns_provider: hetzner
+
+# install required pip modules?
+compute_instance_install_requirements: true
+compute_instance_install_pip_enable: false
+compute_instance_install_pip_role: "geerlingguy.pip"
+
+# DNS
+# TTL 4h -> 14400
+compute_instance_dns_ttl: 14400
+
+# print additional debug output:
+compute_instance_debug_mode_enable: false
+
+# netbox
+# human-readable list of prefixes (example values):
+network_prefix_list:
+  home_network_v4:
+    prefix: "192.168.178.0/24"
+    proxmox_host_bridge: vmbr0
+  home_network_v6:
+    prefix: "fd00::/8"
+    proxmox_host_bridge: vmbr0
+
+netbox_fail_if_ip_entry_exists: true
+# in order to query for the defined gateway in each prefix please tag one (!) IP-address with this tag:
+netbox_gateway_determine_method: "netbox_tag"
+netbox_gateway_tag: "gateway"
+
+# override (defaults to ansible_hostname):
+proxmox_create_node: localhost
+# set if node name is not equal to ansible ssh-connection (usually a FQDN is used here):
+proxmox_create_node_ansible: localhost
+
+proxmox_cluster_name: "proxcluster1"
+
+dns_entry_create_enable: true
+# currently supported: inwx, hetzner
+dns_entry_create_provider: ""
+
+# compute_instance_disksize: values -> disk size total (example: "20G") or grow by GB: (example: "+18G")
+proxmox_vm_diskdevice: virtio0
+proxmox_vm_vga: qxl
+proxmox_vm_onboot: true
+proxmox_vm_ostype: l26
+proxmox_vm_distribution: debian
+proxmox_vm_agent: true
+proxmox_vm_autostart: true
+
+# set to true if you want a new template to be generated:
+cloudinit_image_create_enable: false
+
+cloudinit_os_default_user: debian
+# FIXME generate random values?
+# cloudinit_os_default_rootpassword: -> vault
+# cloudinit_os_default_userpassword: -> vault
+# baserole_root_password_hash_sha512: -> vault
+# baserole_user_password_hash_sha512: -> vault
+cloudinit_disable_root: false
+cloudinit_package_upgrade: true
+cloudinit_resize_rootfs: true
+cloudinit_move_network_config_to_main_file: true
+
+proxmox_resize: true
+proxmox_start: true
+proxmox_update: true
+
+# upgrades packages (will take time if the cloudinit_image is outdated)
+proxmox_upgrade_packages_on_create: true
+
+# move config from /etc/network/interfaces.d/50-cloud-init to /etc/network/interfaces (or /etc/netplan/50-cloud-init.yaml or ):
+cloudinit_move_network_to_main_file: true
+
+compute_instance_cloudinit_image: "template-cloudinit-deb12-latest"
+
+proxmox_snippet_dir: /var/lib/vz/snippets
+proxmox_snippet_storage: local
+# storage 'proxmox_cephfs' does not support content-type 'images':
+# proxmox_snippet_dir: /mnt/pve/proxmox_cephfs/snippets
+# proxmox_snippet_storage: proxmox_cephfs
+
+# proxmox_snippet_user_data_file: user-data.yml
+proxmox_snippet_user_data_file: user-data-{{ compute_instance_hostname }}.yml
+proxmox_snippet_user_data_dest: "{{ proxmox_snippet_dir }}/{{ proxmox_snippet_user_data_file }}"
+proxmox_snippet_user_data_template: "templates/proxmox_cloudinit_user_data.j2"
+
+# set dns server in custom user-config !! will not work on proxmox since DNS searchdomain and DNS server defaults to host settings (of node running the vm)!
+cloudinit_dns_set_servers: true
+# order: google-dns, cloudflare, quad9 (change to your needs!), these setting will be used to set cloudinit_dns_servers depending on network_mode
+cloudinit_dns_servers_v4only:
+  - 8.8.4.4
+  - 1.1.1.1
+  - 9.9.9.9
+
+cloudinit_dns_servers_v6only:
+  - 2001:4860:4860::8888
+  - 2606:4700:4700::1111
+  - 2620:fe::fe
+
+cloudinit_dns_servers_dualstack:
+  - 8.8.4.4
+  - 1.1.1.1
+  - 2620:fe::fe
+
+cloudinit_os_ssh_pubkeys: []
+# example:
+#cloudinit_os_ssh_pubkeys:
+#  - ssh-rsa AAAAB... pubkey1
+#  - ssh-ed25519 AAAA... pubkey2
+
+# default is false:
+cloudinit_os_ssh_root_pwauth: true
+cloudinit_os_timezone: "Europe/Berlin"
+
+# Vars for generating the template
+cloudinit_download_folder: "/tmp/cloudinit"
+cloudinit_download_filename: "cloudinit-image.qcow2"
+cloudinit_download_image: true
+
+# remove existing image if present:
+compute_instance_cloudinit_image_destroy_old: false
+
+# for debugging:
+# cloudinit_download_image: false
+cloudinit_images:
+  debian10:
+    url: "https://cdimage.debian.org/images/cloud/buster/latest/debian-10-genericcloud-amd64.qcow2"
+    hash_algorithm: sha512
+    hash_checksum_file: "https://cdimage.debian.org/images/cloud/buster/latest/SHA512SUMS"
+  debian11:
+    url: "https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2"
+    hash_algorithm: sha512
+    hash_checksum_file: "https://cdimage.debian.org/images/cloud/bullseye/latest/SHA512SUMS"
+  debian12:
+    url: "https://cdimage.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+    hash_algorithm: sha512
+    hash_checksum_file: "https://cdimage.debian.org/images/cloud/bookworm/latest/SHA512SUMS"
+  ubuntu18_04:
+    url: "https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img"
+    hash_algorithm: sha256
+    hash_checksum_file: "https://cloud-images.ubuntu.com/bionic/current/SHA256SUMS"
+  ubuntu20_04:
+    url: "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
+    hash_algorithm: sha256
+    hash_checksum_file: "https://cloud-images.ubuntu.com/focal/current/SHA256SUMS"
+  ubuntu22_04:
+    url: "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+    hash_algorithm: sha256
+    hash_checksum_file: "https://cloud-images.ubuntu.com/jammy/current/SHA256SUMS"

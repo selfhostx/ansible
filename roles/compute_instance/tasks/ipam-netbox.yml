@@ -1,0 +1,255 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/netbox/netbox/
+
+# proxmox
+- name: Netbox for proxmox
+  # cloud-init iso needed if no shared filesystem and if its not a cluster
+  delegate_to: "{{ proxmox_create_node_ansible | default(proxmox_create_node) }}"
+  run_once: true
+  when:
+    - compute_instance_virtualization_provider  == "proxmox"
+  block:
+
+    - name: Lookup prefix details for given prefix-name and set network config (v4)
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
+        proxmox_network_prefix_v4_full: "{{ item.value.prefix }}"
+      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
+      when:
+        - compute_instance_ip_v4 != "no"
+        - "compute_instance_ip_v4 in item.key"
+        - not compute_instance_ip_v4 | ansible.utils.ipaddr
+
+    - name: Lookup prefix details for given prefix-name and set network config (v6)
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
+        proxmox_network_prefix_v6_full: "{{ item.value.prefix }}"
+      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
+      when:
+        - compute_instance_ip_v6 != "no"
+        - "compute_instance_ip_v6 in item.key"
+        - not compute_instance_ip_v6 | ansible.utils.ipaddr
+
+    - name: Lookup bridge for a given ip, calculate prefix locally from IP and set network config (v4)
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
+        proxmox_network_prefix_v4_full: "{{ compute_instance_ip_v4 | ansible.utils.ipaddr('network/prefix') }}"
+        proxmox_network_ip_v4_prefixed: "{{ compute_instance_ip_v4 }}"
+      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
+      when:
+        - compute_instance_ip_v4 != "no"
+        - compute_instance_ip_v4 | ansible.utils.ipaddr
+
+    - name: Lookup bridge for a given ip, calculate prefix locally from IP and set network config (v4)
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
+        proxmox_network_prefix_v6_full: "{{ compute_instance_ip_v6 | ansible.utils.ipaddr('network/prefix') }}"
+        proxmox_network_ip_v6_prefixed: "{{ compute_instance_ip_v6 }}"
+      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
+      when:
+        - compute_instance_ip_v6 != "no"
+        - compute_instance_ip_v6 | ansible.utils.ipaddr
+
+    - name: Debug - Show proxmox_net0 and proxmox_network_prefix_v4_full
+      ansible.builtin.debug:
+        msg: "proxmox_net0: {{ proxmox_net0 }} and proxmox_network_prefix_v4_full is {{ proxmox_network_prefix_v4_full }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - proxmox_network_prefix_v4_full is defined
+
+    - name: Debug - Show proxmox_net0 and proxmox_network_prefix_v6_full
+      ansible.builtin.debug:
+        msg: "proxmox_net0: {{ proxmox_net0 }} and proxmox_network_prefix_v6_full is {{ proxmox_network_prefix_v6_full }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - proxmox_network_prefix_v6_full is defined
+
+    - name: Netbox - query given IP and fail if entries exist (v4)
+      ansible.builtin.fail:
+        msg: "{{ proxmox_network_ip_v4_prefixed }} is already present in prefix {{ proxmox_network_prefix_v4_full }}"
+      when:
+        - netbox_fail_if_ip_entry_exists
+        - compute_instance_ip_v4 != "no"
+        - proxmox_network_ip_v4_prefixed is defined
+        - query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) | length > 0
+      vars:
+        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v4_full }} address={{ proxmox_network_ip_v4_prefixed }}"
+
+    - name: Netbox - query given IP and fail if entries exist (v6)
+      ansible.builtin.fail:
+        msg: "{{ proxmox_network_ip_v6_prefixed }} is already present in prefix {{ proxmox_network_prefix_v6_full }}"
+      when:
+        - netbox_fail_if_ip_entry_exists
+        - compute_instance_ip_v6 != "no"
+        - proxmox_network_ip_v6_prefixed is defined
+        - query('netbox.netbox.nb_lookup', '#ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) | length > 0
+      vars:
+        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v6_full }} address={{ proxmox_network_ip_v6_prefixed }}"
+
+    - name: Netbox - create VM
+      netbox.netbox.netbox_virtual_machine:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          name: "{{ compute_instance_hostname }}"
+          cluster: "{{ proxmox_cluster_name }}"
+          vcpus: "{{ compute_instance_cores }}"
+          # in MB:
+          memory: "{{ compute_instance_memory_max }}"
+          # in GB:
+          disk: "{{ compute_instance_disksize }}"
+        state: present
+      register: created_vm
+
+    - name: Netbox - show created VM
+      ansible.builtin.debug:
+        msg: "Created VM: {{ created_vm }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - created_vm is defined
+
+    - name: Netbox - create interface for VM
+      netbox.netbox.netbox_vm_interface:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          name: "{{ compute_instance_hostname }}-eth0"
+          virtual_machine: "{{ compute_instance_hostname }}"
+        state: present
+      register: created_interface
+
+    - name: Debug - show created interface in netbox
+      ansible.builtin.debug:
+        msg: "Interface: {{ created_interface }}"
+      when:
+        - compute_instance_debug_mode_enable
+        - created_interface is defined
+
+    - name: Netbox - create VM with next available v4
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          prefix: "{{ proxmox_network_prefix_v4_full }}"
+          dns_name: "{{ compute_instance_hostname }}"
+          assigned_object:
+            virtual_machine: "{{ compute_instance_hostname }}"
+            name: "{{ compute_instance_hostname }}-eth0"
+          status: active
+        state: new
+      when:
+        - compute_instance_ip_v4 != "no"
+        - proxmox_network_ip_v4_prefixed is undefined
+        # - not compute_instance_ip_v4 | ansible.utils.ipaddr
+      register: my_ip_v4
+
+    - name: Netbox - create VM with next available v6
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          prefix: "{{ proxmox_network_prefix_v6_full }}"
+          dns_name: "{{ compute_instance_hostname }}"
+          assigned_object:
+            virtual_machine: "{{ compute_instance_hostname }}"
+            name: "{{ compute_instance_hostname }}-eth0"
+          status: active
+        state: new
+      when:
+        - compute_instance_ip_v6 != "no"
+        - proxmox_network_ip_v6_prefixed is undefined
+        # - not compute_instance_ip_v4 | ansible.utils.ipaddr
+      register: my_ip_v6
+
+    - name: Netbox - set new assigned IP as proxmox_network_ip_v4_prefixed # no-handler
+      ansible.builtin.set_fact:
+        proxmox_network_ip_v4_prefixed: "{{ my_ip_v4.ip_address.address }}"
+      when:
+        - my_ip_v4.changed
+
+    - name: Netbox - set new assigned IP as proxmox_network_ip_v6_prefixed # no-handler
+      ansible.builtin.set_fact:
+        proxmox_network_ip_v6_prefixed: "{{ my_ip_v6.ip_address.address }}"
+      when:
+        - my_ip_v6.changed
+
+    - name: Netbox - create VM with given IPv4
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          address: "{{ proxmox_network_ip_v4_prefixed }}"
+          dns_name: "{{ compute_instance_hostname }}"
+          assigned_object:
+            virtual_machine: "{{ compute_instance_hostname }}"
+            name: "{{ compute_instance_hostname }}-eth0"
+          status: active
+      when:
+        - compute_instance_ip_v4 != "no"
+        - compute_instance_ip_v4 | ansible.utils.ipaddr
+
+    - name: Netbox - create VM with given IPv6
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          address: "{{ proxmox_network_ip_v6_prefixed }}"
+          dns_name: "{{ compute_instance_hostname }}"
+          assigned_object:
+            virtual_machine: "{{ compute_instance_hostname }}"
+            name: "{{ compute_instance_hostname }}-eth0"
+          status: active
+      when:
+        - compute_instance_ip_v6 != "no"
+        - compute_instance_ip_v6 | ansible.utils.ipaddr
+
+    - name: Netbox - query for IPv4 gateway # ignore-errors
+      ansible.builtin.set_fact:
+        my_gateway_v4: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) }}"
+      vars:
+        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v4_full }} tag={{ netbox_gateway_tag }}"
+      # asking for non-existing tags results in task failure :-/
+      ignore_errors: true
+      when:
+        - netbox_gateway_determine_method == 'netbox_tag'
+      tags: queries
+
+    - name: Netbox - query for IPv6 gateway # ignore-errors
+      ansible.builtin.set_fact:
+        my_gateway_v6: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) }}"
+      vars:
+        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v6_full }} tag={{ netbox_gateway_tag }}"
+      # asking for non-existing tag results in task failure :-/
+      ignore_errors: true
+      when:
+        - netbox_gateway_determine_method == 'netbox_tag'
+      tags: queries
+
+    - name: Netbox - set IPv4 gateway from results
+      ansible.builtin.set_fact:
+        # msg: "{{ my_gateway | community.general.json_query('value') }}"
+        # msg: "{{ my_gateway.value.address }}"
+        proxmox_network_gateway_v4: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
+      loop: "{{ my_gateway_v4 }}"
+      when:
+        - my_gateway_v4 is defined
+      tags: queries
+
+    - name: Netbox - set IPv6 gateway from results
+      ansible.builtin.set_fact:
+        # msg: "{{ my_gateway | community.general.json_query('value') }}"
+        # msg: "{{ my_gateway.value.address }}"
+        proxmox_network_gateway_v6: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
+      loop: "{{ my_gateway_v6 }}"
+      when:
+        - my_gateway_v6 is defined
+      tags: queries
+
+- name: "Netbox for VMWare"
+  when:
+    - compute_instance_virtualization_provider  == "vmware"
+  block:
+
+    - name: Netbox - VMWare Stub warning
+      ansible.builtin.debug:
+        msg: "VMWare not implemented yet"

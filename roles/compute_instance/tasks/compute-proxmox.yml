@@ -1,0 +1,125 @@
+---
+# proxmox tasks
+
+- name: Proxmox - set network mode dualstack when both v4 and v6 address are present
+  ansible.builtin.set_fact:
+    proxmox_vm_network_mode: dualstack
+    proxmox_vm_ip_cloud_init_string: "ip={{ proxmox_network_ip_v4_prefixed }},gw={{ proxmox_network_gateway_v4 }},ip6={{ proxmox_network_ip_v6_prefixed }},gw6={{ proxmox_network_gateway_v6 }}"
+    cloudinit_dns_servers: "{{ cloudinit_dns_servers_dualstack }}"
+  when:
+    - compute_instance_ip_v4 is defined and compute_instance_ip_v4 != "no"
+    - compute_instance_ip_v6 is defined and compute_instance_ip_v6 != "no"
+
+- name: Proxmox - Set network mode v4only
+  ansible.builtin.set_fact:
+    proxmox_vm_network_mode: v4only
+    proxmox_vm_ip_cloud_init_string: "ip={{ proxmox_network_ip_v4_prefixed }},gw={{ proxmox_network_gateway_v4 }}"
+    cloudinit_dns_servers: "{{ cloudinit_dns_servers_v4only }}"
+  when:
+    - compute_instance_ip_v4 is defined and compute_instance_ip_v4 != "no"
+    - compute_instance_ip_v6 is not defined or compute_instance_ip_v6 == "no"
+
+- name: Proxmox - Set network mode v6only
+  ansible.builtin.set_fact:
+    proxmox_vm_network_mode: v6only
+    proxmox_vm_ip_cloud_init_string: "ip6={{ proxmox_network_ip_v6_prefixed }},gw6={{ proxmox_network_gateway_v6 }}"
+    cloudinit_dns_servers: "{{ cloudinit_dns_servers_v6only }}"
+  when:
+    - compute_instance_ip_v4 is not defined or compute_instance_ip_v4 == "no"
+    - compute_instance_ip_v6 is defined and compute_instance_ip_v6 != "no"
+
+- name: Proxmox - print network config for cloud-init
+  ansible.builtin.debug:
+    msg: "cloud-init-config is: {{ proxmox_vm_ip_cloud_init_string }}"
+  when:
+    - compute_instance_debug_mode_enable
+
+- name: Create cloud init user-data for guest
+  ansible.builtin.template:
+    src: "{{ proxmox_snippet_user_data_template }}"
+    dest: "{{ proxmox_snippet_user_data_dest }}"
+    mode: '0640'
+
+- name: Proxmox - clone VM
+  community.general.proxmox_kvm:
+    node: "{{ proxmox_create_node }}"
+    name: "{{ compute_instance_hostname }}"
+    pool: "{{ proxmox_pool | default(omit) }}"
+    storage: "{{ compute_instance_storage }}"
+    clone: "{{ compute_instance_cloudinit_image }}"
+    timeout: 120
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
+  register: proxvm
+
+#  - name: Waiting to start virtual server machine completely
+#    wait_for:
+#        timeout: 45
+#    when: proxvm.changed == true
+
+- name: Proxmox - resize Disk
+  ansible.builtin.command: "qm resize {{ proxvm.vmid }} {{ proxmox_vm_diskdevice | default('virtio0') }}  {{ compute_instance_disksize }}G"
+  changed_when: true
+  when: proxmox_resize
+
+- name: Proxmox - Configure VM
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
+    node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+    vmid: "{{ proxvm.vmid }}"
+    name: "{{ compute_instance_hostname }}"
+    cores: "{{ compute_instance_cores }}"
+    memory: "{{ compute_instance_memory_max }}"
+    vga: "{{ proxmox_vm_vga }}"
+    boot: c
+    bootdisk: virtio0
+    onboot: "{{ proxmox_vm_onboot | lower }}"
+    ostype: "{{ proxmox_vm_ostype }}"
+    agent: "{{ proxmox_vm_agent | lower }}"
+    autostart: "{{ proxmox_vm_autostart | lower }}"
+    serial:
+      serial0: socket
+    update: "{{ proxmox_update }}"
+    # state: present
+    cicustom: "user={{ proxmox_snippet_storage }}:snippets/{{ proxmox_snippet_user_data_file }}"
+    # disabled since it does not work (see extra task)
+    # docs: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#parameter-net
+    # net:
+      # net[n]: 'model="XX:XX:XX:XX:XX:XX",bridge="value",rate="value",tag="value",firewall="1|0",trunks="vlanid"'
+      # net0: '{{ proxmox_net }}'
+    ipconfig:
+      # doku: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#parameter-ipconfig
+      # ipconfig[n]='[gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,ip=<IPv4Format/CIDR>] [,ip6=<IPv6Format/CIDR>]'
+      ipconfig0: '{{ proxmox_vm_ip_cloud_init_string }}'
+
+    # the following options are visible in web-GUI, but we do not set them since we use cicustom:
+    # ciuser: myUSER
+    # cipassword: "{{ cloudinit_os_default_userpassword }}"
+    # searchdomains: 'myDOMAIN.TLD'
+    # 3 nameservers at max:
+    nameservers: "{{ cloudinit_dns_servers }}"
+    # sshkeys: |
+    #  ssh-rsa AAAA... comment1
+    #  ssh-ed25519 AAAA... comment2
+
+- name: Proxmox - configure network adapter # noqa no-changed-when
+  # workaround since net0 is ignored on update (see shttps://github.com/ansible-collections/community.general/issues/1342)
+  ansible.builtin.command: "qm set {{ proxvm.vmid }} -net0 {{ proxmox_net0 }}"
+  # ansible.builtin.command: "qm set {{ proxvm.vmid }} -net0 {{ proxmox_net0 }},tag={{ proxmox_vm_vlan }}"
+
+- name: Add cloud-init drive # noqa no-changed-when
+  ansible.builtin.command: "qm set {{ proxvm.vmid }} --ide2 {{ proxmox_snippet_storage }}:cloudinit"
+
+# if "state: started" in create-task, not all config is correct (i.e. bootorder), so start it afterwards:
+- name: Proxmox - start VM
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
+    node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+    vmid: "{{ proxvm.vmid }}"
+    state: started
+  when: proxmox_start

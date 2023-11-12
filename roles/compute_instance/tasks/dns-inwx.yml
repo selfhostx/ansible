@@ -1,0 +1,26 @@
+---
+- name: DNS (INWX) - set A-Record
+  inwx.collection.dns:
+    domain: "{{ my_dns_zone }}"
+    type: A
+    record: "{{ compute_instance_hostname | replace('.' + my_dns_zone, '') }}"
+    value: "{{ proxmox_network_ip_v4_prefixed | ansible.utils.ipaddr('address') }}"
+    solo: true
+    ttl: "{{ compute_instance_dns_ttl }}"
+    username: "{{ compute_instance_dns_inwx_username }}"
+    password: "{{ compute_instance_dns_inwx_password }}"
+  when:
+    - compute_instance_ip_v4 is defined and compute_instance_ip_v4 != "no"
+
+- name: DNS (INWX) - set AAAA-Record
+  inwx.collection.dns:
+    domain: "{{ my_dns_zone }}"
+    type: AAAA
+    record: "{{ compute_instance_hostname | replace('.' + my_dns_zone, '') }}"
+    value: "{{ proxmox_network_ip_v6_prefixed | ansible.utils.ipaddr('address') }}"
+    solo: true
+    ttl: "{{ compute_instance_dns_ttl }}"
+    username: "{{ compute_instance_dns_inwx_username }}"
+    password: "{{ compute_instance_dns_inwx_password }}"
+  when:
+    - compute_instance_ip_v6 is defined and compute_instance_ip_v6 != "no"

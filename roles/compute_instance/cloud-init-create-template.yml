@@ -1,0 +1,29 @@
+---
+# source:  https://forum.proxmox.com/threads/regenerate-cloud-init-image-using-ansible.89964/
+
+- name: "Creates a new cloud-init image"
+  hosts: proxmox
+
+  roles:
+    - { role: selfhostx.ansible.compute_instance, tags: compute_instance }
+
+  vars_files:
+    - MY_VAULT.yml
+
+  vars:
+
+    cloudinit_image_create_enable: true
+
+  vars_prompt:
+    - name: compute_instance_cloudinit_image
+      prompt: "Template to use (Examples:  template-cloudinit-deb12-latest, template-cloudinit-ubuntu22-04-latest, ...) "
+      default: "template-cloudinit-deb12-latest"
+      private: false
+    - name: compute_instance_distribution
+      prompt: "which image do you want to use (debian10, debian11, debian12, ubuntu18_04, ubuntu20_04, ubuntu22_04): "
+      default: "debian12"
+      private: false
+    - name: compute_instance_storage
+      prompt: "Choose Storage: local, local-zfs "
+      default: "local-zfs"
+      private: false

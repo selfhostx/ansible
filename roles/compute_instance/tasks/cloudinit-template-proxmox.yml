@@ -1,0 +1,67 @@
+---
+# source:  https://forum.proxmox.com/threads/regenerate-cloud-init-image-using-ansible.89964/
+
+- name: Create download directory
+  ansible.builtin.file:
+    path: "{{ cloudinit_download_folder }}"
+    owner: root
+    group: root
+    mode: '700'
+    state: directory
+
+- name: Download cloud image
+  ansible.builtin.get_url:
+    url: "{{ item.value.url }}"
+    checksum: "{{ item.value.hash_algorithm + ':' + item.value.hash_checksum_file }}"
+    dest: "{{ cloudinit_download_folder }}/{{ cloudinit_download_filename }}"
+  when:
+    - cloudinit_download_image
+    - item.key == compute_instance_distribution
+  loop: "{{ lookup('dict', cloudinit_images) }}"
+
+- name: Destroy old template
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
+    name: "{{ compute_instance_cloudinit_image }}"
+    state: absent
+  when: compute_instance_cloudinit_image_destroy_old
+
+- name: Create empty VM for cloud-Init
+  community.general.proxmox_kvm:
+    node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+    name: "{{ compute_instance_cloudinit_image }}"
+    description: "updated on: {{ ansible_date_time.iso8601 }}"
+    pool: "{{ proxmox_pool | default(omit) }}"
+    boot: c
+    bootdisk: virtio0
+    ide:
+      ide2: "none,media=cdrom"
+    scsihw: virtio-scsi-pci
+    ostype: "{{ proxmox_vm_ostype }}"
+    timeout: 120
+    serial:
+      serial0: socket
+    net:
+      net0: '{{ proxmox_net_config }}'
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
+  register: proxvm
+
+- name: Import cloudinit disk # noqa no-changed-when
+  ansible.builtin.command: "qm importdisk {{ proxvm.vmid }} {{ cloudinit_download_folder }}/{{ cloudinit_download_filename }} {{ compute_instance_storage }}"
+
+- name: Attach unused0 disk to virtio # noqa no-changed-when
+  ansible.builtin.command: "qm set {{ proxvm.vmid }} --virtio0 {{ compute_instance_storage + ':' + 'vm-' + proxvm.vmid|string + '-disk-0' }}"
+
+- name: Convert VM to template
+  community.general.proxmox_kvm:
+    node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
+    name: "{{ compute_instance_cloudinit_image }}"
+    template: true
+    update: true
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
