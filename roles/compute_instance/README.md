@@ -24,14 +24,16 @@ REQUIREMENTS
 ============
 
 on controller:
-# ansible-galaxy collection install community.general inwx.collection community.dns
-#   https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_proxmox_module.html
+- ansible-galaxy collection install community.general inwx.collection community.dns
+- https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_proxmox_module.html
 
 on target:
-# pip3 install netaddr proxmoxer pynetbox
+- pip3 install netaddr proxmoxer pynetbox
 
-# VM-template on proxmox with name of var "compute_instance_cloudinit_image".
+on virtualization host:
+- VM-template on proxmox with name of var "compute_instance_cloudinit_image".
 
+role is able to install requirements on target.
 
 State
 =====
