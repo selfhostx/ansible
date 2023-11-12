@@ -10,7 +10,9 @@ collections:
   - name: ansible.posix
   - name: chocolatey.chocolatey
   - name: community.crypto
+  - name: community.dns
   - name: community.general
   - name: community.libvirt
   - name: community.mysql
   - name: community.zabbix
+  - name: inwx.collection
