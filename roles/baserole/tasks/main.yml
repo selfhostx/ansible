@@ -1,6 +1,6 @@
 ---
 
-- name: Print vaultwarden_pip_extra_vars
+- name: Print extra_vars
   ansible.builtin.debug:
     msg: "ansible_os_family: {{ ansible_os_family }} ansible_distribution: {{ ansible_distribution }} ansible_distribution_major_version: {{ ansible_distribution_major_version }}"
   when: baserole_debug_mode_enable
