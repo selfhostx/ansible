@@ -18,7 +18,7 @@
       prompt: "hostname (FQDN like newhost.domain.tld) "
       private: false
     - name: compute_instance_distribution
-      prompt: "Which Linux distribution is used (debian, ubuntu) "
+      prompt: "Which Linux distribution is used (debian, ubuntu, centos) "
       default: "debian"
       private: false
     - name: compute_instance_cloudinit_image
@@ -57,9 +57,9 @@
     compute_instance_dns_provider: inwx
 
     # DNS
-    compute_instance_dns_hetzner_api_token: "{{ hetzner_dns_api_token }}"
-    compute_instance_dns_inwx_username: "{{ inwx_dns_user }}"
-    compute_instance_dns_inwx_password: "{{ inwx_dns_password }}"
+    # compute_instance_dns_hetzner_api_token: "-> vault"
+    # compute_instance_dns_inwx_username: "-> vault"
+    # compute_instance_dns_inwx_password: "-> vault"
     compute_instance_dns_ttl: 600
 
     compute_instance_debug_mode_enable: true

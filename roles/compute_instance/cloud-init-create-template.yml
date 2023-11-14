@@ -13,6 +13,11 @@
   vars:
 
     cloudinit_image_create_enable: true
+    # remove old template:
+    compute_instance_cloudinit_image_destroy_old: true
+    # required if no cluster with shared filesystem:
+    proxmox_create_node: node1
+    # proxmox_create_node_ansible: node1.domain.tld
 
   vars_prompt:
     - name: compute_instance_cloudinit_image
@@ -20,7 +25,7 @@
       default: "template-cloudinit-deb12-latest"
       private: false
     - name: compute_instance_distribution
-      prompt: "which image do you want to use (debian10, debian11, debian12, ubuntu18_04, ubuntu20_04, ubuntu22_04): "
+      prompt: "which image do you want to use (centos7_amd64, centos8_stream_amd64, centos9_stream_amd64, debian10_amd64, debian11_amd64, debian12_amd64, ubuntu18_04_amd64, ubuntu20_04_amd64, ubuntu22_04_amd64): "
       default: "debian12"
       private: false
     - name: compute_instance_storage
