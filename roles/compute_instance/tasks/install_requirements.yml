@@ -4,9 +4,9 @@
   ansible.builtin.include_role:
     name: "{{ compute_instance_install_pip_role }}"
   when:
-    - compute_instance_install_pip
+    - compute_instance_install_pip_enable
 
-- name: Install proxmoxer via pip
+- name: Install pynetbox via pip
   ansible.builtin.pip:
     name: pynetbox
   when:

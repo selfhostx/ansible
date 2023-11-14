@@ -35,13 +35,15 @@ bootcmd:
 # run commands in system (no comments allowed here):
 runcmd:
   - [ sh, -c, echo "=========runcmd=========" ]
+{% if cloudinit_grub_cmdline_enabled %}
 {% if compute_instance_distribution == "debian" %}
-  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=\"\"/GRUB_CMDLINE_LINUX_DEFAULT=\"net.ifnames=0 biosdevname=0\"/' /etc/default/grub
+  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=\"\"/GRUB_CMDLINE_LINUX_DEFAULT={{ cloudinit_grub_cmdline_string }}/' {{ cloudinit_grub_cmdline_file }}
 {% endif %}
 {% if compute_instance_hostname == "ubuntu" %}
-  - sed -i 's/^GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' /etc/default/grub
+  - sed -i 's/^GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX={{ cloudinit_grub_cmdline_string }}/' {{ cloudinit_grub_cmdline_file }}
 {% endif %}
   - update-grub
+{% endif %}
 {% if cloudinit_move_network_config_to_main_file %}
   - echo "source /etc/network/interfaces.d/*\n" > /etc/network/interfaces
   - sed /^#/d /etc/network/interfaces.d/50-cloud-init >> /etc/network/interfaces

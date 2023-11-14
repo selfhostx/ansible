@@ -10,7 +10,7 @@
         - requirements
   tags: requirements
   when:
-    - compute_instance_install_requirements or compute_instance_install_pip
+    - compute_instance_install_requirements or compute_instance_install_pip_enable
 
 - name: Include cloudinit-template-*.yml (when requested)
   ansible.builtin.include_tasks:

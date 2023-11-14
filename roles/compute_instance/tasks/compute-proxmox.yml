@@ -40,13 +40,15 @@
     dest: "{{ proxmox_snippet_user_data_dest }}"
     mode: '0640'
 
-- name: Proxmox - clone VM
+- name: Proxmox - clone instance
   community.general.proxmox_kvm:
     node: "{{ proxmox_create_node }}"
     name: "{{ compute_instance_hostname }}"
+    clone: "{{ compute_instance_cloudinit_image }}"
     pool: "{{ proxmox_pool | default(omit) }}"
     storage: "{{ compute_instance_storage }}"
-    clone: "{{ compute_instance_cloudinit_image }}"
+    scsihw: "{{ proxmox_vm_scsihw }}"
+    ostype: "{{ proxmox_vm_ostype }}"
     timeout: 120
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
@@ -59,15 +61,12 @@
 #    when: proxvm.changed == true
 
 - name: Proxmox - resize Disk
-  ansible.builtin.command: "qm resize {{ proxvm.vmid }} {{ proxmox_vm_diskdevice | default('virtio0') }}  {{ compute_instance_disksize }}G"
+  ansible.builtin.command: "qm resize {{ proxvm.vmid }} {{ proxmox_vm_diskdevice }}  {{ compute_instance_disksize }}G"
   changed_when: true
   when: proxmox_resize
 
-- name: Proxmox - Configure VM
+- name: Proxmox - Configure instance
   community.general.proxmox_kvm:
-    api_user: "{{ proxmox_api_user }}"
-    api_password: "{{ proxmox_api_pass }}"
-    api_host: "{{ proxmox_api_host }}"
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     vmid: "{{ proxvm.vmid }}"
     name: "{{ compute_instance_hostname }}"
@@ -75,9 +74,10 @@
     memory: "{{ compute_instance_memory_max }}"
     vga: "{{ proxmox_vm_vga }}"
     boot: c
-    bootdisk: virtio0
+    bootdisk: "{{ proxmox_vm_bootdisk | lower }}"
+    scsihw: "{{ proxmox_vm_scsihw | lower }}"
     onboot: "{{ proxmox_vm_onboot | lower }}"
-    ostype: "{{ proxmox_vm_ostype }}"
+    ostype: "{{ proxmox_vm_ostype | lower }}"
     agent: "{{ proxmox_vm_agent | lower }}"
     autostart: "{{ proxmox_vm_autostart | lower }}"
     serial:
@@ -104,6 +104,9 @@
     # sshkeys: |
     #  ssh-rsa AAAA... comment1
     #  ssh-ed25519 AAAA... comment2
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
 
 - name: Proxmox - configure network adapter # noqa no-changed-when
   # workaround since net0 is ignored on update (see shttps://github.com/ansible-collections/community.general/issues/1342)
@@ -116,10 +119,10 @@
 # if "state: started" in create-task, not all config is correct (i.e. bootorder), so start it afterwards:
 - name: Proxmox - start VM
   community.general.proxmox_kvm:
-    api_user: "{{ proxmox_api_user }}"
-    api_password: "{{ proxmox_api_pass }}"
-    api_host: "{{ proxmox_api_host }}"
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     vmid: "{{ proxvm.vmid }}"
     state: started
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
   when: proxmox_start

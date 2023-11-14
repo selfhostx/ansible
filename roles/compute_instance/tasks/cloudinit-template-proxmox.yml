@@ -9,54 +9,70 @@
     mode: '700'
     state: directory
 
-- name: Download cloud image
-  ansible.builtin.get_url:
-    url: "{{ item.value.url }}"
-    checksum: "{{ item.value.hash_algorithm + ':' + item.value.hash_checksum_file }}"
-    dest: "{{ cloudinit_download_folder }}/{{ cloudinit_download_filename }}"
+- name: Set fact cloudinit_download_destination
+  ansible.builtin.set_fact:
+    cloudinit_download_url: "{{ item.value.url }}"
+    cloudinit_download_destination: "{{ cloudinit_download_folder }}/{{ item.key }}-{{ cloudinit_download_filename }}"
+    cloudinit_download_checksum: "{{ item.value.hash_algorithm + ':' + item.value.hash_checksum_file if item.value.hash_algorithm != 'none' }}"
   when:
     - cloudinit_download_image
     - item.key == compute_instance_distribution
   loop: "{{ lookup('dict', cloudinit_images) }}"
 
-- name: Destroy old template
+- name: Download cloud image
+  ansible.builtin.get_url:
+    url: "{{ cloudinit_download_url }}"
+    checksum: "{{ cloudinit_download_checksum if cloudinit_download_checksum is defined else omit }}"
+    dest: "{{ cloudinit_download_destination }}"
+    force: "{{ cloudinit_download_overwrite }}"
+  when:
+    - cloudinit_download_image
+
+- name: Destroy old cloud-init template
   community.general.proxmox_kvm:
+    name: "{{ compute_instance_cloudinit_image }}"
+    state: absent
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
-    name: "{{ compute_instance_cloudinit_image }}"
-    state: absent
-  when: compute_instance_cloudinit_image_destroy_old
+  when:
+    - compute_instance_cloudinit_image_destroy_old
 
-- name: Create empty VM for cloud-Init
+- name: Create empty VM for cloud-init
   community.general.proxmox_kvm:
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     name: "{{ compute_instance_cloudinit_image }}"
-    description: "updated on: {{ ansible_date_time.iso8601 }}"
+    description: "{{ cloudinit_template_description }}"
     pool: "{{ proxmox_pool | default(omit) }}"
-    boot: c
-    bootdisk: virtio0
+    # boot: c
+    # bootdisk: "{{ proxmox_vm_bootdisk }}"
     ide:
       ide2: "none,media=cdrom"
-    scsihw: virtio-scsi-pci
+    scsihw: "{{ proxmox_vm_scsihw }}"
     ostype: "{{ proxmox_vm_ostype }}"
     timeout: 120
     serial:
       serial0: socket
-    net:
-      net0: '{{ proxmox_net_config }}'
+    # not needed here
+    #net:
+    #  net0: '{{ proxmox_net_config }}'
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
   register: proxvm
 
-- name: Import cloudinit disk # noqa no-changed-when
-  ansible.builtin.command: "qm importdisk {{ proxvm.vmid }} {{ cloudinit_download_folder }}/{{ cloudinit_download_filename }} {{ compute_instance_storage }}"
+- name: Import downloaded cloud image as disk # noqa no-changed-when
+  ansible.builtin.command: "qm importdisk {{ proxvm.vmid }} {{ cloudinit_download_destination }} {{ compute_instance_storage }}"
 
-- name: Attach unused0 disk to virtio # noqa no-changed-when
-  ansible.builtin.command: "qm set {{ proxvm.vmid }} --virtio0 {{ compute_instance_storage + ':' + 'vm-' + proxvm.vmid|string + '-disk-0' }}"
+- name: Remove downloaded cloud image
+  ansible.builtin.file:
+    path: "{{ cloudinit_download_destination }}"
+    state: absent
 
-- name: Convert VM to template
+- name: Attach cloud-init disk (currently unused0) to instance # noqa no-changed-when
+  ansible.builtin.command: "qm set {{ proxvm.vmid }} --{{ proxmox_vm_diskdevice }} {{ compute_instance_storage + ':' + 'vm-' + proxvm.vmid|string + '-disk-0' }}"
+
+- name: Convert cloud-init VM to template
   community.general.proxmox_kvm:
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     name: "{{ compute_instance_cloudinit_image }}"

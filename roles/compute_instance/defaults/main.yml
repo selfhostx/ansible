@@ -47,7 +47,9 @@ dns_entry_create_enable: true
 dns_entry_create_provider: ""
 
 # compute_instance_disksize: values -> disk size total (example: "20G") or grow by GB: (example: "+18G")
-proxmox_vm_diskdevice: virtio0
+proxmox_vm_scsihw: "virtio-scsi-pci"
+proxmox_vm_bootdisk: "virtio0"
+proxmox_vm_diskdevice: "virtio0"
 proxmox_vm_vga: qxl
 proxmox_vm_onboot: true
 proxmox_vm_ostype: l26
@@ -124,34 +126,55 @@ cloudinit_os_timezone: "Europe/Berlin"
 cloudinit_download_folder: "/tmp/cloudinit"
 cloudinit_download_filename: "cloudinit-image.qcow2"
 cloudinit_download_image: true
-
-# remove existing image if present:
+# overwrite file if already existing:
+cloudinit_download_overwrite: true
+# remove existing image (if present):
 compute_instance_cloudinit_image_destroy_old: false
 
-# for debugging:
-# cloudinit_download_image: false
+# the following comment is added on the template (visible in GUI):
+cloudinit_template_description: "updated on: {{ ansible_date_time.iso8601 }}"
+
+# enable custom grub cmdline
+cloudinit_grub_cmdline_enabled: false
+# example for eth0-interface
+# cloudinit_grub_cmdline_string: FIXME
+cloudinit_grub_cmdline_file: "/etc/default/grub"
+
 cloudinit_images:
-  debian10:
+  centos7_amd64:
+    url: "https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
+    hash_algorithm: sha256
+    hash_checksum_file: "https://cloud.centos.org/centos/7/images/sha256sum.txt"
+  centos8_stream_amd64:
+    url: "https://cloud.centos.org/centos/8-stream/x86_64/images/CentOS-Stream-GenericCloud-8-latest.x86_64.qcow2"
+    hash_algorithm: "none"
+    hash_checksum_file: ""
+  centos9_stream_amd64:
+    # image hangs at boot, dunno why
+    url: "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2"
+    hash_algorithm: "none"
+    hash_checksum_file: ""
+  debian10_amd64:
     url: "https://cdimage.debian.org/images/cloud/buster/latest/debian-10-genericcloud-amd64.qcow2"
     hash_algorithm: sha512
     hash_checksum_file: "https://cdimage.debian.org/images/cloud/buster/latest/SHA512SUMS"
-  debian11:
+  debian11_amd64:
     url: "https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2"
     hash_algorithm: sha512
     hash_checksum_file: "https://cdimage.debian.org/images/cloud/bullseye/latest/SHA512SUMS"
-  debian12:
+  debian12_amd64:
     url: "https://cdimage.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
     hash_algorithm: sha512
     hash_checksum_file: "https://cdimage.debian.org/images/cloud/bookworm/latest/SHA512SUMS"
-  ubuntu18_04:
+  ubuntu18_04_amd64:
     url: "https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img"
     hash_algorithm: sha256
     hash_checksum_file: "https://cloud-images.ubuntu.com/bionic/current/SHA256SUMS"
-  ubuntu20_04:
+  ubuntu20_04_amd64:
     url: "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
     hash_algorithm: sha256
     hash_checksum_file: "https://cloud-images.ubuntu.com/focal/current/SHA256SUMS"
-  ubuntu22_04:
+  ubuntu22_04_amd64:
     url: "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
     hash_algorithm: sha256
     hash_checksum_file: "https://cloud-images.ubuntu.com/jammy/current/SHA256SUMS"
