@@ -11,7 +11,7 @@ supported virtualization plattforms:
 - hetzner (planned)
 using cloud-init (datasource: config-drive, other will follow, maybe nocloud https://cloudinit.readthedocs.io/en/latest/reference/datasources.html)
 - support bootparameters for grub
-- network config depending on choice of the distribution cloud-image (ifupdown/netplan/networkmanager)
+- network config (+ DNS) depending on choice of the distribution cloud-image (ifupdown/netplan/networkmanager)
 - injecting pubkeys before network is even up
 - executing commands
 - update packages, reboot ... and so on
@@ -24,6 +24,64 @@ networking (IPv4 AND/OR IPv6)
 creates DNS-entries, currently implemented:
 - hetzner
 - inwx
+
+
+Example playbooks
+=================
+
+[playbook-create-cloud-init-template.yml](playbook-create-cloud-init-template.yml)
+[playbook-compute-instance-interactive.yml](playbook-compute-instance-interactive.yml)
+
+Vars
+====
+
+# Required/most important vars:
+
+# hostname (FQDN):
+compute_instance_hostname: "FQDN"
+
+# distribution (values: debian, ubuntu, centos):
+compute_instance_distribution: "debian"
+
+# name of the template-VM to clone from (cloud image)
+compute_instance_cloudinit_image: "template-cloudinit-deb12-latest"
+
+# memory (max.) for VM (in MB), example with 2G:
+compute_instance_memory_max: 2048
+
+# number of CPU cores (example: 2):
+compute_instance_cores: 2
+
+# disk size in GB (example: 20G):
+compute_instance_disksize: 20
+
+# name of target storage (proxmox usually has local" or "local-zfs)
+compute_instance_storage: "local-zfs"
+
+# network/IP for new instance, valid choices:
+# - name of network from dict network_prefix_list (ipam will choose next free IP)
+# - a specific IP with CIDR (like 192.168.178.33/24)
+# - "no" -> no v4 (or v6) networking
+#
+Examples:
+
+compute_instance_ip_v4: "home_network_v4" <- from "network_prefix_list"
+# OR:
+compute_instance_ip_v4: "192.168.178.33/24"
+# deactivate IPv6:
+compute_instance_ip_v6: "no"
+
+# enable creation of DNS records:
+compute_instance_dns_create_records_enable: true
+
+# valid choices: proxmox, vmware (stub)
+compute_instance_virtualization_provider: proxmox
+# valid choices: netbox, infobloxx (stub)
+compute_instance_ipam_provider: netbox
+# valid choices: hetzner, inwx
+compute_instance_dns_provider: hetzner
+
+[more vars in defaults/main.yml](defaults/main.yml)
 
 
 REQUIREMENTS
