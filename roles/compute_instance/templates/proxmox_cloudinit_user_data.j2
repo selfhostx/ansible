@@ -37,12 +37,17 @@ runcmd:
   - [ sh, -c, echo "=========runcmd=========" ]
 {% if cloudinit_grub_cmdline_enabled %}
 {% if compute_instance_distribution == "debian" %}
-  - sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=\"\"/GRUB_CMDLINE_LINUX_DEFAULT={{ cloudinit_grub_cmdline_string }}/' {{ cloudinit_grub_cmdline_file }}
+  - sed -i -r 's/^GRUB_CMDLINE_LINUX_DEFAULT=\".*\"/GRUB_CMDLINE_LINUX_DEFAULT={{ cloudinit_grub_cmdline_string }}/' {{ cloudinit_grub_cmdline_file }}
 {% endif %}
-{% if compute_instance_hostname == "ubuntu" %}
-  - sed -i 's/^GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX={{ cloudinit_grub_cmdline_string }}/' {{ cloudinit_grub_cmdline_file }}
+{% if compute_instance_distribution == "ubuntu" or compute_instance_distribution == "centos" %}
+  - sed -i -r 's/^GRUB_CMDLINE_LINUX=\".*\"/GRUB_CMDLINE_LINUX={{ cloudinit_grub_cmdline_string }}/' {{ cloudinit_grub_cmdline_file }}
 {% endif %}
+{% if compute_instance_distribution == "debian" or compute_instance_distribution == "ubuntu" %}
   - update-grub
+{% endif %}
+{% if compute_instance_distribution == "centos" %}
+  - grub2-mkconfig -o "$(readlink -e /etc/grub2.conf)"
+{% endif %}
 {% endif %}
 {% if cloudinit_move_network_config_to_main_file %}
   - echo "source /etc/network/interfaces.d/*\n" > /etc/network/interfaces

@@ -1,7 +1,6 @@
 ---
 # tasks file
 
-# include IPAM
 - name: Install requirements
   ansible.builtin.include_tasks:
     file: "install_requirements.yml"
@@ -12,7 +11,8 @@
   when:
     - compute_instance_install_requirements or compute_instance_install_pip_enable
 
-- name: Include cloudinit-template-*.yml (when requested)
+# cloud-init templates
+- name: Include cloudinit-template-*.yml (create cloud-init templates when requested)
   ansible.builtin.include_tasks:
     file: "cloudinit-template-{{ compute_instance_virtualization_provider }}.yml"
     apply:
@@ -23,21 +23,15 @@
     - cloudinit_image_create_enable
 
 # common tasks
-- name: Determine count of subdomains
-  ansible.builtin.set_fact:
-    my_levels: "{{ compute_instance_hostname.split('.') | length | int }}"
+- name: Include common.yml
+  ansible.builtin.include_tasks:
+    file: "common.yml"
+    apply:
+      tags:
+        - always
+  tags: always
 
-- name: Sets fact dns zone
-  ansible.builtin.set_fact:
-    # split has optional parameter "maxsplit" which i use to substract the last two fields - domain and tld - from it. dont worry, my simple brain hurts too ;-)
-    my_dns_zone: "{{ compute_instance_hostname.split('.', lookup('ansible.builtin.vars', 'my_levels') | int - 2) | last }}"
-
-- name: Debug - Show Zone
-  ansible.builtin.debug:
-    msg: "compute_instance_hostname {{ compute_instance_hostname }} belongs to DNS-Zone: {{ my_dns_zone }}"
-  when: compute_instance_debug_mode_enable
-
-# include IPAM
+# IPAM solutions
 - name: Include ipam-*.yml
   ansible.builtin.include_tasks:
     file: "ipam-{{ compute_instance_ipam_provider }}.yml"

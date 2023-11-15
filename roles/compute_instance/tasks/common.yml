@@ -1,0 +1,41 @@
+---
+
+- name: Determine count of subdomains for compute_instance_hostname
+  ansible.builtin.set_fact:
+    my_levels: "{{ compute_instance_hostname.split('.') | length | int }}"
+
+- name: Sets fact dns zone of compute_instance_hostname
+  ansible.builtin.set_fact:
+    # split has optional parameter "maxsplit" which i use to substract the last two fields - domain and tld - from it. dont worry, my simple brain hurts too ;-)
+    my_dns_zone: "{{ compute_instance_hostname.split('.', lookup('ansible.builtin.vars', 'my_levels') | int - 2) | last }}"
+
+- name: Debug - Show Zone of compute_instance_hostname
+  ansible.builtin.debug:
+    msg: "compute_instance_hostname {{ compute_instance_hostname }} belongs to DNS-Zone: {{ my_dns_zone }}"
+  when: compute_instance_debug_mode_enable
+
+- name: compute_instance_ip_v4 is a IP
+  ansible.builtin.set_fact:
+    compute_instance_ip_v4_is: "ip"
+  when:
+    - compute_instance_ip_v4 | ansible.utils.ipaddr
+
+- name: compute_instance_ip_v4 is a name
+  ansible.builtin.set_fact:
+    compute_instance_ip_v4_is: "name"
+  when:
+    - compute_instance_ip_v4 != "no"
+    - not compute_instance_ip_v4 | ansible.utils.ipaddr
+
+- name: compute_instance_ip_v6 is a IP
+  ansible.builtin.set_fact:
+    compute_instance_ip_v6_is: "ip"
+  when:
+    - compute_instance_ip_v6 | ansible.utils.ipaddr
+
+- name: compute_instance_ip_v6 is a name
+  ansible.builtin.set_fact:
+    compute_instance_ip_v6_is: "name"
+  when:
+    - compute_instance_ip_v6 != "no"
+    - not compute_instance_ip_v6 | ansible.utils.ipaddr

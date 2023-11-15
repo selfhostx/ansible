@@ -10,7 +10,7 @@
     - compute_instance_virtualization_provider  == "proxmox"
   block:
 
-    - name: Lookup prefix details for given prefix-name and set network config (v4)
+    - name: Prefix name given - lookup prefix address and and set network config as facts (v4)
       ansible.builtin.set_fact:
         proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v4_full: "{{ item.value.prefix }}"
@@ -18,9 +18,9 @@
       when:
         - compute_instance_ip_v4 != "no"
         - "compute_instance_ip_v4 in item.key"
-        - not compute_instance_ip_v4 | ansible.utils.ipaddr
+        - compute_instance_ip_v4_is is defined and compute_instance_ip_v4_is == "name"
 
-    - name: Lookup prefix details for given prefix-name and set network config (v6)
+    - name: Prefix name given - lookup prefix address and and set network config as facts (v6)
       ansible.builtin.set_fact:
         proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v6_full: "{{ item.value.prefix }}"
@@ -28,9 +28,9 @@
       when:
         - compute_instance_ip_v6 != "no"
         - "compute_instance_ip_v6 in item.key"
-        - not compute_instance_ip_v6 | ansible.utils.ipaddr
+        - compute_instance_ip_v6_is == "name"
 
-    - name: Lookup bridge for a given ip, calculate prefix locally from IP and set network config (v4)
+    - name: IP given - lookup prefix address and and set network config as facts (v4)
       ansible.builtin.set_fact:
         proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v4_full: "{{ compute_instance_ip_v4 | ansible.utils.ipaddr('network/prefix') }}"
@@ -38,9 +38,9 @@
       loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
       when:
         - compute_instance_ip_v4 != "no"
-        - compute_instance_ip_v4 | ansible.utils.ipaddr
+        - compute_instance_ip_v6_is == "ip"
 
-    - name: Lookup bridge for a given ip, calculate prefix locally from IP and set network config (v4)
+    - name: IP given - lookup prefix address and and set network config as facts (v6)
       ansible.builtin.set_fact:
         proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v6_full: "{{ compute_instance_ip_v6 | ansible.utils.ipaddr('network/prefix') }}"
@@ -48,7 +48,7 @@
       loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
       when:
         - compute_instance_ip_v6 != "no"
-        - compute_instance_ip_v6 | ansible.utils.ipaddr
+        - compute_instance_ip_v6_is == "ip"
 
     - name: Debug - Show proxmox_net0 and proxmox_network_prefix_v4_full
       ansible.builtin.debug:
@@ -64,7 +64,7 @@
         - compute_instance_debug_mode_enable
         - proxmox_network_prefix_v6_full is defined
 
-    - name: Netbox - query given IP and fail if entries exist (v4)
+    - name: Netbox - IP given query for existing entry and fail if it exists (v4)
       ansible.builtin.fail:
         msg: "{{ proxmox_network_ip_v4_prefixed }} is already present in prefix {{ proxmox_network_prefix_v4_full }}"
       when:
@@ -75,18 +75,18 @@
       vars:
         netbox_api_query_filter: "parent={{ proxmox_network_prefix_v4_full }} address={{ proxmox_network_ip_v4_prefixed }}"
 
-    - name: Netbox - query given IP and fail if entries exist (v6)
+    - name: Netbox - IP given query for existing entry and fail if it exists (v6)
       ansible.builtin.fail:
         msg: "{{ proxmox_network_ip_v6_prefixed }} is already present in prefix {{ proxmox_network_prefix_v6_full }}"
       when:
         - netbox_fail_if_ip_entry_exists
         - compute_instance_ip_v6 != "no"
         - proxmox_network_ip_v6_prefixed is defined
-        - query('netbox.netbox.nb_lookup', '#ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) | length > 0
+        - query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) | length > 0
       vars:
         netbox_api_query_filter: "parent={{ proxmox_network_prefix_v6_full }} address={{ proxmox_network_ip_v6_prefixed }}"
 
-    - name: Netbox - create VM
+    - name: Netbox - create VM entry
       netbox.netbox.netbox_virtual_machine:
         netbox_url: "{{ netbox_url }}"
         netbox_token: "{{ netbox_token }}"
@@ -101,13 +101,6 @@
         state: present
       register: created_vm
 
-    - name: Netbox - show created VM
-      ansible.builtin.debug:
-        msg: "Created VM: {{ created_vm }}"
-      when:
-        - compute_instance_debug_mode_enable
-        - created_vm is defined
-
     - name: Netbox - create interface for VM
       netbox.netbox.netbox_vm_interface:
         netbox_url: "{{ netbox_url }}"
@@ -117,13 +110,6 @@
           virtual_machine: "{{ compute_instance_hostname }}"
         state: present
       register: created_interface
-
-    - name: Debug - show created interface in netbox
-      ansible.builtin.debug:
-        msg: "Interface: {{ created_interface }}"
-      when:
-        - compute_instance_debug_mode_enable
-        - created_interface is defined
 
     - name: Netbox - create VM with next available v4
       netbox.netbox.netbox_ip_address:
@@ -140,7 +126,7 @@
       when:
         - compute_instance_ip_v4 != "no"
         - proxmox_network_ip_v4_prefixed is undefined
-        # - not compute_instance_ip_v4 | ansible.utils.ipaddr
+        - compute_instance_ip_v4_is == "name"
       register: my_ip_v4
 
     - name: Netbox - create VM with next available v6
@@ -158,7 +144,7 @@
       when:
         - compute_instance_ip_v6 != "no"
         - proxmox_network_ip_v6_prefixed is undefined
-        # - not compute_instance_ip_v4 | ansible.utils.ipaddr
+        - compute_instance_ip_v6_is == "name"
       register: my_ip_v6
 
     - name: Netbox - set new assigned IP as proxmox_network_ip_v4_prefixed # no-handler
@@ -186,7 +172,7 @@
           status: active
       when:
         - compute_instance_ip_v4 != "no"
-        - compute_instance_ip_v4 | ansible.utils.ipaddr
+        - compute_instance_ip_v4_is == "ip"
 
     - name: Netbox - create VM with given IPv6
       netbox.netbox.netbox_ip_address:
@@ -201,9 +187,9 @@
           status: active
       when:
         - compute_instance_ip_v6 != "no"
-        - compute_instance_ip_v6 | ansible.utils.ipaddr
+        - compute_instance_ip_v6_is == "ip"
 
-    - name: Netbox - query for IPv4 gateway # ignore-errors
+    - name: Netbox - query for IPv4 gateway via tag # ignore-errors
       ansible.builtin.set_fact:
         my_gateway_v4: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) }}"
       vars:
@@ -214,7 +200,7 @@
         - netbox_gateway_determine_method == 'netbox_tag'
       tags: queries
 
-    - name: Netbox - query for IPv6 gateway # ignore-errors
+    - name: Netbox - query for IPv6 gateway via tag # ignore-errors
       ansible.builtin.set_fact:
         my_gateway_v6: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) }}"
       vars:
@@ -225,13 +211,14 @@
         - netbox_gateway_determine_method == 'netbox_tag'
       tags: queries
 
-    - name: Netbox - set IPv4 gateway from results
+    - name: Netbox - set IPv4 gateway from tag-search
       ansible.builtin.set_fact:
         # msg: "{{ my_gateway | community.general.json_query('value') }}"
         # msg: "{{ my_gateway.value.address }}"
         proxmox_network_gateway_v4: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
       loop: "{{ my_gateway_v4 }}"
       when:
+        - netbox_gateway_determine_method == 'netbox_tag'
         - my_gateway_v4 is defined
       tags: queries
 
@@ -242,8 +229,10 @@
         proxmox_network_gateway_v6: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
       loop: "{{ my_gateway_v6 }}"
       when:
+        - netbox_gateway_determine_method == 'netbox_tag'
         - my_gateway_v6 is defined
       tags: queries
+
 
 - name: "Netbox for VMWare"
   when:

@@ -1,12 +1,48 @@
 ---
 # Defaults
 
+# Required/most important vars:
+
+# hostname (FQDN):
+# compute_instance_hostname: "FQDN"
+
+# distribution (values: debian, ubuntu, centos):
+# compute_instance_distribution: "debian"
+
+# name of the template-VM to clone from (cloud image)
+# compute_instance_cloudinit_image: "template-cloudinit-deb12-latest"
+
+# memory (max.) for VM (in MB), example with 2G:
+# compute_instance_memory_max: 2048
+
+# number of CPU cores (example: 2):
+# compute_instance_cores: 2
+
+# disk size in GB (example: 20G):
+# compute_instance_disksize: 20
+
+# name of target storage (proxmox usually has local" or "local-zfs)
+# compute_instance_storage: "local-zfs"
+
+# network/IP for new instance, valid choices:
+# - name of network from dict network_prefix_list (ipam will choose next free IP)
+# - a specific IP with CIDR (like 192.168.178.33/24)
+# - "no" -> no v4 (or v6) networking
+#
+# Examples:
+# compute_instance_ip_v4: "home_network_v4" <- from "network_prefix_list"
+# OR:
+# compute_instance_ip_v4: "192.168.178.33/24"
+# deactivate IPv6:
+# compute_instance_ip_v6: "no"
+
 # valid choices: proxmox, vmware (stub)
 compute_instance_virtualization_provider: proxmox
 # valid choices: netbox, infobloxx (stub)
 compute_instance_ipam_provider: netbox
 # valid choices: hetzner, inwx
 compute_instance_dns_provider: hetzner
+
 
 # install required pip modules?
 compute_instance_install_requirements: true
@@ -26,12 +62,18 @@ network_prefix_list:
   home_network_v4:
     prefix: "192.168.178.0/24"
     proxmox_host_bridge: vmbr0
+    # needed for netbox_gateway_determine_method: dict"
+    gateway: "192.168.178.1"
   home_network_v6:
     prefix: "fd00::/8"
     proxmox_host_bridge: vmbr0
 
 netbox_fail_if_ip_entry_exists: true
-# in order to query for the defined gateway in each prefix please tag one (!) IP-address with this tag:
+# how find the gateway IP, methods available:
+# dict: attribute "gateway" needs to be present in dictionary "network_prefix_list"
+# netbox_tag: in order to query for the defined gateway in each prefix please tag one (!) IP-address with this tag:
+# last_ip: use last useable IP in the prefix
+# first_ip: use first useable IP in the prefix
 netbox_gateway_determine_method: "netbox_tag"
 netbox_gateway_tag: "gateway"
 
@@ -136,8 +178,8 @@ cloudinit_template_description: "updated on: {{ ansible_date_time.iso8601 }}"
 
 # enable custom grub cmdline
 cloudinit_grub_cmdline_enabled: false
-# example for eth0-interface
-# cloudinit_grub_cmdline_string: FIXME
+# example for eth0-interface (" needs to be escaped with \ for grub):
+# cloudinit_grub_cmdline_string: '\"net.ifnames=0 biosdevname=0\"'
 cloudinit_grub_cmdline_file: "/etc/default/grub"
 
 cloudinit_images:
@@ -178,3 +220,7 @@ cloudinit_images:
     url: "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
     hash_algorithm: sha256
     hash_checksum_file: "https://cloud-images.ubuntu.com/jammy/current/SHA256SUMS"
+
+# empty internal vars):
+compute_instance_ip_v4_is: ""
+compute_instance_ip_v6_is: ""
