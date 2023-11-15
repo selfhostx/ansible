@@ -3,19 +3,25 @@ Description
 ===========
 
 
-This role create computer instances (VMs) on
-- proxmox (no matter if on-premise or co-location, single-server or cluster
-- VmWare (not done yet)
-with cloud-init
-- datasource: config-drive, other will follow, maybe nocloud https://cloudinit.readthedocs.io/en/latest/reference/datasources.html)
-- support bootparameter, injecting pubkeys before network is even up and so on
+This role creates fully automated computer instances (VMs) 
 
-networking (IPv4 AND/OR IPv6):
+supported virtualization plattforms:
+- proxmox (no matter if on-premise or co-location, single-server or cluster)
+- VmWare (planned)
+- hetzner (planned)
+using cloud-init (datasource: config-drive, other will follow, maybe nocloud https://cloudinit.readthedocs.io/en/latest/reference/datasources.html)
+- support bootparameters for grub
+- network config depending on choice of the distribution cloud-image (ifupdown/netplan/networkmanager)
+- injecting pubkeys before network is even up
+- executing commands
+- update packages, reboot ... and so on
+
+networking (IPv4 AND/OR IPv6)
 - next free from given prefix (via query of IPAM solution) netbox (or infoblox in the future)
-- or manual values
+- or manual values (no IPAM)
 - or disabled (when v4 or v6 is not needed)
 
-creates DNS-entriesm, currently implemented:
+creates DNS-entries, currently implemented:
 - hetzner
 - inwx
 
@@ -35,11 +41,6 @@ on virtualization host:
 
 role is able to install requirements on target.
 
-State
-=====
-
-- Some vars will be renamed + breaking changes!
-- Vars documentation improvement
 
 License
 =======
