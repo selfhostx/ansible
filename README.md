@@ -8,7 +8,7 @@ We do not re-invent the wheel, if there is a good role or collection somewhere e
 supported distributions:
   - Debian (all supported versions)
   - Ubuntu (supported LTS-Versions)
-  - Redhat-based distribution (permanent - if maintainer is found - or best-effort-basis)
+  - Redhat-based distributions (best-effort-basis), mainly centos stream
 
 2DO in general:
   - CI (travis, gitlab runner, ...?)
@@ -19,12 +19,17 @@ Roles
 
 list of own roles (see recommended roles in [Roadmap](ROADMAP.md) if you miss something).
 
-Roles                                                         | Description
+Basic Roles                                                   | Description
+--------------------------------------------------------------|-------------------
+[compute_instance](roles/compute_instance)                    | create Linux instances (VMs) via cloud-init with automatic IP-assignment and configuration
+[baserole](roles/baserole)                                    | configuration role for (new) Linux systems
+
+
+Roles for apps and services                                   | Description
 --------------------------------------------------------------|-------------------
 [apache](https://github.com/selfhostx/ansible-role-apache)    | apache webserver
 [ansible semaphore](https://github.com/stefanux/ansible-role-semaphore) | ansible semaphore (ansible GUI)
 [bacula](roles/bacula)                                        | backup system
-[baserole](roles/baserole)                                    | basic role for (new) systems, starting point for new systems
 [certbot](https://github.com/selfhostx/ansible-role-certbot)  | certbot (letsencrypt)
 [dokuwiki](roles/dokuwiki)                                    | dokuwiki (PHP+file-based wiki)
 [gitea](https://github.com/stefanux/ansible-role-gitea)       | gitea (git server)
@@ -32,10 +37,9 @@ Roles                                                         | Description
 [mailrelay](roles/mailrelay)                                  | relay mails via postfix
 [mattermost](roles/mattermost)                                | mattermost (instant messenger)
 [mysql backup](https://github.com/stefanux/ansible-mysqlbackup) | simple mysqldump wrapper
-[netbox)](roles/netbox)                                       | netbox (documentation and IPAM functionality)
+[netbox](roles/netbox)                                        | netbox (documentation and IPAM functionality)
 [nginx (common)](roles/nginx_common)                          | nginx common role
 [postfix mailrelay)](https://github.com/stefanux/ansible-postfix-mailrelay) | postfix mailrelaying
-[proxmox vm creation (including cloud-init)](playbooks/proxmox) | create VMs with cloud-init
 [samba (standalone)](roles/samba_standalone)                  | samba fileserver (standalone, without AD)
 [uptimekuma](roles/uptimekuma)                                | uptime kuma (monitoring and status page tool)
 [vaultwarden](roles/vaultwarden)                              | vaultwarden is a good zero-knowledge passwordmanager (compatible to bitwarden)
