@@ -1,0 +1,36 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/netbox/netbox/
+
+# proxmox
+- name: Assign manual for proxmox
+  # cloud-init iso needed if no shared filesystem and if its not a cluster
+  delegate_to: "{{ proxmox_create_node_ansible | default(proxmox_create_node) }}"
+  run_once: true
+  when:
+    - compute_instance_virtualization_provider  == "proxmox"
+  block:
+
+    - name: Set network config from given details (v4) for proxmox
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ compute_instance_bridge }}"
+        proxmox_network_gateway_v4: "{{ compute_instance_gateway_v4 }}"
+        proxmox_network_ip_v4_prefixed: "{{ compute_instance_ip_v4 }}"
+      when:
+        - compute_instance_ip_v4 != "no"
+
+    - name: Set network config from given details (v6) for proxmox
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ compute_instance_bridge }}"
+        proxmox_network_gateway_v6: "{{ compute_instance_gateway_v6 }}"
+        proxmox_network_ip_v6_prefixed: "{{ compute_instance_ip_v6 }}"
+      when:
+        - compute_instance_ip_v6 != "no"
+
+- name: "VMWare"
+  when:
+    - compute_instance_virtualization_provider  == "vmware"
+  block:
+
+    - name: Netbox - VMWare Stub warning
+      ansible.builtin.debug:
+        msg: "VMWare not implemented yet"

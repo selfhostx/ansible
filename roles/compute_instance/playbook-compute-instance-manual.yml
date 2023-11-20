@@ -1,0 +1,85 @@
+
+---
+# create VMs continue with baserole afterwards
+
+- name: Create new VM via proxmox, cloud-init, netbox and inwx dns
+  # hosts: proxmox
+  hosts: proxmox
+
+  roles:
+    - { role: selfhostx.ansible.compute_instance, tags: compute_instance }
+    # - { role: selfhostx.ansible.baserole, tags: baserole }
+
+  vars_files:
+    - my_vault.yml
+
+  vars_prompt:
+    - name: compute_instance_hostname
+      prompt: "hostname (FQDN like newhost.domain.tld) "
+      private: false
+    - name: compute_instance_distribution
+      prompt: "Which Linux distribution is used (debian, ubuntu, centos) "
+      default: "debian"
+      private: false
+    - name: compute_instance_cloudinit_image
+      prompt: "Template to use (Examples:  template-cloudinit-deb12-latest, template-cloudinit-ubuntu22-04-latest, ...) "
+      default: "template-cloudinit-deb12-latest"
+      private: false
+    - name: compute_instance_memory_max
+      prompt: "Max Memory (in MiB) "
+      default: 2048
+      private: false
+    - name: compute_instance_cores
+      prompt: "Count of Cores (number) "
+      default: 2
+      private: false
+    - name: compute_instance_disksize
+      prompt: "size of Disk (in GB)"
+      default: 20
+      private: false
+    - name: compute_instance_storage
+      prompt: 'choose storage ("local", "local-zfs) '
+      default: "local-zfs"
+      private: false
+    - name: compute_instance_ip_v4
+      prompt: 'Specify name of v4 network (choices: see dict network_prefix_list) OR IPv4-address in CIDR-notation (i.e. 1.2.3.4/24) OR "no" for disabled IPv4 connectivity: '
+      private: false
+      default: "home_network_v4"
+    - name: compute_instance_ip_v6
+      prompt: 'Specify name of v6 network (choices: see dict network_prefix_list) OR IPv6-address in CIDR-notation (i.e. 1:2:3:4::abc/64) OR ip-address in CIDR-notation "no" for no IPv6 connectivity: '
+      private: false
+      default: "home_network_v6"
+    - name: compute_instance_gateway_v4
+      prompt: 'Specify the gateway of v4 network (i.e. "1.2.3.1") :
+      private: false
+    - name: compute_instance_gateway_v6
+      prompt: 'Specify the gateway of v6 network (i.e. "1:2:3:4::1") :
+      private: false
+    - name: compute_instance_bridge
+      prompt: 'Specify the name of the interface/bridge your instance will connected to' :
+      private: false
+      default: "vmbr0"
+
+  vars:
+
+    compute_instance_virtualization_provider: proxmox
+    compute_instance_ipam_provider: manual
+    compute_instance_dns_provider: inwx
+
+    # DNS
+    # compute_instance_dns_hetzner_api_token: "-> vault"
+    # compute_instance_dns_inwx_username: "-> vault"
+    # compute_instance_dns_inwx_password: "-> vault"
+    compute_instance_dns_ttl: 600
+
+    compute_instance_debug_mode_enable: true
+
+    # proxmox_create_node: node1
+    # proxmox_create_node_ansible: node1.domain.tld
+
+    proxmox_cluster_name: "proxcluster1"
+    cloudinit_os_default_user: debian
+
+    #cloudinit_os_ssh_pubkeys:
+    #  - ssh-rsa AAAA... pubkey1
+    #  - ssh-ed25519 AAA... pubkey2
