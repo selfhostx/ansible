@@ -64,13 +64,13 @@
 
     compute_instance_debug_mode_enable: true
 
-  network_prefix_list:
-    home_network_v4:
-      prefix: "192.168.178.0/24"
-      proxmox_host_bridge: vmbr0
-    home_network_v6:
-      prefix: "fd00::/8"
-      proxmox_host_bridge: vmbr0
+    network_prefix_list:
+      home_network_v4:
+        prefix: "192.168.178.0/24"
+        proxmox_host_bridge: vmbr0
+      home_network_v6:
+        prefix: "fd00::/8"
+        proxmox_host_bridge: vmbr0
 
     # proxmox_create_node: node1
     # proxmox_create_node_ansible: node1.domain.tld
