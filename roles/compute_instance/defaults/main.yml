@@ -136,6 +136,8 @@ proxmox_snippet_user_data_file: user-data-{{ compute_instance_hostname }}.yml
 proxmox_snippet_user_data_dest: "{{ proxmox_snippet_dir }}/{{ proxmox_snippet_user_data_file }}"
 proxmox_snippet_user_data_template: "templates/proxmox_cloudinit_user_data.j2"
 
+# enable DNS-record creation:
+compute_instance_dns_create_records_enable: false
 # set dns server in custom user-config !! will not work on proxmox since DNS searchdomain and DNS server defaults to host settings (of node running the vm)!
 cloudinit_dns_set_servers: true
 # order: google-dns, cloudflare, quad9 (change to your needs!), these setting will be used to set cloudinit_dns_servers depending on network_mode
