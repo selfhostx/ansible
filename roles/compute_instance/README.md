@@ -28,8 +28,9 @@ creates **DNS-entries**, currently implemented:
 Example playbooks
 =================
 
+- [playbook-compute-instance-manual.yml](playbook-compute-instance-manual.yml
+- [playbook-compute-instance-netbox.yml](playbook-compute-instance-netbox.yml)
 - [playbook-create-cloud-init-template.yml](playbook-create-cloud-init-template.yml)
-- [playbook-compute-instance-interactive.yml](playbook-compute-instance-interactive.yml)
 
 
 Variables
