@@ -101,5 +101,5 @@
         - dns
   tags: dns
   when:
-    - dns_entry_create_enable
+    - compute_instance_dns_create_records_enable
     - compute_instance_dns_provider is defined

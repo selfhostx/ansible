@@ -15,10 +15,10 @@ chpasswd:
     - {{ cloudinit_os_default_user }}:{{ cloudinit_os_default_userpassword }}
   expire: false
 
-# Upgrade packages on instance, Default: false
+# upgrade packages on instance, Default: false
 package_upgrade: {{ cloudinit_package_upgrade|lower | default('false') }}
 
-# System settings
+# system settings
 resize_rootfs: {{ cloudinit_resize_rootfs|lower | default('true') }}
 
 ssh_authorized_keys:
@@ -28,7 +28,7 @@ ssh_authorized_keys:
 timezone: {{ cloudinit_os_timezone }}
 disable_root: {{ cloudinit_disable_root|lower | default('false') }}
 
-# Template for any additional commands on boot
+# additional commands on boot:
 bootcmd:
   - [ sh, -c, echo "=========bootcmd=========" ]
 

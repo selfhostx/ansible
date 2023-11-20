@@ -84,7 +84,7 @@ proxmox_create_node_ansible: localhost
 
 proxmox_cluster_name: "proxcluster1"
 
-dns_entry_create_enable: true
+dns_entry_create_enable: false
 # currently supported: inwx, hetzner
 dns_entry_create_provider: ""
 
