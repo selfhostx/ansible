@@ -30,14 +30,17 @@ netbox_virtualenv: "{{ netbox_home + '/venv' }}"
 
 netbox_data_dir: "{{ netbox_home + '/netbox-data' }}"
 netbox_media_root: "{{ netbox_data_dir}}/media"
-netbox_reports_root: "{{ netbox_data_dir}}/reports }}"
+netbox_reports_root: "{{ netbox_data_dir}}/reports"
 netbox_scripts_root: "{{ netbox_data_dir}}/scripts"
 
 # netbox only support PostgreSQL:
+netbox_db_name: netbox
 netbox_db_host: localhost
 netbox_db_password: netbox
 netbox_db_user: netbox
-netbox_db: netbox
+# leave blank for default:
+netbox_db_port: ""
+netbox_db_conn_max_age: 300
 
 netbox_listen_address: 127.0.0.1
 netbox_listen_port: 8001
@@ -47,8 +50,15 @@ netbox_metrics_enabled: false
 
 # Redis configurations
 netbox_redis_host: localhost
+netbox_redis_username: ""
 netbox_redis_password: ""
 netbox_redis_port: 6379
+netbox_redis_ssl: false
+
+netbox_redis_sentinel_enable: false
+netbox_redis_sentinel_host: "mysentinel.redis.example.com"
+netbox_redis_sentinel_port: 6379
+netbox_redis_sentinel_service: netbox
 
 # Please fill with your own value (50 chars minimum) REQUIRED:
 # example command: "head /dev/urandom | tr -dc a-zA-Z0-9 | head -c50"
@@ -61,6 +71,51 @@ netbox_redis_port: 6379
 netbox_superuser_username: netbox
 netbox_superuser_password: netbox
 netbox_superuser_email: "netbox@{{ netbox_hostname }}"
+
+# Setting this to True will permit only authenticated users to access any part of NetBox. By default, anonymous users are permitted to access most data in NetBox (excluding secrets) but not make any changes.
+netbox_login_required: true
+netbox_login_timeout: 86400
+netbox_max_page_size: 1000
+
+# This determines how often the GitHub API is called to check the latest release of NetBox. Must be at least 1 hour.
+netbox_release_check_timeout: "24 * 3600"
+
+# Text to include (HTML is allowed):
+netbox_banner_login: ""
+netbox_banner_bottom: ""
+netbox_banner_top: ""
+
+# Base URL path if accessing NetBox within a directory. For example, if installed at http://example.com/netbox/, set:
+# netbox_base_path: "netbox/"
+
+netbox_time_zone: UTC
+netbox_date_format: "N j, Y"
+netbox_short_date_format: "Y-m-d"
+netbox_time_format: "g:i a"
+netbox_short_time_format: "H:i:s"
+netbox_datetime_format: "N j, Y g:i a"
+netbox_short_datetime_format: "Y-m-d H:i"
+netbox_short_time_format: "UTC"
+# url or "None":
+netbox_release_check_url: "https://api.github.com/repos/netbox-community/netbox/releases"
+
+netbox_paginate_count: 50
+netbox_changelog_retention: 90
+
+# FIXME (json-format)
+netbox_plugins_config: ""
+
+netbox_email_server: localhost
+netbox_email_port: 25
+netbox_email_username: ""
+netbox_email_password: ""
+# timeout in seconds:
+netbox_email_timeout: 10
+netbox_email_from_email: ""
+
+# proxy for outgoing requests (example values):
+# netbox_http_proxy: "http://10.10.1.10:3128"
+# netbox_https_proxy: "http://10.10.1.10:1080"
 
 netbox_pid_file: "/var/tmp/netbox.pid"
 netbox_service_main_name: "netbox"
@@ -76,7 +131,6 @@ netbox_systemd_housekeeping_timer_target: "/etc/systemd/system/netbox-housekeepi
 netbox_service_rq_name: "netbox-rq"
 netbox_service_rq_file_template: "systemd-unit-netbox-rq.j2"
 netbox_service_rq_file_target: "/etc/systemd/system/netbox-rq.service"
-
 
 netbox_configuration_file_template: "configuration.py.j2"
 netbox_unicorn_configuration_file_template: "gunicorn.py.j2"
@@ -127,3 +181,9 @@ netbox_superuser_script: |
       user.set_password(password)
       user.save()
       print("changed")
+
+# put any of additional config lines (not already covered) in here:
+# netbox_extra_config: +|
+#   config1
+#   config2
+netbox_extra_config: ""
