@@ -28,7 +28,7 @@ Basic Roles                                                   | Description
 Roles for apps and services                                   | Description
 --------------------------------------------------------------|-------------------
 [apache](https://github.com/selfhostx/ansible-role-apache)    | apache webserver
-[ansible semaphore](https://github.com/stefanux/ansible-role-semaphore) | ansible semaphore (ansible GUI)
+[ansible semaphore](roles/semaphore)                          | ansible semaphore (ansible GUI)
 [bacula](roles/bacula)                                        | backup system
 [certbot](https://github.com/selfhostx/ansible-role-certbot)  | certbot (letsencrypt)
 [dokuwiki](roles/dokuwiki)                                    | dokuwiki (PHP+file-based wiki)
