@@ -1,0 +1,2 @@
+---
+semaphore_pip_extra_vars: "--break-system-packages"

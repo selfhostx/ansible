@@ -1,0 +1,21 @@
+---
+- name: Remove default config (when enabled)
+  ansible.builtin.file:
+    path: "{{ semaphore_nginx_default_config }}"
+    state: absent
+  notify: Restart nginx
+  when: semaphore_nginx_remove_default_config
+
+- name: Ensure nginx config is present
+  ansible.builtin.template:
+    dest: "{{ semaphore_nginx_config_src_dir }}/{{ semaphore_nginx_config_filename }}"
+    mode: "0644"
+    src: "{{ semaphore_nginx_template }}"
+  notify: Restart nginx
+
+- name: Enable nginx config via symbolic link
+  ansible.builtin.file:
+    src: "{{ semaphore_nginx_config_src_dir }}/{{ semaphore_nginx_config_filename }}"
+    dest: "{{ semaphore_nginx_config_dst_dir }}/{{ semaphore_nginx_config_filename }}"
+    state: link
+  notify: Restart nginx

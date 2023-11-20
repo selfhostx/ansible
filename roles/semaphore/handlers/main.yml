@@ -1,0 +1,11 @@
+---
+- name: Semaphore restart
+  ansible.builtin.systemd:
+    name: "{{ semaphore_identifier }}"
+    daemon_reload: true
+    state: restarted
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

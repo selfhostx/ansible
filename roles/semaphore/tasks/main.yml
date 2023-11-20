@@ -1,0 +1,149 @@
+---
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+# Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
+- name: Include distribution major version specific variables (if present)
+  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+  failed_when: false
+  tags:
+    - always
+
+- name: Ensure MySQL Server
+  ansible.builtin.import_tasks: setup-mysql.yml
+  when: semaphore_mysql_install or semaphore_mysql_create_db
+
+- name: Nginx Config
+  ansible.builtin.import_tasks: nginx.yml
+  when: semaphore_nginx_deploy_reverseconfig
+
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  with_items:
+    - git
+    - python3-pip
+
+- name: Install ansible
+  ansible.builtin.pip:
+    name: ansible
+    state: present
+    extra_args: "{{ semaphore_pip_extra_vars | default(omit) }}"
+
+- name: Add semaphore user
+  ansible.builtin.user:
+    name: "{{ semaphore_user }}"
+    createhome: false
+
+- name: Get Semaphore Release Info
+  ansible.builtin.uri:
+    url: 'https://api.github.com/repos/ansible-semaphore/semaphore/releases/latest'
+    return_content: true
+  register: 'semaphore_version_github'
+  when: semaphore_version is not defined or semaphore_version == "latest"
+
+- name: Determine current Semaphore version
+  ansible.builtin.set_fact:
+    semaphore_version: "{{ semaphore_version_github['json']['tag_name'][1:] }}"
+  when: semaphore_version is not defined or semaphore_version == "latest"
+
+- name: Print semaphore version to be installed
+  ansible.builtin.debug:
+    msg: "version: {{ semaphore_version }}"
+
+# FIXME implement lookup of checksum from semaphore_checksums_github.content
+#- name: Get checksum file of current Semaphore version
+#  ansible.builtin.uri:
+#    url: "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ semaphore_version }}/semaphore_{{ semaphore_version }}_checksums.txt"
+#    return_content: true
+#  register: 'semaphore_checksums_github'
+
+#- name: Set checksum from file
+#  ansible.builtin.set_fact:
+#    semaphore_download_checksum: "{{ semaphore_checksums_github['json']['tag_name'][2:] }}"
+
+- name: Create application directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ semaphore_user }}"
+    group: "{{ semaphore_user }}"
+    mode: '0755'
+  with_items:
+    - "{{ semaphore_path }}"
+    - "{{ semaphore_config_path | dirname }}"
+    - "{{ semaphore_tmp_path }}"
+    - "{{ semaphore_version_dir }}"
+
+- name: Download latest release
+  ansible.builtin.get_url:
+    url: "{{ semaphore_download_url }}"
+    checksum: "{{ semaphore_download_checksum | default(omit) }}"
+    dest: "{{ semaphore_version_dir }}.tar.gz"
+    owner: "{{ semaphore_user }}"
+    mode: '0644'
+
+- name: Extract latest release
+  ansible.builtin.unarchive:
+    src: "{{ semaphore_version_dir }}.tar.gz"
+    dest: "{{ semaphore_version_dir }}"
+    remote_src: true
+    creates: "{{ semaphore_version_dir }}/semaphore"
+    owner: "{{ semaphore_user }}"
+    group: "{{ semaphore_user }}"
+
+- name: Create current symlink
+  ansible.builtin.file:
+    src: "{{ semaphore_version_dir }}/semaphore"
+    dest: "{{ semaphore_executable }}"
+    state: "link"
+  notify:
+    - Semaphore restart
+
+- name: Create config file
+  ansible.builtin.template:
+    src: "{{ semaphore_config_template }}"
+    dest: "{{ semaphore_config_path }}"
+    owner: "{{ semaphore_user }}"
+    group: "{{ semaphore_group }}"
+    mode: '0644'
+  no_log: true
+  notify:
+    - Semaphore restart
+
+- name: Setup db migrations
+  ansible.builtin.command: "{{ semaphore_command }} migrate"
+  register: semaphore_migrations
+  changed_when: "'Executing migration' in semaphore_migrations.stdout"
+  notify:
+    - Semaphore restart
+
+- name: Check if default user already exists (fails if not)
+  ansible.builtin.command: "{{ semaphore_command }} user get --login {{ semaphore_default_user | quote }}"
+  register: semaphore_users
+  ignore_errors: true
+  changed_when: false
+
+- name: Create default user (may fail if already present)
+  ansible.builtin.command: "{{ semaphore_command }} user add {% if semaphore_default_user_make_admin %}--admin{% endif %} --name {{ semaphore_default_user_name | quote }} --login {{ semaphore_default_user | quote }} --email {{ semaphore_default_user_mail | quote }} --password {{ semaphore_default_user_password | quote }}"
+  when: semaphore_users.stdout == ""
+  changed_when: true
+  no_log: true
+
+- name: Deploy systemd service file
+  ansible.builtin.template:
+    src: "{{ semaphore_systemd_template }}"
+    dest: "{{ semaphore_systemd_unit_path }}"
+    mode: '0644'
+  notify:
+    - Semaphore restart
+
+- name: Service start
+  ansible.builtin.systemd:
+    name: "{{ semaphore_identifier }}"
+    state: "started"
+    enabled: true

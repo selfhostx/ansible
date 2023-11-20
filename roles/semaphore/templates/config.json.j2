@@ -1,0 +1,58 @@
+{
+{% if semaphore_db_dialect == "bolt" %}
+  "bolt": {
+    "host": "{{ semaphore_db_host }}"
+  },
+{% endif %}
+{% if semaphore_db_dialect == "mysql" %}
+  "mysql": {
+    "host": "{{ semaphore_db_host }}",
+    "user": "{{ semaphore_db_user }}",
+    "pass": "{{ semaphore_db_password }}",
+    "name": "{{ semaphore_db_name }}"
+  },
+{% endif %}
+{% if semaphore_db_dialect == "postgres" %}
+  "postgres": {
+    "host": "{{ semaphore_db_host }}",
+    "user": "{{ semaphore_db_user }}",
+    "pass": "{{ semaphore_db_password }}",
+    "name": "{{ semaphore_db_name }}"
+  },
+{% endif %}
+  "dialect": "{{ semaphore_db_dialect | lower }}",
+  "port": "{{ semaphore_port }}",
+  "interface": "{{ semaphore_interface | lower }}",
+  "tmp_path": "{{ semaphore_tmp_path }}",
+  "cookie_hash": "{{ semaphore_cookie_hash }}",
+  "cookie_encryption": "{{ semaphore_cookie_encryption }}",
+  "access_key_encryption": "{{ semaphore_access_key_encryption }}",
+  "email_sender": "{{ semaphore_email_sender }}",
+  "email_host": "{{ semaphore_email_host }}",
+  "email_port": "{{ semaphore_email_port }}",
+  "web_host": "{{ semaphore_web_host }}",
+  "ldap_enable": {{ semaphore_authentification_ldap_enable | lower }},
+{% if semaphore_authentification_ldap_enable %}
+  "ldap_binddn": "{{ semaphore_ldap_binddn }}",
+  "ldap_bindpassword": "{{ semaphore_ldap_bindpassword }}",
+  "ldap_server": "{{ semaphore_ldap_server }}",
+  "ldap_searchdn": "{{ semaphore_ldap_searchdn }}",
+  "ldap_searchfilter": "{{ semaphore_ldap_searchfilter }}",
+  "ldap_mappings": {
+    "dn": "{{ semaphore_ldap_mappings_dn }}",
+    "mail": "{{ semaphore_ldap_mappings_mail }}",
+    "uid": "{{ semaphore_ldap_mappings_uid }}",
+    "cn": "{{ semaphore_ldap_mappings_cn }}"
+  },
+  "ldap_needtls": {{ semaphore_ldap_needtls | lower }},
+{% endif %}
+  "password_login_disable": {{ semaphore_password_login_disable | lower }},
+  "non_admin_can_create_project": {{ semaphore_non_admin_can_create_project | lower }},
+  "concurrency_mode": "{{ semaphore_concurrency_mode }}",
+  "max_parallel_tasks": {{ semaphore_max_parallel_tasks }},
+  "telegram_chat": "{{ semaphore_telegram_chat }}",
+  "telegram_token": "{{ semaphore_telegram_token }}",
+  "email_alert": {{ semaphore_email_alert | lower }},
+  "telegram_alert": {{ semaphore_telegram_alert | lower }},
+  "slack_alert": {{ semaphore_slack_alert | lower }}
+}

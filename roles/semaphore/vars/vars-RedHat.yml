@@ -1,0 +1,5 @@
+---
+# vars specific for RedHat systems
+semaphore_nginx_default_config: "/etc/nginx/conf.d/default.conf"
+# semaphore_nginx_config_src_dir: ""
+semaphore_nginx_config_dst_dir: "/etc/nginx/conf.d"

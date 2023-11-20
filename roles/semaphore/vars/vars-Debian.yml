@@ -1,0 +1,5 @@
+---
+# vars specific for Debian systems
+semaphore_nginx_default_config: "/etc/nginx/sites-enabled/default"
+semaphore_nginx_config_src_dir: "/etc/nginx/sites-available"
+semaphore_nginx_config_dst_dir: "/etc/nginx/sites-enabled"

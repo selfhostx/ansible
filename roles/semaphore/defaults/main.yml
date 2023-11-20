@@ -1,0 +1,137 @@
+---
+# version to install, defaults to latest stable version (if not set):
+# semaphore_version: "2.9.37"
+
+semaphore_download_url: "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ semaphore_version }}/semaphore_{{ semaphore_version }}_linux_amd64.tar.gz"
+# if not set dynamically determined:
+# semaphore_download_checksum: "sha256:a67a6ef4a49bf7613e87628bf35db7d239050a99d7123a278c6cc85b2bff7997"
+
+# hostname used for nginx and semaphore:
+semaphore_hostname: "{{ ansible_fqdn }}"
+# hostname for semaphore web-GUI (just needed with a URI, i.e. http://semaphore.DOMAIN.TLD/semaphore)
+semaphore_web_host: ""
+
+# destination for reverse-proxy (semaphore does not offer bindung on a ip yet, it binds to *):
+semaphore_listen_ip: "127.0.0.1"
+
+# TCP port on which the web interface will be available. Default: 3000
+semaphore_port: 3000
+# a specific interface to bind on:
+semaphore_interface: ""
+
+# database settings: ===
+
+# database, valid choices: bolt, mysql, postgres
+semaphore_db_dialect: "mysql"
+
+# bolt: must be a path, i.e. "/opt/semaphore/semaphore.bolt"
+semaphore_db_host: "127.0.0.1"
+# postgres: 5432, mysql: 3306, bolt: "" (empty)
+semaphore_db_port: "3306"
+semaphore_db_name: "semaphore"
+semaphore_db_user: "semaphore"
+semaphore_db_password: "semaphore"
+
+# whether to create the mysql db and user
+semaphore_mysql_create_db: true
+semaphore_mysql_allowed_host: "localhost"
+
+# whether to install mysql on the host and the root password to set
+mysql_root_password: "root"
+semaphore_mysql_install: true
+
+
+# User Authentification - local with passwords:
+# the default user that should be created
+semaphore_default_user: "admin"
+# create default user with admin priviledges
+# (otherwise you need to execute "/opt/semaphore/semaphore "):
+semaphore_default_user_make_admin: true
+semaphore_default_user_name: "{{ semaphore_default_user }}"
+semaphore_default_user_password: "admin"
+semaphore_default_user_mail: "admin@example.com"
+
+# disable login with password. Only LDAP and OpenID:
+semaphore_password_login_disable: false
+
+
+# Email:
+semaphore_email_sender: semaphore@domain.tld
+semaphore_email_host: localhost
+semaphore_email_port: 25
+semaphore_email_alert: true
+
+semaphore_slack_alert: false
+semaphore_telegram_chat: ""
+semaphore_telegram_token: ""
+semaphore_telegram_alert: false
+
+semaphore_non_admin_can_create_project: false
+semaphore_concurrency_mode: ""
+semaphore_max_parallel_tasks: 0
+
+
+# LDAP:
+semaphore_authentification_ldap_enable: false
+
+# server example:
+# semaphore_ldap_server: "ldap.subdomain.domain.tld:636"
+semaphore_ldap_server: ""
+semaphore_ldap_searchdn: ""
+# for CN semaphore OU Groups in subdomain.domain.tld:
+# (&(mail=%s)(objectClass=person)(memberOf:=CN=semaphore,OU=Groups,DC=subdomain,DC=omain,DC=tld))
+semaphore_ldap_searchfilter: ""
+# tls for connection (true|false):
+semaphore_ldap_binddn: ""
+semaphore_ldap_bindpassword: ""
+semaphore_ldap_needtls: false
+semaphore_ldap_mappings_dn: ""
+semaphore_ldap_mappings_mail: ""
+semaphore_ldap_mappings_uid: ""
+semaphore_ldap_mappings_cn: ""
+
+
+# binary paths and service identifiers
+semaphore_user: "semaphore"
+semaphore_group: "semaphore"
+semaphore_path: "/opt/semaphore"
+semaphore_config_path: "/etc/semaphore/config.json"
+semaphore_tmp_path: "{{ semaphore_path }}/tmp"
+semaphore_executable: "{{ semaphore_path }}/semaphore"
+semaphore_command: "{{ semaphore_executable }} --config {{ semaphore_config_path | quote }}"
+semaphore_version_dir: "{{ semaphore_executable }}_{{ semaphore_version }}"
+semaphore_identifier: "{{ semaphore_user }}"
+semaphore_systemd_unit_path: "/etc/systemd/system/{{ semaphore_identifier }}.service"
+
+# mysql command lines to create default user
+semaphore_mysql_client_package: "{% if ansible_distribution == 'CentOS' or ansible_distribution == 'Redhat' %}mariadb{% elif ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' %}mysql-client{% endif %}"
+semaphore_mysql_server_package: "{% if ansible_distribution == 'CentOS' or ansible_distribution == 'Redhat' %}mariadb-server{% elif ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' %}mysql-server{% endif %}"
+semaphore_mysql_service_name: "{% if ansible_distribution == 'CentOS' or ansible_distribution == 'Redhat' %}mariadb{% elif ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' %}mysql{% endif %}"
+semaphore_python_mysql_module: "{% if ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' %}python3-PyMySQL{% elif ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' %}python3-mysqldb{% endif %}"
+
+# generated secrets in case they dont exist yet:
+semaphore_cookie_hash: "{{ lookup('password', '/dev/null length=32') | b64encode }}"
+semaphore_cookie_encryption: "{{ lookup('password', '/dev/null length=32') | b64encode }}"
+semaphore_access_key_encryption: "{{ lookup('password', '/dev/null length=32') | b64encode }}"
+
+# use nginx to make a ssl reverse-proxy-config:
+semaphore_nginx_deploy_reverseconfig: true
+semaphore_nginx_template: "nginx-semaphore.j2"
+semaphore_nginx_remove_default_config: false
+semaphore_nginx_config_filename: semaphore
+
+# if you use https://github.com/selfhostx/ansible/tree/main/roles/nginx_common than set to "true" here:
+semaphore_nginx_use_nginx_common_snippet: false
+semaphore_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+semaphore_nginx_tls_hardening_snippet: "{{ semaphore_nginx_snippet_directory }}/tls-hardening.conf"
+
+# enable HSTS (not used when semaphore_nginx_use_nginx_common_snippet: true):
+semaphore_tls_hsts_enable: true
+semaphore_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+semaphore_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ semaphore_hostname }}/fullchain.pem"
+semaphore_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ semaphore_hostname }}/privkey.pem"
+
+semaphore_config_template: "config.json.j2"
+semaphore_systemd_template: "systemd.service.j2"
