@@ -3,7 +3,7 @@
 Ansible role to install/configure NetBox
 
 based on https://github.com/mrlesmithjr/ansible-netbox 
-- check on latest version via githib-API (and ability to choose latest as netbox_version)
+- check on latest version via github-API (and ability to choose latest as netbox_version)
 - without supervisord, systemd-unit instead
 - additional systemd rq and housekeeping unit + timer
 - nginx config with https (you can use nginx_common too)
