@@ -42,11 +42,11 @@ Roadmap
     - ZFS autosnapshot
       - snapshot house-keeping: zfs-keep-and-clean https://github.com/bashclub/zfs-housekeeping
       - monitoring like check-zfs-replication https://github.com/bashclub/check-zfs-replication
-  - ceph (?)
-  - glusterfs (?)
+  - *ceph (?)*
+  - *glusterfs (?)*
 
 **Virtualization**
-  - proxmox (including cloud-init) -> see folder: [playbooks/proxmox](playbooks/proxmox)
+  - proxmox (including cloud-init) -> see role: [compute_instance](roles/compute_instance)
     - VM management: https://github.com/mikaelflora/ansible-role-proxmox-vm
     - *LXC*
     - [ansible dynamic inventory](https://github.com/xezpeleta/Ansible-Proxmox-inventory)
@@ -55,6 +55,7 @@ Roadmap
       - proxmox_migrate.py: https://github.com/HeinleinSupport/proxmox-tools/blob/master/proxmox_migrate.py
   - [libvirt](roles/libvirt)+KVM (including cloud-init)
   - *ovirt? (if maintainer is found)*
+  - debootstrap (if cloud-init is not wanted): https://github.com/nilsmeyer/ansible-debootstrap
   - Container
     - *k3s (if maintainer is found)*
     - *k8s (if maintainer is found)*
