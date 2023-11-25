@@ -72,6 +72,7 @@ baserole_dns_nameservers:
 baserole_dns_nameservers_fallback:
   - 1.1.1.1
 
+# DNS search-domain(s):
 # baserole_dns_searchdomains: "domain1.tld domain2.tld"
 baserole_dns_template_resolv_conf: "resolv.conf.j2"
 
