@@ -1,0 +1,33 @@
+---
+# this builds the config of existing and new server on bacula. run whenever a new host is created.
+- name: Bacula server and config build
+  hosts: bacula
+  # create groups:
+  # - bacula
+  # - bacula_fd
+  # - bacula_sd
+  # - bacula_dir
+  # - bacula_console
+  roles:
+    - { role: selfhostx.ansible.bacula, tags: bacula }
+  vars_files:
+    - my-vault.yml
+
+  pre_tasks:
+    - name: Extract old director block(s)
+      ansible.builtin.command: awk '/^Director\ {/,/}/' /etc/bacula/bacula-fd.conf
+      register: bacula_fd_director_extra_block
+      check_mode: no
+
+    - name: Set bacula_fd_extra_directors_allowed from existing config
+      ansible.builtin.set_fact:
+        bacula_fd_extra_directors_allowed: '{{ bacula_fd_director_extra_block.stdout }}'
+
+    - name: Extract old message block(s)
+      ansible.builtin.command: awk '/^Messages\ {/,/}/' /etc/bacula/bacula-fd.conf
+      register: bacula_fd_messages_extra_block
+      check_mode: no
+
+    - name: Set bacula_fd_extra_messages from existing config
+      ansible.builtin.set_fact:
+        bacula_fd_extra_messages: '{{ bacula_fd_messages_extra_block.stdout }}'
