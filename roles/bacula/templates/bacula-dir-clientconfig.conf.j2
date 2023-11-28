@@ -49,9 +49,6 @@ Job {
   Client Run After Job = "{{ bacula_fd_client_run_after_job }}"
   {% endif %}
   {% if bacula_fd_run_before_job is defined and bacula_fd_run_before_job|length > 0 %}
-  Client Run Before Job = "{{ bacula_fd_run_before_job }}"
-  {% endif %}
-  {% if bacula_fd_run_before_job is defined and bacula_fd_run_before_job|length > 0 %}
   Run Before Job = "{{ bacula_fd_run_before_job }}"
   {% endif %}
   {% if bacula_fd_run_after_job is defined and bacula_fd_run_after_job|length > 0 %}
