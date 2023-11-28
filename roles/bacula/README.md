@@ -112,11 +112,20 @@ File = "/files/EXCLUDED/on/host1"
 File = "/proc"
 ```
 
-**define jobs that the client should run before**
-useful for database-backups (this can be done in a group_var too!):
+**define jobs that the client should run before** (recommended to put this into group_vars or hosts_vars !):
 
-bacula_fd_client_run_before_job: command 
+```yaml
+bacula_fd_client_run_before_job: command
 bacula_fd_client_run_after_job: command
+```
+
+Example:
+```yaml
+bacula_fd_client_run_before_job: "/path/to/my/backupskript create"
+bacula_fd_client_run_after_job: "/path/to/my/backupskript cleanup"
+```
+
+additonal note: for jobs running on director/server-side the vars "bacula_fd_run_before_job", "bacula_fd_run_after_job" or "bacula_fd_run_after_failed_job" are existing.
 
 **additional options in job-ressource**:
 ```yaml
@@ -125,7 +134,7 @@ Option1 = Example1
 Option2 = Example2
 ```
 
-Example: add more "Client Run Before Job" via bacula_fd_extra_job_options:
+Example: add more (than the predefined "bacula_fd_client_run_before_job") "Client Run Before Job" via bacula_fd_extra_job_options:
 ```yaml
 bacula_fd_extra_job_options: |+
     Client Run Before Job = "additional before job" 
