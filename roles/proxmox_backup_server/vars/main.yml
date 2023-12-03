@@ -1,0 +1,5 @@
+---
+# vars file
+pbs_nginx_default_config: "/etc/nginx/sites-enabled/default"
+pbs_nginx_config_src_dir: "/etc/nginx/sites-available"
+pbs_nginx_config_dst_dir: "/etc/nginx/sites-enabled"

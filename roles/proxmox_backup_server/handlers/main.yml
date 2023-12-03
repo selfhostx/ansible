@@ -1,0 +1,28 @@
+---
+# handlers
+
+- name: Restart pbs
+  service:
+    name: "proxmox-backup"
+    state: restarted
+    enabled: true
+  become: true
+
+- name: Restart gui
+  service:
+    name: "proxmox-proxy"
+    state: restarted
+    enabled: true
+  become: true
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: true
+  become: true
+
+- name: Test nginx and restart
+  ansible.builtin.command: nginx -t
+  notify: Restart nginx
+  become: true

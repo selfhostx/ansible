@@ -1,0 +1,62 @@
+---
+# tasks
+
+- name: Setup Server
+  when:
+    - pbs_role == "server"
+  block:
+
+    - name: Install apt key
+      ansible.builtin.apt_key:
+        state: present
+        url: "{{ pbs_pgp_key_url }}"
+
+    - name: Install apt repository
+      ansible.builtin.apt_repository:
+        repo: '{{ pbs_server_repo }}'
+        state: present
+        update_cache: true
+
+    - name: Install pbs server
+      ansible.builtin.apt:
+        name: proxmox-backup-server
+        state: present
+        cache_valid_time: "{{ pbs_cache_valid_time }}"
+
+    - name: Remove enterprise repo
+      ansible.builtin.copy:
+        content: '# deactivated'
+        dest: "{{ pbs_enterprise_repo_file }}"
+        owner: root
+        group: root
+        mode: '0644'
+        state: present
+      when:
+        - pbs_enterprise_repo_file | bool
+        - pbs_server_repo != pbs_enterprise_repo
+
+    - name: Get certificate information
+      community.crypto.x509_certificate_info:
+        path: "{{ pbs_proxy_cert_file }}"
+      register: pbs_cert_result
+
+    - name: Show Certificate fingerprint (needed for trust of self-signed certs)
+      ansible.builtin.debug:
+        msg: "Proxmox backup server has SHA256 fingerprint: {{ pbs_cert_result.fingerprints.sha256 | upper }}"
+
+    - name: Include nginx tasks
+      ansible.builtin.include_tasks: nginx.yml
+      when: pbs_nginx_deploy_reverseconfig | bool
+
+- name: Setup Client
+  when:
+    - pbs_role == "server"
+  block:
+
+    - name: Install pbs client
+      ansible.builtin.apt:
+        name: proxmox-backup-client
+        state: present
+        cache_valid_time: "{{ pbs_cache_valid_time }}"
+      when:
+        - pbs_role: "client"

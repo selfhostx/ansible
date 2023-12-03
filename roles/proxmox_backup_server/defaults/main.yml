@@ -1,0 +1,50 @@
+---
+# defaults for pbs
+
+# client or server?
+pbs_role: "server"
+pbs_hostname: "{{ ansible_fqdn }}"
+pbs_listen_address: "127.0.0.1"
+pbs_listen_port: 8007
+
+pbs_enterprise_repo: "deb https://enterprise.proxmox.com/debian/pbs {{ ansible_distribution_release }} pbs-enterprise"
+pbs_no_subscription_repo: "deb http://download.proxmox.com/debian/pbs {{ ansible_distribution_release }} pbs-no-subscription"
+pbs_pgp_key_url: "https://enterprise.proxmox.com/debian/proxmox-release-{{ ansible_distribution_release }}.gpg"
+# remove if not used:
+pbs_enterprise_repo_remove: true
+pbs_enterprise_repo_file: "/etc/apt/sources.list.d/pbs-enterprise.list"
+
+pbs_server_repo: "{{ pbs_no_subscription_repo }}"
+pbs_client_repo: "deb http://download.proxmox.com/debian/pbs-client {{ ansible_distribution_release }} main"
+pbs_cache_valid_time: "3600"
+
+
+pbs_proxy_cert_file: "/etc/proxmox-backup/proxy.pem"
+
+# optional: reverse-proxy-config
+
+# use nginx to make a ssl reverse-proxy-config (DOES NOT WORK FOR BACKUPS, just GUI. reason: nginx does not support http/2 reverse proxying)
+# use alternatives like apache or haproxy: https://forum.proxmox.com/threads/setup-reverse-proxy-nginx-for-backup-client.93143/
+pbs_nginx_deploy_reverseconfig: false
+pbs_nginx_template: "nginx-pbs.conf.j2"
+# only on debian:
+pbs_nginx_remove_default_config: false
+# debian includes everything, centos only *.conf:
+pbs_nginx_config_filename: pbs.conf
+
+# if you use our nginx_common role, use "true" here:
+pbs_nginx_use_nginx_common_snippet: false
+
+pbs_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+pbs_nginx_tls_hardening_snippet: "{{ pbs_nginx_snippet_directory }}/tls-hardening.conf"
+# enable HSTS (not used when pbs_nginx_use_nginx_common_snippet: true):
+pbs_tls_hsts_enable: true
+pbs_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+pbs_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ pbs_hostname }}/fullchain.pem"
+pbs_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ pbs_hostname }}/privkey.pem"
+
+# hide nginx version number from server-header ("server: nginx" will still be present):
+# remove others vhosts to prevent leaking the version number from them (i.e. with var "pbs_nginx_remove_default_config")
+pbs_hide_nginx_version: true
