@@ -1,7 +1,7 @@
 ---
 - name: Remove default nginx config (when enabled)
   ansible.builtin.file:
-    path: "{{ netbox_nginx_default_config }}"
+    path: "{{ netbox_nginx_remove_default_config }}"
     state: absent
   become: true
   notify: Test nginx and restart
