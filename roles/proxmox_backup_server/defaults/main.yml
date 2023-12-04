@@ -18,8 +18,9 @@ pbs_server_repo: "{{ pbs_no_subscription_repo }}"
 pbs_client_repo: "deb http://download.proxmox.com/debian/pbs-client {{ ansible_distribution_release }} main"
 pbs_cache_valid_time: "3600"
 
-
+pbs_proxy_cert_display_fingerprint: true
 pbs_proxy_cert_file: "/etc/proxmox-backup/proxy.pem"
+
 
 # optional: reverse-proxy-config
 

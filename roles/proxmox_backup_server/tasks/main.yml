@@ -39,10 +39,12 @@
       community.crypto.x509_certificate_info:
         path: "{{ pbs_proxy_cert_file }}"
       register: pbs_cert_result
+      when: pbs_proxy_cert_display_fingerprint | bool
 
     - name: Show Certificate fingerprint (needed for trust of self-signed certs)
       ansible.builtin.debug:
         msg: "Proxmox backup server has SHA256 fingerprint: {{ pbs_cert_result.fingerprints.sha256 | upper }}"
+      when: pbs_proxy_cert_display_fingerprint | bool
 
     - name: Include nginx tasks
       ansible.builtin.include_tasks: nginx.yml
