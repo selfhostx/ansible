@@ -197,6 +197,7 @@
       # asking for non-existing tags results in task failure :-/
       ignore_errors: true
       when:
+        - compute_instance_ip_v4 != "no"
         - netbox_gateway_determine_method == 'netbox_tag'
       tags: queries
 
@@ -229,6 +230,7 @@
         proxmox_network_gateway_v6: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
       loop: "{{ my_gateway_v6 }}"
       when:
+        - compute_instance_ip_v6 != "no"
         - netbox_gateway_determine_method == 'netbox_tag'
         - my_gateway_v6 is defined
       tags: queries
