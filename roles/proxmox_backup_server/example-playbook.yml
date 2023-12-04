@@ -1,0 +1,5 @@
+---
+- name: Install Proxmox backup server
+  hosts: pbs
+  roles:
+    - { role: selfhostx.ansible.proxmox_backup_server, tags: pbs }

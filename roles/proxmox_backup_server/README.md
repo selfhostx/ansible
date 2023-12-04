@@ -1,12 +1,16 @@
-pbs
-===
+Proxmox Backup Server (pbs)
+===========================
 
-This role sets up Proxmox Backup Server and client
+This role sets up Proxmox Backup Server and client.
+
 
 Requirements
 ------------
 
 None
+
+community.crypto for fingerprint.
+
 
 Role Variables
 --------------
@@ -18,16 +22,20 @@ Dependencies
 
 None
 
+
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+[example_playbook.yml](example_playbook.yml)
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+
+License
+=======
+
+GPL-3.0-or-later
+
 
 Author Information
-------------------
+==================
 
-Selfhostx
+selfhostx
