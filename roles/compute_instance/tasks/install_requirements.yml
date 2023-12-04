@@ -9,11 +9,13 @@
 - name: Install pynetbox via pip
   ansible.builtin.pip:
     name: pynetbox
+    extra_args: "{{ compute_instance_pip_extra_vars | default(omit) }}"
   when:
     - compute_instance_ipam_provider == "netbox"
 
 - name: Install proxmoxer via pip
   ansible.builtin.pip:
     name: proxmoxer
+    extra_args: "{{ compute_instance_pip_extra_vars | default(omit) }}"
   when:
     - compute_instance_virtualization_provider == "proxmox"
