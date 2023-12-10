@@ -55,7 +55,7 @@ Required/most important vars:
    - IPAM netbox: `compute_instance_ipam_provider: netbox` (see: [playbook-compute-instance-netbox.yml](playbook-compute-instance-netbox.yml))
      - IPv4 same options as "no IPAM", additional option: name of network (example: "home_network_v4" from dict `network_prefix_list`: `compute_instance_ip_v4: "home_network_v4"` (IPAM will choose next free IP from that prefix)
      - IPv6 same options as "no IPAM", additional option. example: `compute_instance_ip_v6: "home_network_v6"`
-- **IPAM solution** (valid choices: netbox, infobloxx (stub): `compute_instance_ipam_provider: netbox`
+- **IPAM solution** (valid choices: netbox: `compute_instance_ipam_provider: netbox`
 - **Virtualization plattform**, valid choices: proxmox, vmware (stub): `compute_instance_virtualization_provider: proxmox`
 - **DNS**, enable creation of DNS records: `compute_instance_dns_create_records_enable: true`
   - dns provider (valid choices: hetzner, inwx) -> `compute_instance_dns_provider: hetzner`

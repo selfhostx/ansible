@@ -38,7 +38,7 @@
 
 # valid choices: proxmox, vmware (stub)
 compute_instance_virtualization_provider: proxmox
-# valid choices: netbox, infobloxx (stub)
+# valid choices: netbox
 compute_instance_ipam_provider: netbox
 # valid choices: hetzner, inwx
 compute_instance_dns_provider: hetzner
