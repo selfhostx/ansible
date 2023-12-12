@@ -68,6 +68,8 @@
   ansible.builtin.file:
     path: "{{ cloudinit_download_destination }}"
     state: absent
+  when:
+    - cloudinit_remove_downloaded_image
 
 - name: Attach cloud-init disk (currently unused0) to instance # noqa no-changed-when
   ansible.builtin.command: "qm set {{ proxvm.vmid }} --{{ proxmox_vm_diskdevice }} {{ compute_instance_storage + ':' + 'vm-' + proxvm.vmid|string + '-disk-0' }}"

@@ -172,6 +172,8 @@ cloudinit_download_filename: "cloudinit-image.qcow2"
 cloudinit_download_image: true
 # overwrite file if already existing:
 cloudinit_download_overwrite: true
+# remove downloaded file:
+cloudinit_remove_downloaded_image: true
 # remove existing image (if present):
 compute_instance_cloudinit_image_destroy_old: false
 
