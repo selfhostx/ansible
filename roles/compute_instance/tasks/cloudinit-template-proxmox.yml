@@ -63,6 +63,12 @@
 
 - name: Import downloaded cloud image as disk # noqa no-changed-when
   ansible.builtin.command: "qm importdisk {{ proxvm.vmid }} {{ cloudinit_download_destination }} {{ compute_instance_storage }}"
+  register: prox_import_result
+
+- name: Parse name of disk (imported cloud image)
+  ansible.builtin.set_fact:
+    # stdout of "qm importdisk" has the last line "Successfully imported disk as 'unused0:this_is_what_i_need'
+    proxmox_imported_disk_name: "{{ prox_import_result.stdout | split | last | replace(\"'\",'') | regex_replace('unused[0-9]:') }}"
 
 - name: Remove downloaded cloud image
   ansible.builtin.file:
@@ -72,7 +78,7 @@
     - cloudinit_remove_downloaded_image
 
 - name: Attach cloud-init disk (currently unused0) to instance # noqa no-changed-when
-  ansible.builtin.command: "qm set {{ proxvm.vmid }} --{{ proxmox_vm_diskdevice }} {{ compute_instance_storage + ':' + 'vm-' + proxvm.vmid|string + '-disk-0' }}"
+  ansible.builtin.command: "qm set {{ proxvm.vmid }} --{{ proxmox_vm_diskdevice }} {{ proxmox_imported_disk_name }}"
 
 - name: Convert cloud-init VM to template
   community.general.proxmox_kvm:
