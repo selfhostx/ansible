@@ -64,9 +64,9 @@
 
     compute_instance_virtualization_provider: proxmox
     compute_instance_ipam_provider: manual
-    compute_instance_dns_provider: inwx
 
     # DNS
+    compute_instance_dns_provider: hetzner
     # compute_instance_dns_hetzner_api_token: "-> vault"
     # compute_instance_dns_inwx_username: "-> vault"
     # compute_instance_dns_inwx_password: "-> vault"
@@ -79,6 +79,10 @@
 
     proxmox_cluster_name: "proxcluster1"
     cloudinit_os_default_user: debian
+
+    # change storage if needed:
+    # proxmox_snippet_storage: local
+    # proxmox_snippet_dir: "/var/lib/vz/snippets"
 
     #cloudinit_os_ssh_pubkeys:
     #  - ssh-rsa AAAA... pubkey1
