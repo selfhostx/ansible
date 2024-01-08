@@ -36,6 +36,9 @@
 # deactivate IPv6:
 # compute_instance_ip_v6: "no"
 
+# specifiy VLAN (if needed):
+# compute_instance_vlan: 100
+
 # valid choices: proxmox, vmware (stub)
 compute_instance_virtualization_provider: proxmox
 # valid choices: netbox
@@ -71,9 +74,10 @@ network_prefix_list:
 netbox_fail_if_ip_entry_exists: true
 # how find the gateway IP, methods available:
 # dict: attribute "gateway" needs to be present in dictionary "network_prefix_list"
-# netbox_tag: in order to query for the defined gateway in each prefix please tag one (!) IP-address with this tag:
-# last_ip: use last useable IP in the prefix
-# first_ip: use first useable IP in the prefix
+# netbox_tag: in order to query for the defined gateway in each prefix please tag only one IP-address per prefix with this tag
+# other alternatives:
+#  last_ip: use last useable IP in the prefix
+#  first_ip: use first useable IP in the prefix
 netbox_gateway_determine_method: "netbox_tag"
 netbox_gateway_tag: "gateway"
 

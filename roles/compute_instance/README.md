@@ -59,6 +59,12 @@ Required/most important vars:
 - **Virtualization plattform**, valid choices: proxmox, vmware (stub): `compute_instance_virtualization_provider: proxmox`
 - **DNS**, enable creation of DNS records: `compute_instance_dns_create_records_enable: true`
   - dns provider (valid choices: hetzner, inwx) -> `compute_instance_dns_provider: hetzner`
+- **storage**:
+  - proxmox:
+     - proxmox_snippet_storage: `local`
+     - proxmox_snippet_dir: `/var/lib/vz/snippets`
+     - compute_instance_storage: `local`
+
 
 **[more vars in defaults/main.yml](defaults/main.yml)**
 
