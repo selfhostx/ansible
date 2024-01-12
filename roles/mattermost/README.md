@@ -1,7 +1,7 @@
 mattermost
 ==========
 
-designed principles:
+design principles:
 - mattermost has seperate data-directory to seperate code from data (symlinks are used)
   version upgrade possible (just increase the version-number, decrease might not work due db upgrades)
 - nginx with custom mattermost config as reverse proxy in front of mattermost
@@ -11,14 +11,6 @@ designed principles:
 TODO: 
 - Backup before installing new version?
 
-Commands
---------
-
-
-```
-ansible-playbook mattermost.yml 
-```
-
 
 Requirements
 ------------
@@ -26,24 +18,16 @@ Requirements
 none
 
 
-
 Role Variables
 --------------
 
-required:
-```
-FIXME
-```
-see defaults/main.yml for more variables
+see [defaults/main.yml](defaults/main.yml)
 
 
 Example Playbook
 ----------------
 
-```
-FIXME
-```
-
+see [mattermost-example-playbook.yml](mattermost-example-playbook.yml).
 
 
 License
