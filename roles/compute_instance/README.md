@@ -1,15 +1,18 @@
-
 Description
 ===========
 
+This role creates fully automated computing instances (virtual machines).
 
-This role creates fully automated computer instances (VMs).
+
+**Modes of operation**:
+- full manual mode (no IPAM, all vars need to be provided) `compute_instance_ipam_provider: manual`
+- provide specs of instance, but query IPAM (like netbox as source of truth for network/prefix-details like gateway, vlan, bridge): `compute_instance_ipam_provider: netbox`
 
 supported virtualization plattforms:
 - **proxmox** (no matter if on-premise or co-location, single-server or cluster)
 
 **cloud-init** (datasource: config-drive, other will follow, maybe nocloud https://cloudinit.readthedocs.io/en/latest/reference/datasources.html)
-- support bootparameters for grub
+- support boot-parameters for grub
 - network config (+ DNS) depending on choice of the distribution cloud-image (ifupdown/netplan/networkmanager)
 - injecting pubkeys before network is even up
 - executing commands
@@ -20,9 +23,11 @@ supported virtualization plattforms:
 - or next available IP from given prefix (via query of IPAM solution like netbox)
 - or disabled (when v4 or v6 is not needed)
 
-creates **DNS-entries**, currently implemented:
+**DNS-entries**, currently implemented:
 - hetzner
 - inwx
+
+
 
 
 Example playbooks
@@ -53,7 +58,7 @@ Required/most important vars:
      - Gateway IPv6: `compute_instance_gateway_v6: 1:2:3:4::1`
      - Name of the interface/bridge your instance will connected to: `compute_instance_bridge: vmbr0`
    - IPAM netbox: `compute_instance_ipam_provider: netbox` (see: [playbook-compute-instance-netbox.yml](playbook-compute-instance-netbox.yml))
-     - IPv4 same options as "no IPAM", additional option: name of network (example: "home_network_v4" from dict `network_prefix_list`: `compute_instance_ip_v4: "home_network_v4"` (IPAM will choose next free IP from that prefix)
+     - IPv4 same options as "no IPAM", additional option: name of network (example: `compute_instance_ip_v4: "home_network_v4"` (IPAM will choose next free IP from that prefix)
      - IPv6 same options as "no IPAM", additional option. example: `compute_instance_ip_v6: "home_network_v6"`
 - **IPAM solution** (valid choices: netbox: `compute_instance_ipam_provider: netbox`
 - **Virtualization plattform**, valid choices: proxmox, vmware (stub): `compute_instance_virtualization_provider: proxmox`
