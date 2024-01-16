@@ -66,6 +66,15 @@
   tags: dns
   when: baserole_dns_config_enable|bool
 
+- name: Include proxy-config.yml
+  ansible.builtin.include_tasks:
+    file: "proxy-config.yml"
+    apply:
+      tags:
+        - proxy
+  tags: proxy
+  when: baserole_proxy_config_enable|bool
+
 - name: Include ca-config.yml
   ansible.builtin.include_tasks:
     file: "ca-config.yml"
@@ -122,15 +131,6 @@
         - packages
   tags: packages
   when: baserole_package_upgrade_enable|bool
-
-- name: Include proxy-config.yml
-  ansible.builtin.include_tasks:
-    file: "proxy-config.yml"
-    apply:
-      tags:
-        - proxy
-  tags: proxy
-  when: baserole_proxy_config_enable|bool
 
 - name: Include user-root.yml
   ansible.builtin.include_tasks:
