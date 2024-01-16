@@ -42,11 +42,11 @@
       default: "local-zfs"
       private: false
     - name: compute_instance_ip_v4
-      prompt: 'Specify name of v4 network (choices: see dict network_prefix_list) OR IPv4-address in CIDR-notation (i.e. 1.2.3.4/24) OR "no" for disabled IPv4 connectivity: '
+      prompt: 'Specify name of v4 network (search with netbox_prefix_name_query_method) OR IPv4-address in CIDR-notation (i.e. 1.2.3.4/24) OR "no" for disabled IPv4 connectivity: '
       private: false
       default: "home_network_v4"
     - name: compute_instance_ip_v6
-      prompt: 'Specify name of v6 network (choices: see dict network_prefix_list) OR IPv6-address in CIDR-notation (i.e. 1:2:3:4::1/64) OR ip-address in CIDR-notation "no" for no IPv6 connectivity: '
+      prompt: 'Specify name of v6 network (searched with netbox_prefix_name_query_method) OR IPv6-address in CIDR-notation (i.e. 1:2:3:4::1/64) OR ip-address in CIDR-notation "no" for no IPv6 connectivity: '
       private: false
       default: "home_network_v6"
 
@@ -63,14 +63,6 @@
     compute_instance_dns_ttl: 600
 
     compute_instance_debug_mode_enable: true
-
-    network_prefix_list:
-      home_network_v4:
-        prefix: "192.168.178.0/24"
-        proxmox_host_bridge: vmbr0
-      home_network_v6:
-        prefix: "fd00::/8"
-        proxmox_host_bridge: vmbr0
 
     # proxmox_create_node: node1
     # proxmox_create_node_ansible: node1.domain.tld

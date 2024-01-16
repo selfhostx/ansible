@@ -25,19 +25,27 @@
 # compute_instance_storage: "local-zfs"
 
 # network/IP for new instance, valid choices:
-# - name of network from dict network_prefix_list (ipam will choose next free IP)
+# - name of prefixe network FIXME (ipam will choose next free IP)
 # - a specific IP with CIDR (like 192.168.178.33/24)
 # - "no" -> no v4 (or v6) networking
 #
 # Examples:
-# compute_instance_ip_v4: "home_network_v4" <- from "network_prefix_list"
+# compute_instance_ip_v4: "server_network_v4"
 # OR:
 # compute_instance_ip_v4: "192.168.178.33/24"
 # deactivate IPv6:
 # compute_instance_ip_v6: "no"
 
-# specifiy VLAN (if needed):
-# compute_instance_vlan: 100
+# compute_instance_vlan -> specifiy VLAN (if needed), valid choices:
+# - variable is not defined -> no vlans used
+# - number (integer) i.e. vlan 100 would be: "compute_instance_vlan: 100")
+
+# or ask netbox for the vlan of the prefix (set to true, default is false. needs "compute_instance_ipam_provider: netbox" to be used):
+netbox_query_vlan_from_prefix: true
+
+# default bridge:
+compute_instance_bridge: vmbr0
+
 
 # valid choices: proxmox, vmware (stub)
 compute_instance_virtualization_provider: proxmox
@@ -59,29 +67,30 @@ compute_instance_dns_ttl: 14400
 # print additional debug output:
 compute_instance_debug_mode_enable: false
 
-# netbox
-# human-readable list of prefixes (example values):
-network_prefix_list:
-  home_network_v4:
-    prefix: "192.168.178.0/24"
-    proxmox_host_bridge: vmbr0
-    # needed for netbox_gateway_determine_method: dict"
-    gateway: "192.168.178.1"
-  home_network_v6:
-    prefix: "fd00::/8"
-    proxmox_host_bridge: vmbr0
-
+# netbox ====
 netbox_fail_if_ip_entry_exists: true
-# how find the gateway IP, methods available:
-# dict: attribute "gateway" needs to be present in dictionary "network_prefix_list"
-# netbox_tag: in order to query for the defined gateway in each prefix please tag only one IP-address per prefix with this tag
-# other alternatives:
-#  last_ip: use last useable IP in the prefix
-#  first_ip: use first useable IP in the prefix
-netbox_gateway_determine_method: "netbox_tag"
-netbox_gateway_tag: "gateway"
+netbox_validate_certs: true
 
-# override (defaults to ansible_hostname):
+netbox_prefix_name_query_method: "netbox_description"
+
+# how to find the gateway IP, methods available:
+# - netbox_tag: in order to query for the defined gateway in each prefix please tag only one IP-address per prefix with this tag
+# - custom_field: use custom field with name defined in var "netbox_gateway_query_term"
+# - last_ip: use last useable IP in the prefix
+# - first_ip: use first useable IP in the prefix
+netbox_gateway_query_method: "netbox_tag"
+netbox_gateway_query_term: "gateway"
+
+# specify bridge (for proxmox), choices:
+# - "variable" -> use "compute_instance_bridge"
+# - "custom_field" -> query netbox with custom-field defined from "netbox_bridge_query_term"
+netbox_bridge_query_method: "variable"
+netbox_bridge_query_term: "prox_bridge"
+
+
+# Proxmox and clout-init ====
+
+# where to create the instance:
 proxmox_create_node: localhost
 # set if node name is not equal to ansible ssh-connection (usually a FQDN is used here):
 proxmox_create_node_ansible: localhost

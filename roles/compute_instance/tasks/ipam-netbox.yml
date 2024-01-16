@@ -10,45 +10,83 @@
     - compute_instance_virtualization_provider  == "proxmox"
   block:
 
-    - name: Prefix name given - lookup prefix address and and set network config as facts (v4)
+    - name: Prefix name given - lookup prefix address in netbox and set network config as fact (v4)
+      # debug: "result is {{ item.value.prefix }}"
       ansible.builtin.set_fact:
-        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v4_full: "{{ item.value.prefix }}"
-      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
+      loop: "{{ query('netbox.netbox.nb_lookup', 'prefixes', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) }}"
+      vars:
+        netbox_api_query_filter: "description={{ compute_instance_ip_v4 }} family=4"
       when:
         - compute_instance_ip_v4 != "no"
-        - "compute_instance_ip_v4 in item.key"
-        - compute_instance_ip_v4_is is defined and compute_instance_ip_v4_is == "name"
+        - compute_instance_ip_v4_is == "name"
+        - netbox_prefix_name_query_method == "netbox_description"
+      register: netbox_result_prefix_v4
 
-    - name: Prefix name given - lookup prefix address and and set network config as facts (v6)
+    - name: Prefix name given - lookup prefix address in netbox and set network config as fact (v6)
+      # debug: "result is {{ item.value.prefix }}"
       ansible.builtin.set_fact:
-        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v6_full: "{{ item.value.prefix }}"
-      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
+      loop: "{{ query('netbox.netbox.nb_lookup', 'prefixes', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) }}"
+      vars:
+        netbox_api_query_filter: "description={{ compute_instance_ip_v6 }} family=6"
       when:
         - compute_instance_ip_v6 != "no"
-        - "compute_instance_ip_v6 in item.key"
         - compute_instance_ip_v6_is == "name"
+        - netbox_prefix_name_query_method == "netbox_description"
+      register: netbox_result_prefix_v6
 
     - name: IP given - lookup prefix address and and set network config as facts (v4)
       ansible.builtin.set_fact:
-        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v4_full: "{{ compute_instance_ip_v4 | ansible.utils.ipaddr('network/prefix') }}"
         proxmox_network_ip_v4_prefixed: "{{ compute_instance_ip_v4 }}"
-      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
       when:
         - compute_instance_ip_v4 != "no"
         - compute_instance_ip_v6_is == "ip"
 
     - name: IP given - lookup prefix address and and set network config as facts (v6)
       ansible.builtin.set_fact:
-        proxmox_net0: "virtio,bridge={{ item.value.proxmox_host_bridge }}"
         proxmox_network_prefix_v6_full: "{{ compute_instance_ip_v6 | ansible.utils.ipaddr('network/prefix') }}"
         proxmox_network_ip_v6_prefixed: "{{ compute_instance_ip_v6 }}"
-      loop: "{{ lookup('ansible.builtin.dict', network_prefix_list) }}"
       when:
         - compute_instance_ip_v6 != "no"
         - compute_instance_ip_v6_is == "ip"
+
+    - name: Netbox - query for vlan of prefix (v4)
+      ansible.builtin.set_fact:
+        compute_instance_vlan: "{{ item.item.value.vlan.vid }}"
+      loop: "{{ netbox_result_prefix_v4.results }}"
+      when:
+        - compute_instance_ip_v4 != "no"
+        - compute_instance_vlan is undefined
+        - netbox_query_vlan_from_prefix
+        - item.item.value.vlan.vid is defined
+
+    - name: Netbox - query for vlan of prefix (v6)
+      ansible.builtin.set_fact:
+        compute_instance_vlan: "{{ item.item.value.vlan.vid }}"
+      loop: "{{ netbox_result_prefix_v6.results }}"
+      when:
+        - compute_instance_ip_v6 != "no"
+        - compute_instance_vlan is undefined
+        - netbox_query_vlan_from_prefix
+        - item.item.value.vlan.vid is defined
+
+    - name: Set compute_instance_bridge (from variable)
+      ansible.builtin.set_fact:
+        proxmox_net0: "virtio,bridge={{ compute_instance_bridge }}"
+      when:
+        - netbox_bridge_query_method == "variable"
+
+    - name: Set compute_instance_bridge from query to netbox via custom field (FIXME untested)
+      ansible.builtin.set_fact:
+        # proxmox_net0: "virtio,bridge={{ query('netbox.netbox.nb_lookup', 'custom-fields', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) | length > 0 }}"
+        # FIXME: use var "netbox_bridge_query_term"!
+        proxmox_net0: "virtio,bridge={{ netbox_result_prefix_v4.value.custom_fields.bridge }}"
+      vars:
+        netbox_api_query_filter: "name={{ netbox_bridge_query_term }}"
+      when:
+        - netbox_bridge_query_method == "custom_field"
 
     - name: Debug - Show proxmox_net0 and proxmox_network_prefix_v4_full
       ansible.builtin.debug:
@@ -71,7 +109,7 @@
         - netbox_fail_if_ip_entry_exists
         - compute_instance_ip_v4 != "no"
         - proxmox_network_ip_v4_prefixed is defined
-        - query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) | length > 0
+        - query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) | length > 0
       vars:
         netbox_api_query_filter: "parent={{ proxmox_network_prefix_v4_full }} address={{ proxmox_network_ip_v4_prefixed }}"
 
@@ -82,7 +120,7 @@
         - netbox_fail_if_ip_entry_exists
         - compute_instance_ip_v6 != "no"
         - proxmox_network_ip_v6_prefixed is defined
-        - query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) | length > 0
+        - query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) | length > 0
       vars:
         netbox_api_query_filter: "parent={{ proxmox_network_prefix_v6_full }} address={{ proxmox_network_ip_v6_prefixed }}"
 
@@ -106,6 +144,7 @@
         netbox_url: "{{ netbox_url }}"
         netbox_token: "{{ netbox_token }}"
         data:
+          # FIXME make name scheme configurable:
           name: "{{ compute_instance_hostname }}-eth0"
           virtual_machine: "{{ compute_instance_hostname }}"
         state: present
@@ -120,6 +159,7 @@
           dns_name: "{{ compute_instance_hostname }}"
           assigned_object:
             virtual_machine: "{{ compute_instance_hostname }}"
+            # FIXME make name scheme configurable:
             name: "{{ compute_instance_hostname }}-eth0"
           status: active
         state: new
@@ -138,6 +178,7 @@
           dns_name: "{{ compute_instance_hostname }}"
           assigned_object:
             virtual_machine: "{{ compute_instance_hostname }}"
+            # FIXME make name scheme configurable:
             name: "{{ compute_instance_hostname }}-eth0"
           status: active
         state: new
@@ -168,6 +209,7 @@
           dns_name: "{{ compute_instance_hostname }}"
           assigned_object:
             virtual_machine: "{{ compute_instance_hostname }}"
+            # FIXME make name configurable
             name: "{{ compute_instance_hostname }}-eth0"
           status: active
       when:
@@ -183,57 +225,82 @@
           dns_name: "{{ compute_instance_hostname }}"
           assigned_object:
             virtual_machine: "{{ compute_instance_hostname }}"
+            # FIXME make name configurable
             name: "{{ compute_instance_hostname }}-eth0"
           status: active
       when:
         - compute_instance_ip_v6 != "no"
         - compute_instance_ip_v6_is == "ip"
 
-    - name: Netbox - query for IPv4 gateway via tag # ignore-errors
+    #- name: Show gateway v4
+    #  ansible.builtin.debug:
+    #    msg: "{{ item.item.value.custom_fields.default_rtr }}"
+    #  loop: "{{ netbox_result_prefix_v4.results }}"
+
+    - name: Netbox - query for IPv4 gateway via custom field FIXME use var netbox_gateway_query_term
       ansible.builtin.set_fact:
-        my_gateway_v4: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) }}"
+        # working:
+        proxmox_network_gateway_v4: "{{ 'item.item.value.custom_fields.default_rtr' }}"
+        # proxmox_network_gateway_v4: "{{ vars['item.item.value.custom_fields.' + netbox_gateway_query_term] }}"
+        # proxmox_network_gateway_v4: "{{ lookup('vars', 'item.item.value.custom_fields.' + netbox_gateway_query_term) }}"
+        # proxmox_network_gateway_v4: "{{ item.item.value.custom_fields. + vars[netbox_gateway_query_term] }}"
+        # proxmox_network_gateway_v4: "{{ 'item.item.value.custom_fields.' + netbox_gateway_query_term }}"
+        # proxmox_network_gateway_v4: "{{ lookup('vars', netbox_query_gateway_v4) }}"
+#      vars:
+#        - netbox_query_gateway_v4: "{{ 'item.item.value.custom_fields.' + netbox_gateway_query_term }}"
+      loop: "{{ netbox_result_prefix_v4.results }}"
+      when:
+        - compute_instance_ip_v4 != "no"
+        - netbox_gateway_query_method == 'netbox_custom_field'
+
+    - name: Netbox - query for IPv6 gateway via custom field FIXME use var netbox_gateway_query_term
+      ansible.builtin.set_fact:
+        proxmox_network_gateway_v6: "{{ item.item.value.custom_fields.default_rtr }}"
+      loop: "{{ netbox_result_prefix_v6.results }}"
+      when:
+        - compute_instance_ip_v6 != "no"
+        - netbox_gateway_query_method == 'netbox_custom_field'
+
+    - name: Netbox - query for IPv4 gateway via tag defined in netbox_gateway_query_term # ignore-errors
+      ansible.builtin.set_fact:
+        my_gateway_v4: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) }}"
       vars:
-        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v4_full }} tag={{ netbox_gateway_tag }}"
+        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v4_full }} tag={{ netbox_gateway_query_term }}"
       # asking for non-existing tags results in task failure :-/
       ignore_errors: true
       when:
         - compute_instance_ip_v4 != "no"
-        - netbox_gateway_determine_method == 'netbox_tag'
-      tags: queries
+        - netbox_gateway_query_method == 'netbox_tag'
 
-    - name: Netbox - query for IPv6 gateway via tag # ignore-errors
+    - name: Netbox - query for IPv6 gateway via tag defined in netbox_gateway_query_term # ignore-errors
       ansible.builtin.set_fact:
-        my_gateway_v6: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token) }}"
+        my_gateway_v6: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) }}"
       vars:
-        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v6_full }} tag={{ netbox_gateway_tag }}"
-      # asking for non-existing tag results in task failure :-/
+        netbox_api_query_filter: "parent={{ proxmox_network_prefix_v6_full }} tag={{ netbox_gateway_query_term }}"
+      # asking for non-existing tags results in task failure :-/
       ignore_errors: true
       when:
-        - netbox_gateway_determine_method == 'netbox_tag'
-      tags: queries
+        - compute_instance_ip_v6 != "no"
+        - netbox_gateway_query_method == 'netbox_tag'
 
-    - name: Netbox - set IPv4 gateway from tag-search
+    - name: Netbox - set IPv4 gateway from results
       ansible.builtin.set_fact:
-        # msg: "{{ my_gateway | community.general.json_query('value') }}"
-        # msg: "{{ my_gateway.value.address }}"
         proxmox_network_gateway_v4: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
       loop: "{{ my_gateway_v4 }}"
       when:
-        - netbox_gateway_determine_method == 'netbox_tag'
         - my_gateway_v4 is defined
-      tags: queries
+        # FIXME make it work for all methods
+        - netbox_gateway_query_method == 'netbox_tag'
+
 
     - name: Netbox - set IPv6 gateway from results
       ansible.builtin.set_fact:
-        # msg: "{{ my_gateway | community.general.json_query('value') }}"
-        # msg: "{{ my_gateway.value.address }}"
         proxmox_network_gateway_v6: "{{ item.value.address | ansible.utils.ipaddr('address') }}"
       loop: "{{ my_gateway_v6 }}"
       when:
-        - compute_instance_ip_v6 != "no"
-        - netbox_gateway_determine_method == 'netbox_tag'
         - my_gateway_v6 is defined
-      tags: queries
+        # FIXME make it work for all methods
+        - netbox_gateway_query_method == 'netbox_tag'
 
 
 - name: "Netbox for VMWare"
