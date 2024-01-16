@@ -1,6 +1,6 @@
 ---
 
-- name: Determine count of subdomains for compute_instance_hostname
+- name: Determine count of subdomains for compute_instance_hostname (Ok to fail here if you just wanted to create a cloud-init template)
   ansible.builtin.set_fact:
     my_levels: "{{ compute_instance_hostname.split('.') | length | int }}"
 
@@ -14,26 +14,26 @@
     msg: "compute_instance_hostname {{ compute_instance_hostname }} belongs to DNS-Zone: {{ my_dns_zone }}"
   when: compute_instance_debug_mode_enable
 
-- name: compute_instance_ip_v4 is a IP
+- name: Compute_instance_ip_v4 is a IP
   ansible.builtin.set_fact:
     compute_instance_ip_v4_is: "ip"
   when:
     - compute_instance_ip_v4 | ansible.utils.ipaddr
 
-- name: compute_instance_ip_v4 is a name
+- name: Compute_instance_ip_v4 is a name
   ansible.builtin.set_fact:
     compute_instance_ip_v4_is: "name"
   when:
     - compute_instance_ip_v4 != "no"
     - not compute_instance_ip_v4 | ansible.utils.ipaddr
 
-- name: compute_instance_ip_v6 is a IP
+- name: Compute_instance_ip_v6 is a IP
   ansible.builtin.set_fact:
     compute_instance_ip_v6_is: "ip"
   when:
     - compute_instance_ip_v6 | ansible.utils.ipaddr
 
-- name: compute_instance_ip_v6 is a name
+- name: Compute_instance_ip_v6 is a name
   ansible.builtin.set_fact:
     compute_instance_ip_v6_is: "name"
   when:
