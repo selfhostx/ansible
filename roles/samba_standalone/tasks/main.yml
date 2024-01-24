@@ -48,8 +48,7 @@
     mode: '0660'
     src: '{{ samba_template }}'
     validate: 'testparm --suppress-prompt %s'
-  notify:
-    - 'restart samba'
+  notify: 'Restart samba'
 
 - name: Create Users on system from dictionary
   ansible.builtin.user:
@@ -65,6 +64,7 @@
   - samba_userlist is defined
   - samba_userlist|length > 0
   with_items: "{{ samba_userlist }}"
+  no_log: true
 
 # idea from: https://stackoverflow.com/questions/44762488/non-interactive-samba-user-creation-via-ansible
 - name: Create Samba users with smbpasswd
@@ -78,7 +78,6 @@
   register: samba_create_users
   changed_when: "'Added user' in samba_create_users.stdout"
   with_items: "{{ samba_userlist }}"
-  # loop: "{{ samba_users }}"
   no_log: true
 
 - name: shell - set samba passwords correctly
@@ -93,4 +92,4 @@
   when: samba_test_created_users
   changed_when: "'New SMB password' in samba_verify_users.stdout"
   with_items: "{{ samba_userlist }}"
-  # no_log: true
+  no_log: true
