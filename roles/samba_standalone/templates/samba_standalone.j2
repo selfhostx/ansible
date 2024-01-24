@@ -1,30 +1,30 @@
 # {{ ansible_managed }}
 # Global parameters
 [global]
-	log file = /var/log/samba/log.%m
-	logging = file
-	map to guest = Bad User
-	max log size = 1000
-	obey pam restrictions = Yes
-	pam password change = Yes
-	panic action = /usr/share/samba/panic-action %d
-	passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
-	passwd program = /usr/bin/passwd %u
-	server role = standalone server
-	unix password sync = Yes
-	usershare allow guests = Yes
-	idmap config * : backend = tdb
+  log file = /var/log/samba/log.%m
+  logging = file
+  map to guest = Bad User
+  max log size = 1000
+  obey pam restrictions = Yes
+  pam password change = Yes
+  panic action = /usr/share/samba/panic-action %d
+  passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+  passwd program = /usr/bin/passwd %u
+  server role = standalone server
+  unix password sync = Yes
+  usershare allow guests = Yes
+  idmap config * : backend = tdb
 
-	store dos attributes = no
-	ea support = no
-	map archive = no
-	map hidden = no
-	map system = no
-	map readonly = no
+  store dos attributes = no
+  ea support = no
+  map archive = no
+  map hidden = no
+  map system = no
+  map readonly = no
 
-	min protocol = {{ samba_min_protocol }}
-	client max protocol = {{ samba_client_max_protocol }}
-	encrypt passwords = yes
+  min protocol = {{ samba_min_protocol }}
+  client max protocol = {{ samba_client_max_protocol }}
+  encrypt passwords = yes
 
   server signing = {{ samba_server_signing }}
   smb encrypt = {{ samba_smb_encrypt }}
