@@ -18,6 +18,10 @@
 # number of CPU cores (example: 2):
 # compute_instance_cores: 2
 
+# Specify emulated CPU type (if none is selected proxmox will choose "kvm64" by itself, other common choices are "host" or plattforms like "SandyBridge-IBRS" to allow live-migration with different Host-CPUs)
+# for more information see: https://pve.proxmox.com/pve-docs/chapter-qm.html#qm_cpu
+# compute_instance_cpu: kvm64
+
 # disk size in GB (example: 20G):
 # compute_instance_disksize: 20
 

@@ -70,6 +70,7 @@
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     vmid: "{{ proxvm.vmid }}"
     name: "{{ compute_instance_hostname }}"
+    cpu: "{{ compute_instance_cpu | default(omit) }}"
     cores: "{{ compute_instance_cores }}"
     memory: "{{ compute_instance_memory_max }}"
     vga: "{{ proxmox_vm_vga }}"
