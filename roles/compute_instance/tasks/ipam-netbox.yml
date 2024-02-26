@@ -301,13 +301,3 @@
         - my_gateway_v6 is defined
         # FIXME make it work for all methods
         - netbox_gateway_query_method == 'netbox_tag'
-
-
-- name: "Netbox for VMWare"
-  when:
-    - compute_instance_virtualization_provider  == "vmware"
-  block:
-
-    - name: Netbox - VMWare Stub warning
-      ansible.builtin.debug:
-        msg: "VMWare not implemented yet"

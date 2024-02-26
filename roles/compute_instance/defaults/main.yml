@@ -51,7 +51,7 @@ netbox_query_vlan_from_prefix: true
 compute_instance_bridge: vmbr0
 
 
-# valid choices: proxmox, vmware (stub)
+# valid choices: proxmox
 compute_instance_virtualization_provider: proxmox
 # valid choices: netbox
 compute_instance_ipam_provider: netbox

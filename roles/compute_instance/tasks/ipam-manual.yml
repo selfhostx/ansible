@@ -25,12 +25,3 @@
         proxmox_network_ip_v6_prefixed: "{{ compute_instance_ip_v6 }}"
       when:
         - compute_instance_ip_v6 != "no"
-
-- name: "VMWare"
-  when:
-    - compute_instance_virtualization_provider  == "vmware"
-  block:
-
-    - name: Netbox - VMWare Stub warning
-      ansible.builtin.debug:
-        msg: "VMWare not implemented yet"
