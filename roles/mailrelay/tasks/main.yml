@@ -22,7 +22,7 @@
   - postfix_myorigin == none
   - not postfix_take_ansible_name_as_myorigin
 
-- name: warn if domainname is missing
+- name: Warn if domainname is missing
   ansible.builtin.debug: msg='Warning - domainname is not set (usually in /etc/hosts), most MTAs will refuse non-FQDN-senders...'
   when:
   - postfix_myorigin is not defined
@@ -31,10 +31,10 @@
   - not postfix_fail_if_domainname_is_missing
 
 - name: Show some important vars
-  debug:
+  ansible.builtin.debug:
     msg: ansible_fqdn is {{ ansible_fqdn }}, ansible_domain is {{ ansible_domain }}, postfix_myorigin is {{ postfix_myorigin }}
 
-- name: fail if domainname is missing
+- name: Fail if domainname is missing
   ansible.builtin.fail: msg='Failing - ansible_domain is not set up properly (usually in /etc/hosts) for postfix_myorigin, most MTAs will refuse non-FQDN-senders...'
   when:
   - postfix_myorigin is not defined
