@@ -87,7 +87,7 @@ netbox_gateway_query_term: "gateway"
 
 # specify bridge (for proxmox), choices:
 # - "variable" -> use "compute_instance_bridge"
-# - "custom_field" -> query netbox with custom-field defined from "netbox_bridge_query_term"
+# - "custom_field" -> query netbox with custom-field defined from "netbox_bridge_query_term" (Content type of custom field needs to be "IPAM > Prefix" with Type "Text")
 netbox_bridge_query_method: "variable"
 netbox_bridge_query_term: "prox_bridge"
 
