@@ -13,7 +13,9 @@ roles:
   - src: geerlingguy.pip
   - src: geerlingguy.postgresql
   - src: geerlingguy.repo-epel
-  - src: jnv.unattended-upgrades
+  # deprecated:
+  # - src: jnv.unattended-upgrades
+  - src: hifis.unattended_upgrades
   - src: mailcow.mailcow
   - src: powerdns.pdns_recursor
   - src: powerdns.dnsdist

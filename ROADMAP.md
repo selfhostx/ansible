@@ -10,6 +10,7 @@ Roadmap
 **general *nix config**
   - [our baserole](roles/baserole)
   - https://github.com/willshersystems/ansible-sshd
+  - unattended upgrades: https://galaxy.ansible.com/ui/standalone/roles/hifis/unattended_upgrades/documentation/
 
 **Backup**
   - **bacula** https://github.com/selfhostx/ansible/blob/main/roles/bacula
