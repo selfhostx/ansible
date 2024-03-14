@@ -95,7 +95,7 @@ netbox_time_format: "g:i a"
 netbox_short_time_format: "H:i:s"
 netbox_datetime_format: "N j, Y g:i a"
 netbox_short_datetime_format: "Y-m-d H:i"
-netbox_short_time_format: "UTC"
+
 # url or "None":
 netbox_release_check_url: "https://api.github.com/repos/netbox-community/netbox/releases"
 
