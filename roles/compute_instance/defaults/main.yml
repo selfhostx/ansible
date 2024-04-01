@@ -133,6 +133,7 @@ cloudinit_move_network_config_to_main_file: true
 proxmox_resize: true
 proxmox_start: true
 proxmox_update: true
+proxmox_task_timeout: 120
 
 # upgrades packages (will take time if the cloudinit_image is outdated)
 proxmox_upgrade_packages_on_create: true

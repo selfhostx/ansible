@@ -50,7 +50,7 @@
       ide2: "none,media=cdrom"
     scsihw: "{{ proxmox_vm_scsihw }}"
     ostype: "{{ proxmox_vm_ostype }}"
-    timeout: 120
+    timeout: "{{ proxmox_task_timeout }}"
     serial:
       serial0: socket
     # not needed here

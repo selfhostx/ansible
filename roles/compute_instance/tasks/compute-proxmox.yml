@@ -49,7 +49,7 @@
     storage: "{{ compute_instance_storage }}"
     scsihw: "{{ proxmox_vm_scsihw }}"
     ostype: "{{ proxmox_vm_ostype }}"
-    timeout: 120
+    timeout: "{{ proxmox_task_timeout }}"
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
@@ -57,7 +57,7 @@
 
 #  - name: Waiting to start virtual server machine completely
 #    wait_for:
-#        timeout: 45
+#        timeout: "{{ proxmox_task_timeout }}"
 #    when: proxvm.changed == true
 
 - name: Proxmox - resize Disk
