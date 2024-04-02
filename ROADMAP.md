@@ -146,6 +146,10 @@ Roadmap
   - ipsec strongswan (2DO, but low prio because usually this is done on firewalls and wireguard is simpler)
   - *(stunnel -> needed?)*
 
+**DHCP**
+  - kea-DHCP standalone (2DO) included in pfsense/opnsense
+  - ISC dhcp (EOL)
+
 **DNS**
   - **self-hosted:**
     - recursive
@@ -156,7 +160,7 @@ Roadmap
       - PowerDNS Authoritative (-> powerdns.pdns )
       - *bind -> 2DO: maintainer needed*
     - adfiltering
-      - powerdns with filtering (lua-based) -> FIXME code commit
+      - powerdns with filtering (lua-based): https://gist.github.com/stefanux/8d3741e2faf8d463c95ff28bd7989261 (2DO: release Code)
       - *pihole?*
       - *adguard home?*
   - **DNS (external service)**:
@@ -242,6 +246,7 @@ Roadmap
     - jitsi via docker (but usage discouraged due to limitations, over-complex architecture and bad documentation)
   - Wiki
     - [dokuwiki](roles/dokuwiki)
+    - xwiki (2DO code)
     - *wiki.js? (2Do: maintainer needed; -> https://github.com/supertarto/ansible-wikijs ?)*
     - *bookstack (2Do: maintainer needed)*
     - *mediawiki (2Do: maintainer needed)*
@@ -251,7 +256,7 @@ Roadmap
     - [vaultwarden](roles/vaultwarden)
     - *hashicorp vault (2DO maintainer needed)?*
     - *privacyIDEA (2DO maintainer needed)*
-  - roundcube webmail (2DO)
+  - roundcube webmail (refactor Code)
   - Ticketsystems
     - Zammad
   - kimai2 (timetracking)
