@@ -55,9 +55,10 @@ Roadmap
       - PVE Balance: https://github.com/PLUTEX/pve_balance
       - proxmox_migrate.py: https://github.com/HeinleinSupport/proxmox-tools/blob/master/proxmox_migrate.py
   - [libvirt](roles/libvirt)+KVM (including cloud-init)
+  - *apache cloudstack (for big installation beyond the scope of proxmox): https://github.com/ngine-io/ansible-collection-cloudstack*
   - *ovirt? (if maintainer is found)*
   - debootstrap (if cloud-init is not wanted): https://github.com/nilsmeyer/ansible-debootstrap
-  - Container
+  - Container:
     - *k3s (if maintainer is found)*
     - *k8s (if maintainer is found)*
     - docker
@@ -86,6 +87,7 @@ Roadmap
     - https://galaxy.ansible.com/aalaesar/install_nextcloud / https://github.com/aalaesar/install_nextcloud
     - https://gitlab.com/mejo-/ansible-role-nextcloud
     - https://git.coop/webarch/nextcloud
+  - *filestash (2DO)*
   - S3
     - minio
     - ceph RGW
