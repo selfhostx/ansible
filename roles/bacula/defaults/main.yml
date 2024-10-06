@@ -82,6 +82,7 @@ bacula_sd_max_jobs: 15
 bacula_sd_device_max_jobs: "{{ bacula_sd_max_jobs }}"
 
 # define which storage device-template we use:
+# include all vars from that template to stay compatible
 bacula_sd_device_template: "storage_device_include_ringbuffer.j2"
 
 # define port defaults in case they got overriden later:
@@ -137,6 +138,11 @@ bacula_fd_fileset_ignore_changes: False
 #    Option1 = Value1
 # bacula_dir_extra_director_options: |+
 #    Option1 = Value1
+
+# extend SD device-section with extra options
+# (makes only sense if predefined template for bacula_sd_device_template should be used, if you override that template anyway, you need to add these options there):
+#bacula_sd_device_extra_options: |+
+#  Option1 = Value1
 
 # define extra systemwide filesets:
 # bacula_dir_fileset_extra_template: ""

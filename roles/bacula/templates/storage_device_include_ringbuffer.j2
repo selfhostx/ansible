@@ -7,3 +7,6 @@
   RemovableMedia = no;
   AlwaysOpen = no;
   Maximum Concurrent Jobs = {{ bacula_sd_device_max_jobs }}
+{% if bacula_sd_device_extra_options is defined and bacula_sd_device_extra_options|length > 0 %}
+{{ bacula_sd_device_extra_options }}
+{% endif %}

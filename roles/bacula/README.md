@@ -74,6 +74,8 @@ Example: Ringbuffer
 - size is bacula_sd_pool_max_volumes x bacula_sd_pool_max_volume_byte
 Example: 10G x 100 Volumes means maximum capacity is ~1TB backupspace, depending on the amount
 
+see template from var "bacula_sd_device_template" (default is [storage_device_include_ringbuffer.j2](templates/storage_device_include_ringbuffer.j2)) and optional more options from var "bacula_sd_device_extra_options".
+
 ### Storage Definitions
 bacula_sd_device_name: "RingBuffer"
 bacula_sd_media_type: "File"
