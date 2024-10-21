@@ -1,26 +1,25 @@
-Ansible-Rolle für postfix (ab Version 2.3) mit den Aufgaben:
-- eines mailrelays (mails für interne Systeme)
-- "Satelliten"-Systeme die nur zum mailrelay gehen aber keine Zugangsdaten für mail-Accounts mail-servern haben
+ansible-role for postfix (version >=2.3) relaying mails:
+- as central mailrelay (for internal systems)
+- "satelite"-mode (just relay to a central host)
 
-
-Die folgenden Rollen wurden aus Ausgangsbasis genommen:
+sources:
 - https://galaxy.ansible.com/geerlingguy/postfix
 - https://github.com/Oefenweb/ansible-postfix
+- https://github.com/stefanux/ansible-postfix-mailrelay (archived version)
 
 
-Implementiert wurden:
+implemented:
 
-- Testmail (kann mit extra vars -e "postfix_send_test_mail=true" fallweise aktiviert werden)
+- test mail (run with extra vars -e "postfix_send_test_mail=true" for some runs)
 
 - relayhost = 
-	domain (MX, dann A-Record )
-	oder [1.2.3.4]
-	-> http://www.postfix.org/postconf.5.html#relayhost
+	domain (MX, fallback A-Record )
+	oder specific host: [1.2.3.4] or [FQDN]
+	see: http://www.postfix.org/postconf.5.html#relayhost
 
 - mydestination = no.local.destination
-	deb9: mydestination = $myhostname, postfix-mta-deb9, localhost.localdomain, , localhost"
+	deb9: mydestination = $myhostname, postfix-mta-deb9, localhost.localdomain, localhost"
 	centos7: mydestination = $myhostname, localhost.$mydomain, localhost
-
 
 - hostname - sollte mit defaults funktionieren wenn im Host richtig gesetzt, aber Warnung als task eingefügt 
 	 reject_non_fqdn_sender http://www.postfix.org/postconf.5.html#reject_non_fqdn_sender
