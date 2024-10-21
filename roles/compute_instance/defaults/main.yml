@@ -242,6 +242,10 @@ cloudinit_images:
     url: "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
     hash_algorithm: sha256
     hash_checksum_file: "https://cloud-images.ubuntu.com/jammy/current/SHA256SUMS"
+  ubuntu24_04_amd64:
+    url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+    hash_algorithm: sha256
+    hash_checksum_file: "https://cloud-images.ubuntu.com/noble/current/SHA256SUMS"
 
 # empty internal vars):
 compute_instance_ip_v4_is: ""
