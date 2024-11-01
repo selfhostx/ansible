@@ -138,3 +138,5 @@ mattermost_db_unit_mysql: "mysql.service"
 
 # skip download for testing:
 mattermost_skip_download: False
+
+TerminateSessionsOnPasswordChange: True
