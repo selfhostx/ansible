@@ -157,6 +157,7 @@ app-stores:
 app-installer:
 - bitnami (aquired by vmware)
 - turnkey (own scripts)
+- [coolify](https://coolify.io)
 - pikapods (based on docker)
 - CapRover (based on docker, nginx)
 
