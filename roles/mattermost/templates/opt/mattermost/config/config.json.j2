@@ -101,7 +101,7 @@
     "ManagedResourcePaths": "",
     "EnableCustomGroups": true,
     "MaximumPayloadSizeBytes": 300000,
-    "TerminateSessionsOnPasswordChange": {{mattermost_TerminateSessionsOnPasswordChange }}
+    "TerminateSessionsOnPasswordChange": {{ mattermost_TerminateSessionsOnPasswordChange | lower }}
   },
   "TeamSettings": {
     "SiteName": "{{ mattermost_sitename }}",
