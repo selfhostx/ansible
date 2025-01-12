@@ -8,6 +8,7 @@ official zabbix-project already shares a lot of templates: https://github.com/za
 Commands
 --------
 
+you need to enable certain checks on hosts first (group_vars, hosts_vars, inventory, ...) example: "zabbix_checks_dns_enable: true" then run:
 
 ```
 ansible-playbook zabbix-checks.yml 
@@ -18,7 +19,6 @@ Requirements
 ------------
 
 none
-
 
 
 Role Variables
