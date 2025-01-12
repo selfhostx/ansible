@@ -220,7 +220,7 @@ Roadmap
 
 **Reverse-Proxy/Loadbalancer**:
   - self-hosted:
-    - haproxy
+    - haproxy (various roles available; config mgmt: https://opendev.org/openstack/kolla-ansible/src/branch/master/ansible/roles/haproxy-config )
     - nginx proxy manager GUI (needs docker)
     - nginx reverse proxy (vanilla)
     - apache mod_proxy (maintainer needed)
