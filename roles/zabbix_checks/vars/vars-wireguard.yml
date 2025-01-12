@@ -1,4 +1,4 @@
 ---
 zabbix_wireguard_userparameter_filename: "userparameter_wireguard.conf"
 zabbix_wireguard_sudoers_filename: "/etc/sudoers.d/20_zabbix-wireguard-sudoers"
-zabbix_wireguard_script_filename: "{{ zabbix_scripts_dir }}/wireguard.sh"
+zabbix_wireguard_script_filename: "wireguard.sh"

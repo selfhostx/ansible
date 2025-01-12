@@ -32,7 +32,7 @@
 - name: Copy wireguard.sh for wireguard template
   copy:
     src: "wireguard.sh"
-    dest: "{{ zabbix_wireguard_script_filename }}"
+    dest: "{{ zabbix_scripts_dir }}/{{ zabbix_wireguard_script_filename }}"
     # root owns it because sudo:
     owner: "root"
     group: "{{ zabbix_group }}"
