@@ -166,5 +166,5 @@
         dest: "/etc/hosts"
         owner: root
         group: root
-        mode: 0644
+        mode: '0644'
 # tasks from mrlesmithjr.etc-hosts END
