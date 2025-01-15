@@ -9,8 +9,8 @@
      - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
      - geerlingguy.mysql
      - stefanux.mysqlbackup
-     # https://github.com/stefanux/ansible-role-semaphore
-     - { role: stefanux.semaphore, tags: semaphore }
+     - { role: selfhostx.ansible.semaphore, tags: semaphore }
+     # difference to source role: https://github.com/stefanux/ansible-role-semaphore
 
   vars_files:
     - YOUR-vault.yml
