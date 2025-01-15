@@ -59,7 +59,14 @@ For all options see [defaults/main.yml](defaults/main.yml)
 
 ## Demo/Development
 
-Molecule is used for testing, the webinterface of the centos machine will be exposed and can be used as demo.
+Role forked from https://github.com/morbidick/ansible-role-semaphore
+
+changes from forked roles are mostly on vars, added nginx reverse-config (see this [commit](https://github.com/morbidick/ansible-role-semaphore/commit/f1720b0ea88931c780c05bf4396f29b12786cd33) or this [comparison](https://github.com/morbidick/ansible-role-semaphore/compare/main...stefanux:ansible-role-semaphore:main)) for details.
+will backport upstream changes if useful.
+
+Maybe not included latest features from semaphore in config template, if you see missing keys or errors: please open a issue / PR.
+
+Molecule is useable for testing (not used atm), the webinterface of the centos machine will be exposed and can be used as demo.
 
 * run `molecule converge`
 * open your browser at [127.0.0.1:3000](http://127.0.0.1:3000)
@@ -69,7 +76,3 @@ Molecule is used for testing, the webinterface of the centos machine will be exp
 
 MIT
 
-Role forked from https://github.com/morbidick/ansible-role-semaphore
-
-changes from forked roles are mostly on vars, added nginx reverse-config (see this [commit](https://github.com/morbidick/ansible-role-semaphore/commit/f1720b0ea88931c780c05bf4396f29b12786cd33) or this [comparison](https://github.com/morbidick/ansible-role-semaphore/compare/main...stefanux:ansible-role-semaphore:main)) for details.
-will backport upstream changes if useful.
