@@ -45,7 +45,7 @@
 
     - name: Gather Reverse-Record (v4)
       ansible.builtin.set_fact:
-        hostname_reverse_record_v4: "{{ lookup('community.general.dig', '{{ ansible_default_ipv4.address }}') }}"
+        hostname_reverse_record_v4: "{{ lookup('community.general.dig', '{{ ansible_default_ipv4.address }}', 'qtype=PTR') }}"
       when:
         - baserole_check_reverserecord
         - baserole_ipv4_enable
@@ -53,7 +53,7 @@
 
     - name: Gather Reverse-Record (v6)
       ansible.builtin.set_fact:
-        hostname_reverse_record_v6: "{{ lookup('community.general.dig', '{{ ansible_default_ipv6.address }}') }}"
+        hostname_reverse_record_v6: "{{ lookup('community.general.dig', '{{ ansible_default_ipv6.address }}', 'qtype=PTR') }}"
       when:
         - baserole_check_reverserecord
         - baserole_ipv6_enable
@@ -106,7 +106,7 @@
       when:
         - baserole_check_reverserecord
         - baserole_ipv4_enable
-        - hostname_reverse_record_v4 != inventory_hostname
+        - hostname_reverse_record_v4 != inventory_hostname + '.'
         - not hostname_reverse_record_v4 == "NXDOMAIN"
       ignore_errors: true
 
@@ -116,7 +116,7 @@
       when:
         - baserole_check_reverserecord
         - baserole_ipv6_enable
-        - hostname_reverse_record_v6 != inventory_hostname
+        - hostname_reverse_record_v6 != inventory_hostname + '.'
         - not hostname_reverse_record == "NXDOMAIN"
       ignore_errors: true
 
