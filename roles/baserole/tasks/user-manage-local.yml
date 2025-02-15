@@ -1,55 +1,8 @@
 ---
-# conditions for user-tasks:
-- name: No Conditions set for skipping
-  ansible.builtin.set_fact:
-    skip_this_user: false
-  when:
-    - item.conditional_hostgroup is undefined
-    - item.conditional_var_name_exists is undefined
-  tags:
-    - htop
-    - nano
-    - pubkey
-    - ssh
-    - sudo
-    - userlocal
-    - vim
-
-- name: Set Condition Skip
-  ansible.builtin.set_fact:
-    skip_this_user: true
-  when:
-    - item.conditional_hostgroup is defined
-    - item.conditional_var_name_exists is defined
-  tags:
-    - htop
-    - nano
-    - pubkey
-    - ssh
-    - sudo
-    - userlocal
-    - vim
-
 - name: Check if conditional_hostgroup is present
   ansible.builtin.set_fact:
-    skip_this_user: false
-  when: item.conditional_hostgroup is defined and item.conditional_hostgroup in group_names
-  tags:
-    - htop
-    - nano
-    - pubkey
-    - ssh
-    - sudo
-    - userlocal
-    - vim
-
-- name: Check if the var in item.conditional_var_name_exists is defined (fails when not)
-  ansible.builtin.set_fact:
-    skip_this_user: false
-  when:
-    - lookup('vars', item.conditional_var_name_exists) is defined
-  changed_when: false
-  ignore_errors: true
+    item.skip_this_user: true
+  when: item.conditional_hostgroup is defined and not item.conditional_hostgroup in group_names
   tags:
     - htop
     - nano
@@ -88,7 +41,7 @@
     ssh_key_passphrase: '{{ item.ssh_key_passphrase | d(omit) }}'
     ssh_key_type:       '{{ item.ssh_key_type       | d(omit) }}'
   when:
-    - not skip_this_user
+    - item.skip_this_user is defined
 # yamllint enable rule:colon
 
 - name: Remove sudoers file (with password)
@@ -116,16 +69,16 @@
   tags:
     - sudo
 
-- name: Set Skip if state (of user) is absent
+- name: Set skip if state (of user) is set to absent
   ansible.builtin.set_fact:
-    skip_this_user: true
+    item.skip_this_user: true
   when:
     - item.state is defined
     - item.state == "absent"
 
 - name: User Create block
   when:
-    - not skip_this_user
+    - not item.skip_this_user is defined
   block:
     - name: Create .ssh dir
       ansible.builtin.file:
