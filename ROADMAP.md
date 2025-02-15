@@ -126,7 +126,7 @@ Roadmap
       - stand-alone
       - backends like LDAP
     - mailcow (-> mailcow.mailcow [Example playbook](https://github.com/selfhostx/ansible/blob/main/playbooks/mailcow.yml)) easy-to-use-package with dovecot, postfix, SOGo, rspamd, clamav and supports DKIM
-    - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ )?
+    - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ ) role: https://github.com/ubermail/ubermail/blob/master/tasks/imapsync.yml
   - groupware
     - *kopano (maintainer needed)*
     - *zimbra (maintainer needed)*
@@ -193,6 +193,10 @@ Roadmap
   - *icinga(2) (maintainer needed)*
   - statuspages: Uptime Kuma, *[https://github.com/valeriansaliou/vigil](virgil), cachet, cstate, ... -> need maintainers*
 
+**Log-aggregation**
+  - grafana loki (FIXME release code)
+  - graylog
+
 **User directory**
   - keycloak
   - LDAP?
@@ -208,6 +212,7 @@ Roadmap
   - hostfirewall
     - iptables/nftables -> geerlingguy.firewall (maybe iptables-persistent ?)
     - ufw
+
 **Proxy**
   - tinyproxy [juju4.tinyproxy](https://galaxy.ansible.com/ui/standalone/roles/juju4/tinyproxy)
   - *squid (maintainer needed)*
@@ -234,14 +239,11 @@ Roadmap
     - deb: aptly? FIXME
     - rpm: FIXME
 
-**Log-aggregation**
-  - grafana loki (FIXME release code)
-  - graylog
-
 **Python**
   - PIP -> geerlingguy.pip
 
 **Apps**
+  - clamav virusscanner: geerlingguy.clamav
   - Videoconference
     - opentalk (still beta)
     - bbb ( https://github.com/juanluisbaptiste/ansible-bigbluebutton )
@@ -269,6 +271,7 @@ Roadmap
   - Rustdesk (remote control)
   - doodle-clones (dudle, framadate, ...)
   - etherpad
+  - [overleaf](https://github.com/overleaf/overleaf) Latex collaborative editor
   - jellyfin / emby?
   - limesurvey
   - mastodon (twitter-alternative)

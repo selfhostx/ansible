@@ -4,6 +4,7 @@
 
 roles:
   - src: geerlingguy.apache
+  - src: geerlingguy.clamav
   - src: geerlingguy.git
   - src: geerlingguy.gitlab
   - src: geerlingguy.mysql
