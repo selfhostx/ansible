@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.0</version>
+    <date>2023-02-18T15:48:32Z</date>
+    <groups>
+        <group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <uuid>95de158073af440195516bcdc2e5f6cb</uuid>
+            <template>Template Linux iostat</template>
+            <name>Template Linux iostat</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>b5197bbf88664cacb9e5dead2daf5554</uuid>
+                    <name>IOSTAT: Hard disk drive discovery</name>
+                    <key>iostat</key>
+                    <delay>60</delay>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>cdb37501660f466d814c2d30bf7d0e8f</uuid>
+                            <name>iostat: Avg queue length on $2</name>
+                            <key>iostat[avgqu,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>req</units>
+                            <description>The average queue length of the requests that were issued to the device. - Average Queue Lenght. Usual is 2 per physical disk. So, if we have 5 disks, an average queue lenght under 10 is fine</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>fd1a9d88d9fa49d993c8ce27d8827d59</uuid>
+                            <name>iostat: Avg queue size on $2</name>
+                            <key>iostat[avgrq,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>B</units>
+                            <description>The average queue size of the requests that were issued to the device. Is calculated in sectors*512 (usual size of a sector in Unix)</description>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>512</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>172a262c94a04d2aaa68939665faa2e3</uuid>
+                            <name>iostat: I/O latency on $2</name>
+                            <key>iostat[await,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>ms</units>
+                            <description>The average time (in milliseconds) for I/O requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them. In other words I/O time for complete a process (read the disk, change data, write in disk) -  (SSD usually is under 5 ms, HDD 100 ms )</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>71bdac0e3b1e4dea95ed329c9dedf692</uuid>
+                                    <expression>avg(/Template Linux iostat/iostat[await,{#HDNAME}],120s)&gt;200</expression>
+                                    <name>Disk: {#HDNAME} I/O latency high</name>
+                                    <priority>WARNING</priority>
+                                    <description>Disk transfer time for an I/O operations take over 200 ms to execute. This can be a problem for your disk performance. Consider that an SSD must complete an I/O req in &lt; 5 ms, and a HDD &lt; 150 ms</description>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>Value</tag>
+                                            <value>{ITEM.VALUE}</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>9768b5c462c943cb84b4be807c36c193</uuid>
+                            <name>iostat: Read I/O latency on $2</name>
+                            <key>iostat[rawait,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>ms</units>
+                            <description>The average time (in milliseconds) for  read I/O requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them. (SSD usually is under 1 ms, HDD 30 ms )</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>4a3d9c9e8b9249e3a3ff9528dd0bcc70</uuid>
+                            <name>iostat: KBps $1 on $2</name>
+                            <key>iostat[read,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>Bps</units>
+                            <description>The total number of kilobytes read per second. SSD has until 400 Mb/s, HDD until 60 Mb/s</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>1024</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>858e92a333fa48979249e89de1851326</uuid>
+                            <name>iostat: Merged read IOPS on $2</name>
+                            <key>iostat[rrqm,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>req/s</units>
+                            <description>The number of read requests merged per second that were queued to the device.
+Reads and writes which are adjacent to each other may be merged for efficiency. Thus two 4K reads may become one 8K read before it is ultimately handed to the disk, and so it will be counted (and queued) as only one I/O.  This field lets you know how often this was done.</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>1695f3e902234d78a806de5913c368e2</uuid>
+                            <name>iostat: Read IOPS on $2</name>
+                            <key>iostat[rs,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>req</units>
+                            <description>The number of read requests that were issued to the device per second.  In other words, how many IOPS per second are read. SSD can handle until 30 000 IOPS, HDD - 170</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>739ec384716d48bfa067ec7c36057b83</uuid>
+                            <name>iostat: Utilization % on $2</name>
+                            <key>iostat[util,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <description>Percentage of CPU time during which I/O requests were issued to the device (bandwidth utilization for the device). Device saturation occurs when this value is close to 100%.</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>e2f5cc5cff0e49e6bfd96d678c68b20e</uuid>
+                                    <expression>avg(/Template Linux iostat/iostat[util,{#HDNAME}],120s)&gt;90</expression>
+                                    <name>Disk: {#HDNAME} Utilization high</name>
+                                    <priority>WARNING</priority>
+                                    <description>Saturation (bandwidth utilization for the device). Device saturation occurs when this value is close to 100% and in this time device can't deserve  CPU requests. Server is going very slow</description>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>Value</tag>
+                                            <value>{ITEM.VALUE}</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>ecde24e3928149c8b9c937c871b6a648</uuid>
+                            <name>iostat: Write I/O latency on $2</name>
+                            <key>iostat[wawait,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>ms</units>
+                            <description>The average time (in milliseconds) for  write I/O requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them. (SSD usually is under 4 ms, HDD 70 ms )</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>17be61f546f74877a3d306ece82a8bc5</uuid>
+                            <name>iostat: KBps $1 on $2</name>
+                            <key>iostat[write,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>Bps</units>
+                            <description>The total number of kilobytes written per second. SSD has until 400 Mb/s, HDD until 60 Mb/s</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>1024</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>567948af62b247b89dd886c9103ae03e</uuid>
+                            <name>iostat: Merged write IOPS on $2</name>
+                            <key>iostat[wrqm,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>req/s</units>
+                            <description>The number of write requests merged per second that were queued to the device.
+Reads and writes which are adjacent to each other may be merged for efficiency. Thus two 4K reads may become one 8K read before it is ultimately handed to the disk, and so it will be counted (and queued) as only one I/O.  This field lets you know how often this was done.</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>f53aec7866184d1b8a0b9391a095e79f</uuid>
+                            <name>iostat: Write IOPS on $2</name>
+                            <key>iostat[ws,{#HDNAME}]</key>
+                            <delay>60</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>req</units>
+                            <description>The number of write requests that were issued to the device per second. In other words, how many IOPS per second are read. SSD can handle until 10 000 IOPS, HDD - 170</description>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Iostat</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <uuid>40b71f18c27b4bd589b6236bf41e0aff</uuid>
+                            <name>iostat: {#HDNAME} Latency</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template Linux iostat</host>
+                                        <key>iostat[await,{#HDNAME}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <uuid>5c03d5212efd407ea954f8f2c2c3ae31</uuid>
+                            <name>iostat: {#HDNAME}  Traffic</name>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>009900</color>
+                                    <item>
+                                        <host>Template Linux iostat</host>
+                                        <key>iostat[read,{#HDNAME}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>DD0000</color>
+                                    <item>
+                                        <host>Template Linux iostat</host>
+                                        <key>iostat[write,{#HDNAME}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <uuid>09913e14d14840f1ba9b1c1925aacd02</uuid>
+                            <name>iostat: {#HDNAME}  Utilization</name>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>00EEEE</color>
+                                    <item>
+                                        <host>Template Linux iostat</host>
+                                        <key>iostat[util,{#HDNAME}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>00DD00</color>
+                                    <yaxisside>RIGHT</yaxisside>
+                                    <item>
+                                        <host>Template Linux iostat</host>
+                                        <key>iostat[rs,{#HDNAME}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <color>FF6666</color>
+                                    <yaxisside>RIGHT</yaxisside>
+                                    <item>
+                                        <host>Template Linux iostat</host>
+                                        <key>iostat[ws,{#HDNAME}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>
