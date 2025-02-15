@@ -117,7 +117,7 @@
         - baserole_check_reverserecord
         - baserole_ipv6_enable
         - hostname_reverse_record_v6 != inventory_hostname + '.'
-        - not hostname_reverse_record == "NXDOMAIN"
+        - not hostname_reverse_record_v6 == "NXDOMAIN"
       ignore_errors: true
 
     - name: Fail if FQDN is not inventory_hostname
