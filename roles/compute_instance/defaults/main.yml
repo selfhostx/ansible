@@ -130,6 +130,9 @@ cloudinit_package_upgrade: true
 cloudinit_resize_rootfs: true
 cloudinit_move_network_config_to_main_file: true
 
+# set to false if cloud-init should manage the system after first configuration
+cloudinit_disabled: true
+
 proxmox_resize: true
 proxmox_start: true
 proxmox_update: true

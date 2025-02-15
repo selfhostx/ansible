@@ -65,7 +65,9 @@ runcmd:
 {% if cloudinit_os_ssh_root_pwauth %}
   - echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 {% endif %}
+{% if cloudinit_disabled %}
   - touch /etc/cloud/cloud-init.disabled
+{% endif %}
   - reboot
 
 # Note that the file to disable cloud-init is checked to know when the vm is booted
