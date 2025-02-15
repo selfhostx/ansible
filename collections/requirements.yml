@@ -16,3 +16,4 @@ collections:
   - name: community.mysql
   - name: community.zabbix
   - name: inwx.collection
+  - name: hifis.toolkit
