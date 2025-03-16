@@ -148,7 +148,8 @@ smtpd_relay_restrictions =
   permit_sasl_authenticated,
   permit_mynetworks,
 
-  permit_tls_clientcerts,
+  # if you want clientcerts, you need smtpd_tls_ask_ccert=yes and permit_tls_clientcerts
+  # permit_tls_clientcerts,
   # users from ALL trusted CAs are allowed to relay (attention!):
   # permit_tls_all_clientcerts,
 
