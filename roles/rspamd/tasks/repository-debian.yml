@@ -1,0 +1,40 @@
+---
+# source: https://github.com/securCom/ansible-role_repo-rspamd (BSD license)
+- name: Installing rspamd required packages
+  ansible.builtin.apt:
+    name: "{{ package }}"
+    state: present
+  loop: "{{ rspamd_repo_dep }}"
+  loop_control:
+    loop_var: package
+  retries: 3
+  delay: 2
+  when: rspamd_enable_external_repo
+
+- name: Importing rspamd gpg key
+  ansible.builtin.apt_key:
+    state: present
+    keyring: /etc/apt/trusted.gpg.d/rspamd.gpg
+    url: "{{ rspamd_repo_key }}"
+  when: rspamd_enable_external_repo
+
+- name: Add rspamd repository
+  ansible.builtin.template:
+    src: "repository-debian.j2"
+    dest: /etc/apt/sources.list.d/rspamd.list
+    owner: root
+    group: root
+    mode: '0644'
+  when: rspamd_enable_external_repo
+  register: rspamd_repo_changed
+
+- name: Update debian repository cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: rspamd_repo_changed.changed   # noqa 503
+
+- name: Remove rspamd repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/rspamd.list
+    state: absent
+  when: not rspamd_enable_external_repo

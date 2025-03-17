@@ -1,0 +1,9 @@
+{{ ansible_managed | comment }}
+
+[rspamd]
+name=Rspamd stable repository
+baseurl=http://rspamd.com/rpm-stable/{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}/x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=http://rspamd.com/rpm/gpg.key

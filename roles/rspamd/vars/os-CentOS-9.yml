@@ -1,0 +1,8 @@
+---
+rspamd_repo_supported: false
+rspamd_repo_key: https://rspamd.com/rpm-stable/gpg.key
+
+# nginx                           
+rspamd_nginx_default_config: "/etc/nginx/conf.d/default.conf"
+# rspamd_nginx_config_src_dir: ""
+rspamd_nginx_config_dst_dir: "/etc/nginx/conf.d"

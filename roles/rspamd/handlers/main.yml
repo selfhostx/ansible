@@ -1,0 +1,22 @@
+---
+# handlers
+
+- name: Restart postfix
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
+
+- name: Restart opendkim
+  ansible.builtin.service:
+    name: opendkim
+    state: restarted
+
+- name: Restart rspamd
+  ansible.builtin.service:
+    name: rspamd
+    state: restarted
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

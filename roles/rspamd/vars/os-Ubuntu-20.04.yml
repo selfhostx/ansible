@@ -1,0 +1,10 @@
+---
+rspamd_repo_supported: true
+rspamd_repo_key: https://rspamd.com/apt-stable/gpg.key
+rspamd_repo_dep:
+  - gnupg
+
+# nginx
+rspamd_nginx_default_config: "/etc/nginx/sites-enabled/default"
+rspamd_nginx_config_src_dir: "/etc/nginx/sites-available"
+rspamd_nginx_config_dst_dir: "/etc/nginx/sites-enabled"

@@ -1,0 +1,52 @@
+---
+# defaults file for rspamd
+
+# true -> use rspamd repo
+# false -> use distribution repos
+rspamd_enable_external_repo: true
+
+rspamd_milter_listen: "127.0.0.1"
+rspamd_milter_port: 11332
+rspamd_redis_listen: "127.0.0.1"
+rspamd_redis_port: 6379
+rspamd_ui_listen: "127.0.0.1"
+rspamd_ui_port: 11334
+
+# set the rspamd password 
+# `openssl rand -base64 32` and hash it with `rspamadm pw`. Use the hash here.
+rspamd_password: ""
+rspamd_password_minimum_length: 32
+
+rspamd_organization: "{{ ansible_domain }}"
+
+rspamd_packages:
+  - rspamd
+
+# virtual domains
+rspamd_virtual_domains: []
+rspamd_virtual_users: []
+rspamd_virtual_aliases: []
+rspamd_virtual_sieves: []
+rspamd_sieve_max_redirects: 5
+
+# hostname used for nginx:
+rspamd_hostname: "{{ ansible_fqdn }}"
+
+# use nginx to make a ssl reverse-proxy-config:
+rspamd_nginx_deploy_reverseconfig: false
+rspamd_nginx_template: "nginx_admin_ui_config.j2"
+rspamd_nginx_remove_default_config: false
+rspamd_nginx_config_filename: rspamd
+
+# if you use https://github.com/selfhostx/ansible/tree/main/roles/nginx_common than set to "true" here:
+rspamd_nginx_use_nginx_common_snippet: false
+rspamd_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+rspamd_nginx_tls_hardening_snippet: "{{ rspamd_nginx_snippet_directory }}/tls-hardening.conf"
+
+# enable HSTS (not used when rspamd_nginx_use_nginx_common_snippet: true):
+rspamd_tls_hsts_enable: true
+rspamd_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+rspamd_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ rspamd_hostname }}/fullchain.pem"
+rspamd_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ rspamd_hostname }}/privkey.pem"

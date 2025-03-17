@@ -1,0 +1,48 @@
+upstream rspamd_backend {
+   server {{ rspamd_ui_listen }}:{{ rspamd_ui_port }};
+   keepalive 32;
+}
+
+server {
+  listen 80 {% if rspamd_nginx_remove_default_config %}default_server{% endif %};
+  listen [::]:80 {% if rspamd_nginx_remove_default_config %}default_server{% endif %};
+
+  server_name {{ rspamd_hostname }};
+  server_tokens off;
+  return 301 https://$server_name$request_uri;
+}
+
+server {
+  listen 443 ssl {% if rspamd_nginx_remove_default_config %}default_server{% endif %};
+  listen [::]:443 ssl {% if rspamd_nginx_remove_default_config %}default_server{% endif %};
+  server_name {{ rspamd_hostname }};
+
+  server_tokens off;
+  ssl_certificate {{ rspamd_nginx_ssl_certificate }};
+  ssl_certificate_key {{ rspamd_nginx_ssl_certificate_key }};
+
+{% if rspamd_nginx_use_nginx_common_snippet %}
+  include {{ rspamd_nginx_tls_hardening_snippet }};
+{% else %}
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers CHACHA20:-AES:AESGCM:AESCCM:!kRSA:!PSK:!aECDSA:!aDSS:!aNULL:!eNULL:!SHA1:!MD5;
+  ssl_ecdh_curve X25519:secp521r1:secp384r1;
+{% if rspamd_tls_hsts_enable %}
+  add_header Strict-Transport-Security "max-age={{ rspamd_tls_hsts_time }}";
+{% endif %}
+{% endif %}
+
+  access_log /var/log/nginx/{{ rspamd_hostname }}.access.log;
+  error_log /var/log/nginx/{{ rspamd_hostname }}.error.log;
+
+  location / {
+       proxy_set_header Host $http_host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+       proxy_read_timeout 600s;
+       proxy_http_version 1.1;
+       proxy_pass http://rspamd_backend;
+  }
+}

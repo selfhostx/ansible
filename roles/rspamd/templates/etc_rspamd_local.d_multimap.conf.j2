@@ -1,0 +1,11 @@
+# https://rspamd.com/doc/modules/multimap.html
+
+# Blacklists
+local_bl_ip { type = "ip"; map = "$LOCAL_CONFDIR/local.d/local_bl_ip.map.inc"; symbol = "LOCAL_BL_IP"; description = "Local ip blacklist";score = 3; }
+local_bl_from { type = "from"; map = "$LOCAL_CONFDIR/local.d/local_bl_from.map.inc"; symbol = "LOCAL_BL_FROM"; description = "Local from blacklist";score = 3; }
+local_bl_rcpt { type = "rcpt"; map = "$LOCAL_CONFDIR/local.d/local_bl_rcpt.map.inc"; symbol = "LOCAL_BL_RCPT"; description = "Local rcpt blacklist";score = 3; }
+
+# Whitelists
+local_wl_ip { type = "ip"; map = "$LOCAL_CONFDIR/local.d/local_wl_ip.map.inc"; symbol = "LOCAL_WL_IP"; description = "Local ip whitelist";score = -5; }
+local_wl_from { type = "from"; map = "$LOCAL_CONFDIR/local.d/local_wl_from.map.inc"; symbol = "LOCAL_WL_FROM"; description = "Local from whitelist";score = -5; }
+local_wl_rcpt { type = "rcpt"; map = "$LOCAL_CONFDIR/local.d/local_wl_rcpt.map.inc"; symbol = "LOCAL_WL_RCPT"; description = "Local rcpt whitelist";score = -5; }

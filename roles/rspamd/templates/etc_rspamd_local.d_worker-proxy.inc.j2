@@ -1,0 +1,9 @@
+# Configure the Rspamd proxy to talk to Postfix via a milter
+
+bind_socket = "{{ rspamd_milter_listen }}:{{ rspamd_milter_port }}";
+milter = yes;
+timeout = 120s;
+upstream "local" {
+  default = yes;
+  self_scan = yes;
+}

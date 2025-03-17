@@ -1,0 +1,17 @@
+# The default antivirus check. Infected mails will get marked with ** SPAM ** in subject,
+# marked as read, and moved to the JUNK folder.
+
+clamav {
+  attachments_only = false;
+  symbol = "CLAM_VIRUS";
+  type = "clamav";
+  action = "rewrite subject";
+
+  # If set true, log message is emitted for clean messages
+  #log_clean = false;
+
+  # Debian uses by default the unix socket, other distros may use the commented TCP
+  #servers = "127.0.0.1:3310";
+  servers = "/var/run/clamav/clamd.ctl";
+}
+

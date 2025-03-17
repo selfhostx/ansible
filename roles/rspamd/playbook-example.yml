@@ -1,0 +1,106 @@
+# example rspamd relay with IPs:
+# 1.2.3.4
+# [2a01:a:b:c::d]/128
+
+- name: Install rspamd
+  hosts:
+    - rspamd
+
+  vars_files:
+    - vault.yml
+
+  vars:
+    # letsencrypt:
+    certbot_create_method: standalone
+    certbot_certs:
+      - domains:
+        - "{{ ansible_fqdn }}"
+    certbot_auto_renew_minute: 17
+    certbot_auto_renew_hour: 3
+    certbot_admin_email: postmaster@domain.tld
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+
+    pdns_rec_config:
+      allow-from: '127.0.0.0/8, ::1/128, fe80::/10, 1.2.3.4, [2a01:a:b:c::d]/128'
+      local-address: '127.0.0.1, ::'
+      query-local-address: '::, 0.0.0.0'
+      dnssec: validate
+      dnssec-log-bogus: yes
+
+    nginx_dh_enable: true
+    rspamd_nginx_deploy_reverseconfig: true
+    rspamd_nginx_remove_default_config: true
+
+    # mailrelay / postfix
+    postfix_relay_role: "master"
+    postfix_inet_interfaces: "all"
+    postfix_inet_protocols: "all"
+    postfix_relaydomains_domainlist:
+      - "DOMAIN1.tld :[TARGET_FQDN]"
+    postfix_mynetworks:
+      - 127.0.0.0/8
+      - '[::ffff:127.0.0.0]/104'
+      - '[::1]/128'
+      - 1.2.3.4
+      - '[2a01:a:b:c::d]/128'
+
+    postfix_send_test_mail: false
+    postfix_send_test_mail_from: "root"
+    postfix_send_test_mail_host: "localhost"
+    postfix_send_test_mail_to: "postmaster@domain.tld"
+    postfix_send_test_mail_port: 25
+    postfix_send_test_mail_subject: "Installation of postfix is working on:"
+    postfix_send_test_mail_body: "...and i did it with Ansible!"
+
+    # postfix_smtpd_tls_cert_file: "/etc/letsencrypt/live/$FQDN/cert.pem"
+    # postfix_smtpd_tls_key_file: "/etc/letsencrypt/live/$FQDN/privkey.pem"
+    # postfix_smtpd_tls_ca_file: "/etc/letsencrypt/live/$FQDN/fullchain.pem"
+
+    postfix_extra_config: |+
+      # Postscreen
+      postscreen_access_list = permit_mynetworks
+      postscreen_dnsbl_sites =
+        sbl-xbl.spamhaus.org*2
+        cbl.abuseat.org*2
+        bl.spamcop.net*2
+        dnsbl.sorbs.net*1
+        spam.spamrats.com*2
+      postscreen_dnsbl_threshold = 3
+      postscreen_dnsbl_action = enforce
+      postscreen_greet_action = enforce
+
+      # smtpd_milters = unix:/var/lib/rspamd/rspamd.sock
+      # -> permissions...
+      # or for TCP socket
+      smtpd_milters = inet:localhost:11332
+
+      # skip mail without checks if something goes wrong
+      milter_default_action = accept
+
+      # 6 is the default milter protocol version;
+      # prior to Postfix 2.6 the default protocol was 2.
+      milter_protocol = 6
+
+    # set dns-servicer, 127.0.0.1 needs to be first for postscreen:
+    # baserole_dns_nameservers:
+    #   - 127.0.0.1
+    #   - 8.8.4.4
+    #   - 2001:4860:4860::8888
+
+  roles:
+    # - { role: selfhostx.ansible.baserole, tags: baserole }
+    - { role: selfhostx.certbot, tags: certbot,letsencrypt }
+    - { role: geerlingguy.clamav, tags: clamav }
+    - { role: geerlingguy.redis, tags: redis }
+    - { role: selfhostx.ansible.mailrelay, tags: mailrelay }
+    - { role: powerdns.pdns_recursor, tags: pdns }
+    - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+    - { role: selfhostx.ansible.rspamd, tags: rspamd }
+
+
+  tasks:
+    # /var/run/clamav/clamd.ctl does not exist when start of "clamav-daemon" fails and "clamav-freshclam" runs
+    - name: Run freshclam
+      ansible.builtin.command: /usr/bin/freshclam --quiet
+      tags: clamav

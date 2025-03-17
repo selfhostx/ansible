@@ -1,0 +1,99 @@
+---
+# Installs and configures the Rspamd spam/virus filtering system.
+
+- name: Include os specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "os-{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    - "os-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "os-default.yml"
+
+- name: Include repository tasks Redhat
+  ansible.builtin.import_tasks: repository-redhat.yml
+  when: rspamd_repo_supported and ansible_distribution in ('CentOS', 'RedHat')
+
+- name: Include repository tasks Debian
+  ansible.builtin.import_tasks: repository-debian.yml
+  when: rspamd_repo_supported and ansible_distribution in ('Debian', 'Ubuntu')
+
+- name: Install Rspamd (Debian)
+  ansible.builtin.apt:
+    pkg: "{{ rspamd_packages }}"
+    state: latest
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Install Rspamd (Redhat family)
+  ansible.builtin.dnf:
+    pkg: "{{ rspamd_packages }}"
+    state: latest
+    update_cache: true
+  when: ansible_os_family == "Redhat"
+
+- name: Fail if rspamd password is less than 32 chars
+  ansible.builtin.fail: msg="Password too weak, use 32 chars or more."
+  when:
+    - rspamd_password | length < rspamd_password_minimum_length
+
+- name: Hash the rspamd password hash
+  ansible.builtin.command: "rspamadm pw -p {{ rspamd_password }}"
+  register: rspamd_hashed_pw
+  no_log: true
+
+- name: Configure rspamd/local.d/* files
+  ansible.builtin.template: src="etc_rspamd_local.d_{{ item }}.j2" dest="/etc/rspamd/local.d/{{ item }}"
+  with_items:
+    - "worker-controller.inc"
+    - "worker-proxy.inc"
+    - "greylist.conf"
+    - "redis.conf"
+    - "mime_types.conf"
+    - "replies.conf"
+    - "milter_headers.conf"
+    - "antivirus.conf"
+    - "options.inc"
+    - "dmarc.conf"
+    - "asn.conf"
+    - "greylist.conf"
+    - "ip_score.conf"
+    - "metrics.conf"
+    - "milter_headers.conf"
+    - "multimap.conf"
+    - "mx_check.conf"
+    - "phishing.conf"
+    - "surbl.conf"
+    - "url_reputation.conf"
+    - "url_tags.conf"
+  notify: Restart rspamd
+
+- name: Configure local blacklist/whitelist multimap files
+  ansible.builtin.template: src="etc_rspamd_local.d_{{ item }}.j2" dest="/etc/rspamd/local.d/{{ item }}" mode="0644"
+  with_items:
+    - "local_bl_from.map.inc"
+    - "local_bl_ip.map.inc"
+    - "local_bl_rcpt.map.inc"
+    - "local_wl_from.map.inc"
+    - "local_wl_ip.map.inc"
+    - "local_wl_rcpt.map.inc"
+  notify: Restart rspamd
+
+- name: Copy DKIM configuration into place
+  ansible.builtin.copy: src=etc_rspamd_override.d_dkim_signing.conf dest=/etc/rspamd/override.d/dkim_signing.conf owner=root group=root mode="0644"
+  notify: Restart rspamd
+
+- name: Create dkim key directory
+  ansible.builtin.file: path=/var/lib/rspamd/dkim state=directory owner=_rspamd group=_rspamd
+
+- name: Generate DKIM keys
+  ansible.builtin.shell: rspamadm dkim_keygen -s default -d {{ item.name }} -k {{ item.name }}.default.key > {{ item.name }}.default.txt
+  args:
+    creates: /var/lib/rspamd/dkim/{{ item.name }}.default.key
+    chdir: /var/lib/rspamd/dkim/
+  with_items: "{{ rspamd_virtual_domains }}"
+
+- name: Start rspamd systemd listener
+  ansible.builtin.service: name=rspamd state=started enabled=yes
+
+- name: Include repository tasks Redhat
+  ansible.builtin.import_tasks: admin-ui-nginx.yml
+  when: rspamd_nginx_deploy_reverseconfig
