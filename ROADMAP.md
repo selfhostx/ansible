@@ -116,7 +116,7 @@ Roadmap
     - helper-scripte -> deploy_hook (FIXME code commit)
   - certificate distribution
     - own certs (individual, wildcards) -> Code available
-    - vaulted files via sops https://github.com/mozilla/sops ? 2DO)
+    - vaulted files from password manager (see section!)
   - internal CAs:
     - create certs for hosts -> 2DO
     - distribute CAs ([is implemented in baserole](https://github.com/selfhostx/ansible/commit/b9be736aae11c9d183bead6afa27e25466483f66))
@@ -258,8 +258,9 @@ Roadmap
     - *mediawiki (2Do: maintainer needed)*
   - Netbox (IPAM/IT Asset Management)
   - Piwik (2DO)
-  - passwordmanager
+  - **passwordmanager**:
     - [vaultwarden](roles/vaultwarden)
+    - [sops](https://github.com/mozilla/sops) [howto](https://dev.to/rimelek/use-sops-in-ansible-to-read-your-secrets-2gfa)
     - *[openbao](https://openbao.org/) (fork of hashicorp vault which is not opensource anymore) (2DO maintainer needed)?*
     - *privacyIDEA (2DO maintainer needed)*
   - roundcube webmail (refactor Code)
@@ -269,7 +270,7 @@ Roadmap
   - *joplin (note taking application; 2DO maintainer needed)*
 
 **candidates**
-  - Guacamole (remote desktop gateway)
+  - Apache Guacamole (remote desktop gateway)
   - Rustdesk (remote control)
   - doodle-clones (dudle, framadate, ...)
   - etherpad
