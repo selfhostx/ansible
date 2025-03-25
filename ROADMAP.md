@@ -87,6 +87,7 @@ Roadmap
     - https://galaxy.ansible.com/aalaesar/install_nextcloud / https://github.com/aalaesar/install_nextcloud
     - https://gitlab.com/mejo-/ansible-role-nextcloud
     - https://git.coop/webarch/nextcloud
+  - [opencloud](https://github.com/opencloud-eu) fork of owncloud infinite scale, see [deployment examples](https://github.com/opencloud-eu/opencloud/tree/main/deployments/examples)
   - *filestash (2DO)*
   - S3
     - minio
@@ -212,6 +213,7 @@ Roadmap
   - hostfirewall
     - iptables/nftables -> geerlingguy.firewall (maybe iptables-persistent ?)
     - ufw
+    - firewalld is (mostly) covered by ansible.posix.firewalld *(except "firewall-cmd --reload" which needs to be run as command)*
 
 **Proxy**
   - tinyproxy [juju4.tinyproxy](https://galaxy.ansible.com/ui/standalone/roles/juju4/tinyproxy)
@@ -258,7 +260,7 @@ Roadmap
   - Piwik (2DO)
   - passwordmanager
     - [vaultwarden](roles/vaultwarden)
-    - *hashicorp vault (2DO maintainer needed)?*
+    - *[openbao](https://openbao.org/) (fork of hashicorp vault which is not opensource anymore) (2DO maintainer needed)?*
     - *privacyIDEA (2DO maintainer needed)*
   - roundcube webmail (refactor Code)
   - Ticketsystems
@@ -284,4 +286,4 @@ Roadmap
   - distributed key/value stores
     - zookeeper
     - etcd
-    - redis [geerlingguy.postgresql](https://github.com/geerlingguy/ansible-role-redis)
+    - redis [geerlingguy.redis](https://github.com/geerlingguy/ansible-role-redis)
