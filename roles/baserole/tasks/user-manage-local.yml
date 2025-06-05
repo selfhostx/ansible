@@ -40,8 +40,7 @@
     ssh_key_file:       '{{ item.ssh_key_file_name  | d(omit) }}'
     ssh_key_passphrase: '{{ item.ssh_key_passphrase | d(omit) }}'
     ssh_key_type:       '{{ item.ssh_key_type       | d(omit) }}'
-  when:
-    - item.skip_this_user is defined
+  when: item.skip_this_user is undefined or not item.skip_this_user | bool
 # yamllint enable rule:colon
 
 - name: Remove sudoers file (with password)
@@ -77,8 +76,7 @@
     - item.state == "absent"
 
 - name: User Create block
-  when:
-    - not item.skip_this_user is defined
+  when: item.skip_this_user is undefined or not item.skip_this_user | bool
   block:
     - name: Create .ssh dir
       ansible.builtin.file:
