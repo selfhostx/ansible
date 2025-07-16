@@ -1,7 +1,9 @@
 zabbix checks role
 ==================
 
-official zabbix-project already shares a lot of templates: https://github.com/zabbix/community-templates
+role for installing userparameters and templates for common Linux environments
+
+official zabbix-project already shares a lot of templates (https://github.com/zabbix/community-templates) but they require manual install.
 
 
 
@@ -44,4 +46,4 @@ GPL-3.0-or-later
 Author Information
 ==================
 
-selfhostix
+Stefan Schwarz
