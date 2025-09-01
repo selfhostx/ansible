@@ -187,4 +187,5 @@ unverified_recipient_reject_code = 577
 #     ($server_name).
 {% endif %}
 
-{{ postfix_extra_config }}
+{{ postfix_extra_config | default('') }}
+
