@@ -1,5 +1,6 @@
 ---
 - name: Install MySQL-Server
+  become: true
   ansible.builtin.package:
     name: "{{ semaphore_mysql_server_package }}"
     update_cache: true
@@ -8,6 +9,7 @@
   when: semaphore_mysql_install
 
 - name: Install MySQL-Client
+  become: true
   ansible.builtin.package:
     name: "{{ semaphore_mysql_client_package }}"
     update_cache: true
@@ -15,6 +17,7 @@
   when: semaphore_mysql_install
 
 - name: Install Python MySQL module
+  become: true
   ansible.builtin.package:
     name: "{{ semaphore_python_mysql_module }}"
     update_cache: true
@@ -22,13 +25,64 @@
   when: semaphore_mysql_install or semaphore_mysql_create_db
 
 - name: Start the MySQL service
+  become: true
   ansible.builtin.systemd:
     name: "{{ semaphore_mysql_service_name }}"
     state: started
     enabled: true
   when: semaphore_mysql_install
 
-- name: Update mysql root password for all root accounts
+# ---------------------------------------------------------
+# MySQL-Version ermitteln und entscheiden, ob Socket-Auth
+# (MySQL >= 8.4) oder klassische Passwort-Auth genutzt wird
+# ---------------------------------------------------------
+
+- name: Get MySQL server version
+  become: true
+  ansible.builtin.command: "mysql -NBe 'SELECT VERSION();'"
+  register: mysql_version_cmd
+  changed_when: false
+  failed_when: false
+  when: semaphore_mysql_install or semaphore_mysql_create_db
+
+- name: Set MySQL version facts
+  ansible.builtin.set_fact:
+    mysql_server_version: "{{ mysql_version_cmd.stdout | default('0.0.0') }}"
+    mysql_use_socket_auth: "{{ (mysql_version_cmd.stdout | default('0.0.0')) is version('8.4', '>=') }}"
+  when:
+    - mysql_version_cmd is defined
+    - mysql_version_cmd.rc == 0
+
+- name: "Fallback: disable socket auth usage if version detection failed"
+  ansible.builtin.set_fact:
+    mysql_use_socket_auth: false
+  when:
+    - mysql_use_socket_auth is not defined
+
+# ---------------------------------------------------------
+# Root-Accounts aktualisieren – je nach Auth-Methode
+# ---------------------------------------------------------
+
+- name: Update mysql root password for all root accounts (socket auth, MySQL >= 8.4)
+  become: true
+  community.mysql.mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: "{{ mysql_unix_socket | default('/var/run/mysqld/mysqld.sock') }}"
+    check_implicit_admin: true
+    priv: "*.*:ALL,GRANT"
+  loop:
+    - "{{ inventory_hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+  when:
+    - mysql_install.changed    # noqa: no-handler
+    - mysql_use_socket_auth
+
+- name: Update mysql root password for all root accounts (password auth, MySQL < 8.4)
+  become: true
   community.mysql.mysql_user:
     name: root
     host: "{{ item }}"
@@ -37,14 +91,32 @@
     login_password: "{{ mysql_root_password }}"
     check_implicit_admin: true
     priv: "*.*:ALL,GRANT"
-  with_items:
-    - "{{ ansible_hostname }}"
+  loop:
+    - "{{ inventory_hostname }}"
     - 127.0.0.1
     - ::1
     - localhost
-  when: mysql_install.changed # noqa: no-handler
+  when:
+    - mysql_install.changed    # noqa: no-handler
+    - not mysql_use_socket_auth
 
-- name: Setup semaphore database
+# ---------------------------------------------------------
+# Semaphore-Datenbank anlegen
+# ---------------------------------------------------------
+
+- name: Setup semaphore database (socket auth, MySQL >= 8.4)
+  become: true
+  community.mysql.mysql_db:
+    name: "{{ semaphore_db_name }}"
+    state: present
+    login_unix_socket: "{{ mysql_unix_socket | default('/var/run/mysqld/mysqld.sock') }}"
+    check_implicit_admin: true
+  when:
+    - semaphore_mysql_create_db
+    - mysql_use_socket_auth
+
+- name: Setup semaphore database (password auth, MySQL < 8.4)
+  become: true
   community.mysql.mysql_db:
     name: "{{ semaphore_db_name }}"
     state: present
@@ -52,9 +124,29 @@
     login_password: "{{ mysql_root_password }}"
     login_host: "{{ semaphore_db_host }}"
     login_port: "{{ semaphore_db_port }}"
-  when: semaphore_mysql_create_db
+  when:
+    - semaphore_mysql_create_db
+    - not mysql_use_socket_auth
 
-- name: Setup semaphore database user
+# ---------------------------------------------------------
+# Semaphore-DB-User anlegen
+# ---------------------------------------------------------
+
+- name: Setup semaphore database user (socket auth, MySQL >= 8.4)
+  become: true
+  community.mysql.mysql_user:
+    name: "{{ semaphore_db_user }}"
+    host: "{{ semaphore_mysql_allowed_host }}"
+    password: "{{ semaphore_db_password }}"
+    login_unix_socket: "{{ mysql_unix_socket | default('/var/run/mysqld/mysqld.sock') }}"
+    check_implicit_admin: true
+    priv: "{{ semaphore_db_name }}.*:ALL,GRANT"
+  when:
+    - semaphore_mysql_create_db
+    - mysql_use_socket_auth
+
+- name: Setup semaphore database user (password auth, MySQL < 8.4)
+  become: true
   community.mysql.mysql_user:
     name: "{{ semaphore_db_user }}"
     host: "{{ semaphore_mysql_allowed_host }}"
@@ -64,4 +156,6 @@
     login_host: "{{ semaphore_db_host }}"
     login_port: "{{ semaphore_db_port }}"
     priv: "{{ semaphore_db_name }}.*:ALL,GRANT"
-  when: semaphore_mysql_create_db
+  when:
+    - semaphore_mysql_create_db
+    - not mysql_use_socket_auth
