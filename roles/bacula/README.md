@@ -21,6 +21,166 @@ see the notes on firewalling: https://www.bacula.org/9.6.x-manuals/en/problems/D
 
 Currently only tested on mysql / mariadb and Ubuntu/Debian in LTS-Versions.
 
+## Using Official Bacula Repository (Bacula 10+)
+
+### Overview
+
+Starting with Bacula 10, official packages require registration and GPG key verification. This role supports both:
+- **Distribution packages** (default, older Bacula versions from distro repos)
+- **Official Bacula repository** (newer versions with free registration)
+
+### When to Use Official Repository
+
+Use `bacula_use_official_repo: true` when you need:
+- Bacula version 10 or newer
+- Latest features and bug fixes
+- Versions newer than your distribution provides
+- Consistent Bacula version across different OS distributions
+
+**Supported Distributions** (latest 2 versions only):
+- Debian: bookworm (12), trixie (13)
+- Ubuntu: jammy (22.04), noble (24.04)
+
+### Getting Started with Official Repository
+
+**Step 1: Register for access key**
+1. Visit https://www.bacula.org/bacula-binary-package-download/
+2. Register for free (name + email)
+3. Receive alphanumeric access key
+
+**Step 2: Configure variables**
+
+```yaml
+# Enable official repository
+bacula_use_official_repo: true
+
+# REQUIRED: Your access key from bacula.org
+bacula_repo_access_key: "your-access-key-here"
+
+# REQUIRED: Bacula version to install
+bacula_version: "13.0.4"
+```
+
+**Step 3: Run the role**
+
+The role will automatically:
+1. Validate required variables (fails if missing)
+2. Check distribution compatibility
+3. Download and install Bacula GPG signing key
+4. Configure official repository
+5. Install/upgrade Bacula packages
+
+### Upgrading Existing Installations
+
+**Yes, this works for upgrades!** The role handles:
+- New installations (fresh Bacula setup)
+- Upgrades from distribution packages to official repo
+- Upgrades between official repo versions
+
+When upgrading:
+```yaml
+# In your inventory or playbook
+bacula_use_official_repo: true
+bacula_repo_access_key: "your-key"
+bacula_version: "13.0.4"  # Set desired version
+```
+
+The role will:
+- Add official repository (if not present)
+- Upgrade existing Bacula packages to specified version
+- Preserve configuration files
+- Restart services only if needed
+
+**Important Notes:**
+- Downgrades are not supported
+- Database schema migrations happen automatically (make backups!)
+- Configuration compatibility is maintained by Bacula
+
+### Validation and Safety
+
+The role includes built-in safety checks:
+
+**Required variable validation:**
+```
+ERROR: Official Bacula repository requires:
+- bacula_repo_access_key: Get your free access key from https://www.bacula.org/...
+- bacula_version: Specify Bacula version (e.g., "13.0.4")
+```
+
+**Distribution compatibility check:**
+```
+ERROR: Distribution 'stretch' is not supported for official Bacula repository.
+Supported distributions: bookworm, trixie, jammy, noble
+```
+
+If validation fails, the role **stops immediately** before making any changes.
+
+### Example Configurations
+
+**New installation with official repo:**
+```yaml
+---
+- hosts: backup_servers
+  become: true
+  vars:
+    bacula_use_official_repo: true
+    bacula_repo_access_key: "abc123xyz789"
+    bacula_version: "13.0.4"
+    bacula_dir_role: true
+    bacula_sd_role: true
+    bacula_fd_role: true
+  roles:
+    - selfhostx.ansible.bacula
+```
+
+**Upgrade existing installation:**
+```yaml
+---
+- hosts: bacula_director
+  become: true
+  vars:
+    # Switch from distro packages to official repo
+    bacula_use_official_repo: true
+    bacula_repo_access_key: "{{ vault_bacula_repo_key }}"
+    bacula_version: "13.0.4"
+  roles:
+    - selfhostx.ansible.bacula
+```
+
+**Continue using distribution packages:**
+```yaml
+---
+- hosts: backup_servers
+  become: true
+  vars:
+    # Default: use distribution packages
+    bacula_use_official_repo: false
+  roles:
+    - selfhostx.ansible.bacula
+```
+
+### Technical Details
+
+**GPG Key Management:**
+- Debian/Ubuntu: Modern keyring method (`/usr/share/keyrings/`)
+- RHEL/CentOS: `rpm --import` method
+- Key URL: https://www.bacula.org/downloads/Bacula-4096-Distribution-Verification-key.asc
+- Fingerprint: `5235 F5B6 68D8 1DB6 1704 A82D C0BE 2A5F E9DF 3643`
+
+**Repository Configuration:**
+- Debian/Ubuntu: `/etc/apt/sources.list.d/bacula-community.list`
+- RHEL/CentOS: `/etc/yum.repos.d/bacula-community.repo`
+- Old repository files are automatically removed
+
+**Ansible Tags:**
+```bash
+# Setup repository only
+ansible-playbook playbook.yml --tags bacula-repository
+
+# Skip repository setup
+ansible-playbook playbook.yml --skip-tags bacula-repository
+```
+
 ## Quick start
 
 ### customize (at least) this vars:

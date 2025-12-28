@@ -1,6 +1,29 @@
 ---
 # defaults file for ansible-role-bacula
 
+# Bacula official repository configuration (for Bacula 10+)
+# Set to true to use official Bacula repositories instead of distribution packages
+bacula_use_official_repo: false
+
+# Registration access key from https://www.bacula.org/bacula-binary-package-download/
+# REQUIRED when bacula_use_official_repo is true
+bacula_repo_access_key: ""
+
+# Bacula version to install from official repository
+bacula_version: "13.0.4"
+
+# GPG signing key for Bacula packages
+bacula_gpg_key_url: "https://www.bacula.org/downloads/Bacula-4096-Distribution-Verification-key.asc"
+
+# Supported distributions for official repository (latest 2 versions only)
+# Debian: bookworm (12), trixie (13 - when released)
+# Ubuntu: jammy (22.04), noble (24.04)
+bacula_supported_distributions:
+  - bookworm
+  - trixie
+  - jammy
+  - noble
+
 # will be overriden later (see register-facts.yml):
 bacula_fd_fqdn: "{{ ansible_fqdn }}"
 bacula_sd_fqdn: "{{ ansible_fqdn }}"
