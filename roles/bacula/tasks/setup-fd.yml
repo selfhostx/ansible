@@ -4,7 +4,7 @@
   package:
     name: "{{ bacula_fd_package_name }}"
     state: present
-  when: ansible_os_family != "Windows"
+  when: ansible_facts['os_family'] != "Windows"
   tags:
   - packages
 
@@ -12,7 +12,7 @@
   chocolatey.chocolatey.win_chocolatey:
     name: "{{ bacula_fd_package_name }}"
     state: present
-  when: ansible_os_family == "Windows"
+  when: ansible_facts['os_family'] == "Windows"
   tags:
   - packages
 
@@ -59,7 +59,7 @@
     mode: "{{ bacula_fd_filemode }}"
     validate: "{{ bacula_fd_binary }} -t -c %s"
   notify: 'Restart bacula-fd'
-  when: ansible_os_family != "Windows"
+  when: ansible_facts['os_family'] != "Windows"
 
 - name: Setup FD | Manage configuration of bacula-fd file (Windows)
   win_template:
@@ -71,7 +71,7 @@
     # mode: "{{ bacula_filemode }}"
     validate: "{{ bacula_fd_binary }} -t -c %s"
   notify: 'Restart bacula-fd (Windows)'
-  when: ansible_os_family == "Windows"
+  when: ansible_facts['os_family'] == "Windows"
 
 - name: Setup FD | Register FD Config on director
   template:
@@ -87,7 +87,7 @@
   service:
     name: "{{ bacula_fd_service_name }}"
     enabled: yes
-  when: ansible_os_family != "Windows"
+  when: ansible_facts['os_family'] != "Windows"
   notify: 'Start bacula-fd'
   tags:
   - packages
@@ -96,7 +96,7 @@
   win_service:
     name: "{{ bacula_fd_service_name }}"
     start_mode: auto
-  when: ansible_os_family == "Windows"
+  when: ansible_facts['os_family'] == "Windows"
   notify: 'Start bacula-fd (Windows)'
   tags:
   - packages

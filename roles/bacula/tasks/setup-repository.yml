@@ -21,9 +21,9 @@
 - name: Check if distribution is supported for official repository
   ansible.builtin.assert:
     that:
-      - ansible_distribution_release in bacula_supported_distributions
+      - ansible_facts['distribution_release'] in bacula_supported_distributions
     fail_msg: |
-      ERROR: Distribution '{{ ansible_distribution_release }}' is not supported for official Bacula repository.
+      ERROR: Distribution '{{ ansible_facts['distribution_release'] }}' is not supported for official Bacula repository.
       Supported distributions: {{ bacula_supported_distributions | join(', ') }}
 
       This role is limited to the latest two distribution versions:
@@ -31,14 +31,14 @@
       - Ubuntu: jammy (22.04), noble (24.04)
 
       For older distributions, set bacula_use_official_repo: false to use distribution packages.
-    success_msg: "Distribution '{{ ansible_distribution_release }}' is supported"
+    success_msg: "Distribution '{{ ansible_facts['distribution_release'] }}' is supported"
   tags:
     - bacula-repository
     - bacula-validation
 
 # Debian/Ubuntu Repository Setup
 - name: Setup Bacula repository for Debian/Ubuntu
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   tags:
     - bacula-repository
   block:
@@ -54,6 +54,8 @@
       args:
         creates: /usr/share/keyrings/bacula-archive-keyring.gpg
         executable: /bin/bash
+      register: gpg_key_download
+      failed_when: gpg_key_download.rc != 0
 
     - name: Verify GPG key was installed
       ansible.builtin.stat:
@@ -87,7 +89,7 @@
 
 # RHEL/CentOS Repository Setup
 - name: Setup Bacula repository for RHEL/CentOS
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
   tags:
     - bacula-repository
   block:
@@ -123,7 +125,7 @@
   ansible.builtin.debug:
     msg: |
       Bacula official repository configured successfully:
-      - Distribution: {{ ansible_distribution }} {{ ansible_distribution_release }}
+      - Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_release'] }}
       - Bacula version: {{ bacula_version }}
       - Repository: https://www.bacula.org/packages/.../
 

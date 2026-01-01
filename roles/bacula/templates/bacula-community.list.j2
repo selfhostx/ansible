@@ -2,9 +2,9 @@
 # This file is managed by Ansible - DO NOT EDIT MANUALLY
 #
 # Bacula version: {{ bacula_version }}
-# Distribution: {{ ansible_distribution }} {{ ansible_distribution_release }}
-# Architecture: {{ ansible_architecture }}
+# Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_release'] }}
+# Architecture: {{ ansible_facts['architecture'] }}
 #
 # For more information: https://www.bacula.org/bacula-binary-package-download/
 
-deb [signed-by=/usr/share/keyrings/bacula-archive-keyring.gpg arch=amd64] https://www.bacula.org/packages/{{ bacula_repo_access_key }}/debs/{{ bacula_version }}/{{ ansible_distribution_release }}/amd64/ {{ ansible_distribution_release }} main
+deb [signed-by=/usr/share/keyrings/bacula-archive-keyring.gpg] http://www.bacula.org/packages/{{ bacula_repo_access_key }}/debs/{{ bacula_version }}/ {{ ansible_facts['distribution_release'] }} main
