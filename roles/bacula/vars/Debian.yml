@@ -22,9 +22,11 @@ bacula_fd_binary_official: "/opt/bacula/bin/bacula-fd"
 bacula_dir_binary: "/usr/sbin/bacula-dir"
 bacula_dir_binary_official: "/opt/bacula/bin/bacula-dir"
 bacula_dir_service_name: "bacula-director"
+bacula_dir_service_name_official: "bacula-dir"
 bacula_sd_binary: "/usr/sbin/bacula-sd"
 bacula_sd_binary_official: "/opt/bacula/bin/bacula-sd"
 bacula_sd_service_name: "bacula-sd"
+bacula_sd_service_name_official: "bacula-sd"
 bacula_dir_queryfile: /etc/bacula/scripts/query.sql
 bacula_dir_dbimport_mysql_file: "/usr/share/dbconfig-common/data/bacula-director-mysql/install/mysql"
 bacula_dir_dbimport_pgsql_file: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install/pgsql"
@@ -46,6 +48,7 @@ bacula_sd_packages:
 
 # Official Bacula repository package names
 # Note: Official repo uses different package names than Debian
+# Note: bacula-postgresql and bacula-mysql include BOTH director AND storage daemon
 bacula_dir_packages_mysql_official:
 - bacula-mysql
 - bacula-common
@@ -55,6 +58,6 @@ bacula_dir_packages_pgsql_official:
 bacula_console_packages_official:
 - bacula-console
 - bacula-common
-bacula_sd_packages_official:
-- bacula-sd
-- bacula-common
+# Storage daemon is included in bacula-postgresql/bacula-mysql packages
+# No separate SD package in official repository
+bacula_sd_packages_official: []
