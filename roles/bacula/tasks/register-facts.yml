@@ -14,6 +14,8 @@
     bacula_sd_binary: "{{ bacula_sd_binary_official }}"
     bacula_dir_service_name: "{{ bacula_dir_service_name_official }}"
     bacula_sd_service_name: "{{ bacula_sd_service_name_official }}"
+    bacula_dir_dbimport_pgsql_file: "{{ bacula_dir_dbimport_pgsql_file_official }}"
+    bacula_dir_dbimport_mysql_file: "{{ bacula_dir_dbimport_mysql_file_official }}"
   when:
     - bacula_use_official_repo | default(false) | bool
     - ansible_facts['os_family'] == 'Debian'

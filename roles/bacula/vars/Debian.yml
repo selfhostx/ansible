@@ -31,6 +31,9 @@ bacula_dir_queryfile: /etc/bacula/scripts/query.sql
 bacula_dir_dbimport_mysql_file: "/usr/share/dbconfig-common/data/bacula-director-mysql/install/mysql"
 bacula_dir_dbimport_pgsql_file: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install/pgsql"
 bacula_dir_dbimport_pgsql_dbsettings: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install-dbadmin/pgsql"
+# Official Bacula repository paths
+bacula_dir_dbimport_mysql_file_official: "/opt/bacula/scripts/make_mysql_tables"
+bacula_dir_dbimport_pgsql_file_official: "/opt/bacula/scripts/make_postgresql_tables"
 
 # Debian repository package names
 bacula_dir_packages_mysql:
