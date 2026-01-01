@@ -212,6 +212,23 @@
   tags:
   - db
 
+- name: Setup pgsql | Check if tables exist (pgsql)
+  postgresql_query:
+    query: "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'version'"
+    db: "{{ bacula_dir_dbname }}"
+  register: bacula_database_pgsql_tables_check
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
 - name: Setup pgsql | Create Tables in DB (pgsql)
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
@@ -225,8 +242,25 @@
     ansible_ssh_pipelining: true
   when:
   - bacula_dir_db_engine == "pgsql"
-  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
   - bacula_dir_db_adminuser|length == 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_tables_check.rowcount == 0)
+  tags:
+  - db
+
+- name: Setup pgsql | Check if tables exist (pgsql via bacula_dir_db_adminuser)
+  postgresql_query:
+    query: "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'version'"
+    db: "{{ bacula_dir_dbname }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_pgsql_tables_check_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  failed_when: false
+  changed_when: false
   tags:
   - db
 
@@ -243,8 +277,8 @@
     state: "restore"
   when:
   - bacula_dir_db_engine == "pgsql"
-  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
   - bacula_dir_db_adminuser|length > 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_tables_check_admin.rowcount == 0)
   tags:
   - db
 
