@@ -127,6 +127,7 @@ Roadmap
       - stand-alone
       - backends like LDAP
     - mailcow (-> mailcow.mailcow [Example playbook](https://github.com/selfhostx/ansible/blob/main/playbooks/mailcow.yml)) easy-to-use-package with dovecot, postfix, SOGo, rspamd, clamav and supports DKIM
+    - *[stalwart mail server](https://github.com/stalwartlabs/mail-server)*
     - imapsync ( https://www.bachmann-lan.de/imapsync-unter-debian-11-installieren/ ) role: https://github.com/ubermail/ubermail/blob/master/tasks/imapsync.yml
   - groupware
     - *kopano (maintainer needed)*
