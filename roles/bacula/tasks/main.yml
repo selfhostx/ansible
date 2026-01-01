@@ -19,6 +19,13 @@
 - name: Update package cache
   include_tasks: "update-package-cache.yml"
 
+- name: Cleanup old Debian packages (if using official repo)
+  include_tasks: "cleanup-debian-packages.yml"
+  when: bacula_use_official_repo|bool
+  tags:
+    - bacula-cleanup
+    - packages
+
 - name: Setup DIR
   include_tasks: "setup-director.yml"
   when: bacula_dir_role|bool
