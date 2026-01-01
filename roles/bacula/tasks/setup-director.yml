@@ -108,3 +108,16 @@
   notify: 'Start bacula-dir'
   tags:
   - packages
+
+- name: Setup DIR | Flush handlers to start services
+  meta: flush_handlers
+
+- name: Setup DIR | Wait for bacula-dir to be running
+  service_facts:
+  register: service_state
+  until: service_state.ansible_facts.services[bacula_dir_service_name + '.service'].state == 'running'
+  retries: 5
+  delay: 2
+  when: bacula_restart_services
+  tags:
+  - packages
