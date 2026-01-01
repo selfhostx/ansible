@@ -24,6 +24,12 @@ Schedule {
   Name = "Never"
 }
 
+{% if bacula_dir_schedules_extra is defined and bacula_dir_schedules_extra|length > 0 %}
+# Extra schedules defined via bacula_dir_schedules_extra variable
+{{ bacula_dir_schedules_extra }}
+{% endif %}
+
 {% if bacula_dir_schedule_extra_template is defined %}
+# Extra schedules from template (deprecated - use bacula_dir_schedules_extra instead)
 {% include bacula_dir_schedule_extra_template %}
 {% endif %}
