@@ -25,8 +25,8 @@ bacula_supported_distributions:
   - noble
 
 # will be overriden later (see register-facts.yml):
-bacula_fd_fqdn: "{{ ansible_fqdn }}"
-bacula_sd_fqdn: "{{ ansible_fqdn }}"
+bacula_fd_fqdn: "{{ ansible_facts['fqdn'] }}"
+bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
 
 bacula_dir_name: "bacula-dir"
 bacula_mon_name: "bacula-mon"

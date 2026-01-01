@@ -18,9 +18,12 @@ bacula_fd_packages_official:
 - bacula-common
 bacula_fd_service_name: "bacula-fd"
 bacula_fd_binary: "/usr/sbin/bacula-fd"
+bacula_fd_binary_official: "/opt/bacula/bin/bacula-fd"
 bacula_dir_binary: "/usr/sbin/bacula-dir"
+bacula_dir_binary_official: "/opt/bacula/bin/bacula-dir"
 bacula_dir_service_name: "bacula-director"
 bacula_sd_binary: "/usr/sbin/bacula-sd"
+bacula_sd_binary_official: "/opt/bacula/bin/bacula-sd"
 bacula_sd_service_name: "bacula-sd"
 bacula_dir_queryfile: /etc/bacula/scripts/query.sql
 bacula_dir_dbimport_mysql_file: "/usr/share/dbconfig-common/data/bacula-director-mysql/install/mysql"
