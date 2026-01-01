@@ -59,6 +59,23 @@
   tags:
   - db
 
+- name: Setup pgsql | Check if DB exists (pgsql)
+  postgresql_query:
+    query: "SELECT 1 FROM pg_database WHERE datname = '{{ bacula_dir_dbname }}'"
+    db: postgres
+  register: bacula_database_pgsql_check
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
 - name: Setup pgsql | Create DB if not exists (pgsql)
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
@@ -79,8 +96,24 @@
   when:
   - bacula_dir_db_engine == "pgsql"
   - bacula_dir_db_adminuser|length == 0
-#  - bacula_database_pgsql_destroyed.changed
-#  - not bacula_database_pgsql_exists.changed
+  - bacula_database_pgsql_check.rowcount == 0
+  tags:
+  - db
+
+- name: Setup pgsql | Check if DB exists (pgsql via bacula_dir_db_adminuser)
+  postgresql_query:
+    query: "SELECT 1 FROM pg_database WHERE datname = '{{ bacula_dir_dbname }}'"
+    db: postgres
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_pgsql_check_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  failed_when: false
+  changed_when: false
   tags:
   - db
 
@@ -108,8 +141,7 @@
   when:
   - bacula_dir_db_engine == "pgsql"
   - bacula_dir_db_adminuser|length > 0
-#  - bacula_database_pgsql_destroyed.changed
-#  - not bacula_database_pgsql_exists.changed
+  - bacula_database_pgsql_check_admin.rowcount == 0
   tags:
   - db
 
