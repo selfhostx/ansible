@@ -181,6 +181,25 @@ ansible-playbook playbook.yml --tags bacula-repository
 ansible-playbook playbook.yml --skip-tags bacula-repository
 ```
 
+**Package Naming Differences:**
+
+Official Bacula repository uses different package names than Debian/Ubuntu:
+
+| Component | Debian Package | Official Bacula Package |
+|-----------|---------------|------------------------|
+| Director (PostgreSQL) | bacula-director<br>bacula-director-pgsql<br>bacula-bscan | bacula-postgresql<br>bacula-common |
+| Director (MySQL) | bacula-director<br>bacula-director-mysql<br>bacula-bscan | bacula-mysql<br>bacula-common |
+| Storage Daemon | bacula-sd | bacula-sd<br>bacula-common |
+| File Daemon (Client) | bacula-fd | bacula-client<br>bacula-common |
+| Console | bacula-console | bacula-console<br>bacula-common |
+
+The role automatically selects the correct package names based on `bacula_use_official_repo`.
+
+When upgrading from distribution packages to official repository:
+- Old Debian packages are automatically removed
+- Official Bacula packages are installed with correct names
+- Configuration files are preserved during the transition
+
 ## Quick start
 
 ### customize (at least) this vars:

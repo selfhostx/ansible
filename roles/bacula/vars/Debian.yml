@@ -11,6 +11,11 @@ bacula_workingdirectory: "/var/lib/bacula"
 bacula_piddirectory: "/var/run/bacula"
 bacula_plugindirectory: "/usr/lib/bacula"
 bacula_fd_package_name: "bacula-fd"
+bacula_fd_packages:
+- bacula-fd
+bacula_fd_packages_official:
+- bacula-client
+- bacula-common
 bacula_fd_service_name: "bacula-fd"
 bacula_fd_binary: "/usr/sbin/bacula-fd"
 bacula_dir_binary: "/usr/sbin/bacula-dir"
@@ -22,6 +27,7 @@ bacula_dir_dbimport_mysql_file: "/usr/share/dbconfig-common/data/bacula-director
 bacula_dir_dbimport_pgsql_file: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install/pgsql"
 bacula_dir_dbimport_pgsql_dbsettings: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install-dbadmin/pgsql"
 
+# Debian repository package names
 bacula_dir_packages_mysql:
 - bacula-bscan
 - bacula-director
@@ -34,3 +40,18 @@ bacula_console_packages:
 - bacula-console
 bacula_sd_packages:
 - bacula-sd
+
+# Official Bacula repository package names
+# Note: Official repo uses different package names than Debian
+bacula_dir_packages_mysql_official:
+- bacula-mysql
+- bacula-common
+bacula_dir_packages_pgsql_official:
+- bacula-postgresql
+- bacula-common
+bacula_console_packages_official:
+- bacula-console
+- bacula-common
+bacula_sd_packages_official:
+- bacula-sd
+- bacula-common

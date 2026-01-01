@@ -15,7 +15,7 @@
 
 - name: Setup SD | Install bacula-sd package
   package:
-    name: "{{ bacula_sd_packages }}"
+    name: "{{ bacula_sd_packages_official if bacula_use_official_repo | default(false) | bool else bacula_sd_packages }}"
     state: "{{ 'latest' if bacula_use_official_repo | default(false) | bool else 'present' }}"
   tags:
   - packages
