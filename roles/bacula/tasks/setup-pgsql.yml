@@ -229,7 +229,24 @@
   tags:
   - db
 
-- name: Setup pgsql | Create Tables in DB (pgsql)
+- name: Setup pgsql | Create Tables in DB (pgsql) - Official repo via shell script
+  command: "{{ bacula_dir_dbimport_pgsql_file }}"
+  environment:
+    db_name: "{{ bacula_dir_dbname }}"
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  register: bacula_pgsql_tables_created
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  - bacula_use_official_repo | default(false) | bool
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_tables_check.rowcount == 0)
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql) - Debian repo via SQL file
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
     target: "{{ bacula_dir_dbimport_pgsql_file }}"
@@ -240,9 +257,11 @@
   become_user: postgres
   vars:
     ansible_ssh_pipelining: true
+  register: bacula_pgsql_tables_created
   when:
   - bacula_dir_db_engine == "pgsql"
   - bacula_dir_db_adminuser|length == 0
+  - not (bacula_use_official_repo | default(false) | bool)
   - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_tables_check.rowcount == 0)
   tags:
   - db
@@ -264,7 +283,24 @@
   tags:
   - db
 
-- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser)
+- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser) - Official repo via shell script
+  command: "{{ bacula_dir_dbimport_pgsql_file }}"
+  environment:
+    db_name: "{{ bacula_dir_dbname }}"
+    PGHOST: "{{ bacula_dir_dbaddress | default('localhost') }}"
+    PGPORT: "{{ bacula_dir_dbport | default('5432') }}"
+    PGUSER: "{{ bacula_dir_db_adminuser }}"
+    PGPASSWORD: "{{ bacula_dir_db_adminpass }}"
+  register: bacula_pgsql_tables_created_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  - bacula_use_official_repo | default(false) | bool
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_tables_check_admin.rowcount == 0)
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser) - Debian repo via SQL file
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
     target: "{{ bacula_dir_dbimport_pgsql_file }}"
@@ -275,9 +311,11 @@
 #    login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
     maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgresql_user) }}"
     state: "restore"
+  register: bacula_pgsql_tables_created_admin
   when:
   - bacula_dir_db_engine == "pgsql"
   - bacula_dir_db_adminuser|length > 0
+  - not (bacula_use_official_repo | default(false) | bool)
   - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_tables_check_admin.rowcount == 0)
   tags:
   - db
@@ -321,6 +359,7 @@
 #    port: "{{ bacula_dir_dbport }}"
   when:
   - bacula_dir_db_adminuser|length == 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_pgsql_tables_created.changed | default(false))
   become: True
   become_user: postgres
   vars:
@@ -341,6 +380,7 @@
     login_user: "{{ bacula_dir_db_adminuser }}"
   when:
   - bacula_dir_db_adminuser|length > 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_pgsql_tables_created_admin.changed | default(false))
 
 - name: Setup pgsql | Grant rights to sequences on those tables (pgsql)
   postgresql_privs:
@@ -354,6 +394,7 @@
     port: "{{ bacula_dir_dbport }}"
   when:
   - bacula_dir_db_adminuser|length == 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_pgsql_tables_created.changed | default(false))
   become: True
   become_user: postgres
   vars:
@@ -374,4 +415,5 @@
     login_user: "{{ bacula_dir_db_adminuser }}"
   when:
   - bacula_dir_db_adminuser|length > 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_pgsql_tables_created_admin.changed | default(false))
 
