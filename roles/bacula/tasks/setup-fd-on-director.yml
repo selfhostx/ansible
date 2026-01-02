@@ -24,9 +24,6 @@
     owner: "{{ bacula_dir_user }}"
     group: "{{ bacula_dir_group }}"
     mode: "{{ bacula_dir_filemode }}"
-  when:
-  - bacula_fd_fileset_includes is defined
-  - bacula_fd_fileset_includes|length > 0
 
 - name: Setup FD on director | Manage bacula-fd service
   service:
