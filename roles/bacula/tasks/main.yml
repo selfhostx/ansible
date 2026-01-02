@@ -44,6 +44,14 @@
   tags:
     - bacula-sd
 
+- name: Ensure correct storage and working directory permissions
+  include_tasks: "setup-storage-permissions.yml"
+  tags:
+    - bacula-sd
+    - bacula-dir
+    - bacula-fd
+    - bacula-permissions
+
 - name: Setup FD
   include_tasks: "setup-fd.yml"
   when: bacula_fd_role|bool

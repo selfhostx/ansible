@@ -1,0 +1,91 @@
+---
+# Cleanup old Bacula configuration files after migration to official repository
+# This removes old configs from /etc/bacula and creates a README explaining the migration
+
+- name: Cleanup configs | Remove old Bacula configuration files from /etc/bacula
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/bacula/bacula-dir.conf
+    - /etc/bacula/bacula-sd.conf
+    - /etc/bacula/bacula-fd.conf
+    - /etc/bacula/bconsole.conf
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+  tags:
+    - bacula-cleanup
+    - bacula-config
+
+- name: Cleanup configs | Remove old include configs from /etc/bacula/conf.d
+  ansible.builtin.shell: |
+    if [ -d /etc/bacula/conf.d ]; then
+      rm -f /etc/bacula/conf.d/*.conf
+    fi
+  args:
+    executable: /bin/bash
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+  changed_when: false
+  tags:
+    - bacula-cleanup
+    - bacula-config
+
+- name: Cleanup configs | Ensure /etc/bacula directory exists for README
+  ansible.builtin.file:
+    path: /etc/bacula
+    state: directory
+    mode: '0755'
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+  tags:
+    - bacula-cleanup
+    - bacula-config
+
+- name: Cleanup configs | Create migration README in old config directory
+  ansible.builtin.copy:
+    dest: /etc/bacula/README.md
+    mode: '0644'
+    content: |
+      # Bacula Configuration Migration Notice
+
+      This server uses **Bacula {{ bacula_version }} from the official Bacula repository**.
+
+      ## Configuration Location Changed
+
+      **Old Location (Debian packages):** `/etc/bacula/`
+      **New Location (Official Bacula):** `/opt/bacula/etc/`
+
+      ## Current Configuration Files
+
+      All Bacula configuration is now managed at:
+      - **Main Config Directory:** `/opt/bacula/etc/`
+      - **Director Config:** `/opt/bacula/etc/bacula-dir.conf`
+      - **Storage Daemon Config:** `/opt/bacula/etc/bacula-sd.conf`
+      - **File Daemon Config:** `/opt/bacula/etc/bacula-fd.conf`
+      - **Console Config:** `/opt/bacula/etc/bconsole.conf`
+      - **Include Directory:** `/opt/bacula/etc/conf.d/`
+
+      ## Working Directories
+
+      - **Working Directory:** `/opt/bacula/working/`
+      - **Scripts:** `/opt/bacula/scripts/`
+      - **Plugins:** `/opt/bacula/plugins/`
+
+      ## Do Not Use This Directory
+
+      This `/etc/bacula/` directory is **no longer used** and kept only for reference.
+
+      All configuration changes must be made via Ansible role deployment.
+
+      Migration completed: {{ ansible_date_time.iso8601 }}
+      Managed by: Ansible (selfhostx.ansible.bacula role)
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+  tags:
+    - bacula-cleanup
+    - bacula-config

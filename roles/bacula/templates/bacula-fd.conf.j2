@@ -26,7 +26,7 @@ FileDaemon {
   {{ bacula_fd_connect_listen_addresses }}
   }
 {% else %}
-  FDAddress = {{ bacula_fd_connect_address|default(bacula_fd_fqdn) }}
+  FDAddress = {{ bacula_fd_listen_address }}
   FDport = {{ bacula_fd_port }}
 {% endif %}
 {% if bacula_fd_source_address is defined and bacula_fd_source_address|length > 0 %}

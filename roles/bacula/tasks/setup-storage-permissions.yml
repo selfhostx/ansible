@@ -1,0 +1,72 @@
+---
+# Ensure correct ownership and permissions for Bacula storage and working directories
+# This prevents "Permission denied" errors during backup operations
+
+- name: Storage permissions | Ensure archive device directory exists with correct ownership
+  ansible.builtin.file:
+    path: "{{ bacula_sd_archive_device }}"
+    state: directory
+    owner: "{{ bacula_sd_user }}"
+    group: "{{ bacula_sd_group }}"
+    mode: '0750'
+  when:
+    - bacula_sd_role | bool
+    - bacula_sd_archive_device is defined
+  tags:
+    - bacula-sd
+    - bacula-permissions
+
+- name: Storage permissions | Ensure spool directory exists with correct ownership
+  ansible.builtin.file:
+    path: /var/spool/bacula
+    state: directory
+    owner: "{{ bacula_sd_user }}"
+    group: "{{ bacula_sd_group }}"
+    mode: '0750'
+  when:
+    - bacula_sd_role | bool
+  tags:
+    - bacula-sd
+    - bacula-permissions
+
+- name: Storage permissions | Ensure working directory has correct ownership
+  ansible.builtin.file:
+    path: "{{ bacula_workingdirectory }}"
+    state: directory
+    owner: "{{ bacula_sd_user }}"
+    group: "{{ bacula_sd_group }}"
+    mode: '0755'
+  when:
+    - bacula_sd_role | bool
+  tags:
+    - bacula-sd
+    - bacula-permissions
+
+- name: Storage permissions | Ensure Director working directory has correct ownership
+  ansible.builtin.file:
+    path: "{{ bacula_workingdirectory }}"
+    state: directory
+    owner: "{{ bacula_dir_user }}"
+    group: "{{ bacula_dir_group }}"
+    mode: '0755'
+  when:
+    - bacula_dir_role | bool
+    - not bacula_sd_role | bool  # Only if Director is separate from SD
+  tags:
+    - bacula-dir
+    - bacula-permissions
+
+- name: Storage permissions | Ensure File Daemon working directory has correct ownership
+  ansible.builtin.file:
+    path: "{{ bacula_workingdirectory }}"
+    state: directory
+    owner: "{{ bacula_fd_user }}"
+    group: "{{ bacula_fd_group }}"
+    mode: '0755'
+  when:
+    - bacula_fd_role | bool
+    - not bacula_dir_role | bool  # Only if FD is standalone
+    - not bacula_sd_role | bool
+  tags:
+    - bacula-fd
+    - bacula-permissions

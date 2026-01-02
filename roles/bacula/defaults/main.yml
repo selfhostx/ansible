@@ -28,6 +28,11 @@ bacula_supported_distributions:
 bacula_fd_fqdn: "{{ ansible_facts['fqdn'] }}"
 bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
 
+# FD listen address: IP/interface the FD binds to for incoming connections
+# Default: 0.0.0.0 (listen on all interfaces)
+# Note: This is different from bacula_fd_connect_address (used by Director to connect)
+bacula_fd_listen_address: "0.0.0.0"
+
 bacula_dir_name: "bacula-dir"
 bacula_mon_name: "bacula-mon"
 bacula_sd_name: "bacula-sd"
