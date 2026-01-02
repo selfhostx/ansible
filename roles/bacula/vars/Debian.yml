@@ -32,6 +32,15 @@ bacula_dir_dbimport_mysql_file: "/usr/share/dbconfig-common/data/bacula-director
 bacula_dir_dbimport_pgsql_file: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install/pgsql"
 bacula_dir_dbimport_pgsql_dbsettings: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install-dbadmin/pgsql"
 # Official Bacula repository paths
+bacula_config_dir_official: "/opt/bacula/etc"
+bacula_console_config_official: "{{ bacula_config_dir_official }}/bconsole.conf"
+bacula_dir_config_official: "{{ bacula_config_dir_official }}/bacula-dir.conf"
+bacula_sd_config_official: "{{ bacula_config_dir_official }}/bacula-sd.conf"
+bacula_dir_include_config_dir_official: "{{ bacula_config_dir_official }}/conf.d"
+bacula_fd_auto_psk_file_filename_official: "{{ bacula_config_dir_official }}/bacula_fd_psk_auto.secret"
+bacula_workingdirectory_official: "/opt/bacula/working"
+bacula_piddirectory_official: "/opt/bacula/working"
+bacula_plugindirectory_official: "/opt/bacula/plugins"
 bacula_dir_dbimport_mysql_file_official: "/opt/bacula/scripts/make_mysql_tables"
 bacula_dir_dbimport_pgsql_file_official: "/opt/bacula/scripts/make_postgresql_tables"
 
