@@ -81,7 +81,7 @@
 
       All configuration changes must be made via Ansible role deployment.
 
-      Migration completed: {{ ansible_date_time.iso8601 }}
+      Migration completed: {{ ansible_facts['date_time']['iso8601'] }}
       Managed by: Ansible (selfhostx.ansible.bacula role)
   when:
     - bacula_use_official_repo | default(false) | bool
