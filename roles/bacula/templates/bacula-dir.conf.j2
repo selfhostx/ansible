@@ -60,8 +60,18 @@ Messages {
   #  for example, a 'no-reply@mydomain.com', is better since that tends to
   #  tell (most) people that its coming from an automated source.
   #
-  mailcommand = "/usr/sbin/bsmtp -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: %t %e of %c %l\" %r"
-  operatorcommand = "/usr/sbin/bsmtp -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: Intervention needed for %j\" %r"
+{% if bacula_mail_command_type == "mail" %}
+  mailcommand = "{{ bacula_mail_command_mail }} -s \"Bacula: %t %e of %c %l\" %r"
+  operatorcommand = "{{ bacula_mail_command_mail }} -s \"Bacula: Intervention needed for %j\" %r"
+{% else %}
+{% if bacula_use_official_repo | default(false) | bool %}
+  mailcommand = "{{ bacula_mail_command_bsmtp_official }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: %t %e of %c %l\" %r"
+  operatorcommand = "{{ bacula_mail_command_bsmtp_official }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: Intervention needed for %j\" %r"
+{% else %}
+  mailcommand = "{{ bacula_mail_command_bsmtp }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: %t %e of %c %l\" %r"
+  operatorcommand = "{{ bacula_mail_command_bsmtp }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: Intervention needed for %j\" %r"
+{% endif %}
+{% endif %}
   mail = {{ bacula_dir_email_admin }} = all, !skipped
   operator = {{ bacula_dir_email_operator }} = mount
   console = all, !skipped, !saved
@@ -79,7 +89,15 @@ Messages {
 #
 Messages {
   Name = Daemon
-  mailcommand = "/usr/sbin/bsmtp -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula daemon message\" %r"
+{% if bacula_mail_command_type == "mail" %}
+  mailcommand = "{{ bacula_mail_command_mail }} -s \"Bacula daemon message\" %r"
+{% else %}
+{% if bacula_use_official_repo | default(false) | bool %}
+  mailcommand = "{{ bacula_mail_command_bsmtp_official }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula daemon message\" %r"
+{% else %}
+  mailcommand = "{{ bacula_mail_command_bsmtp }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula daemon message\" %r"
+{% endif %}
+{% endif %}
   mail = root = all, !skipped
   console = all, !skipped, !saved
   append = "{{ bacula_logfile }}" = all, !skipped

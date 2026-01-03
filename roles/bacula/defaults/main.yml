@@ -46,6 +46,14 @@ bacula_dir_restore_path: "/var/bacula-restores"
 bacula_dir_email_admin: root
 bacula_dir_email_operator: root
 
+# Mail command configuration
+# Options: "bsmtp" (Bacula's built-in SMTP) or "mail" (system mail command)
+bacula_mail_command_type: "mail"
+# Mail command binary paths
+bacula_mail_command_bsmtp: "/usr/sbin/bsmtp"  # For Debian packages
+bacula_mail_command_bsmtp_official: "/opt/bacula/bin/bsmtp"  # For official repo
+bacula_mail_command_mail: "/usr/bin/mail"  # System mail command
+
 # decide what component is needed.
 # fd is default, override via host_vars
 bacula_fd_role: True
