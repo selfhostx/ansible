@@ -1,9 +1,11 @@
 ---
 - name: Include OS specific variables.
   include_vars: "{{ ansible_facts['os_family'] }}.yml"
+  tags: always
 
 - name: Setup facts
   include_tasks: "register-facts.yml"
+  tags: always
 
 - name: Change Bacula Definition (when Ports have changed)
   include_tasks: "change_ports_in_service_file.yml"
