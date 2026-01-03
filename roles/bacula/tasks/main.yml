@@ -51,6 +51,8 @@
   when: bacula_fd_role|bool
   tags:
     - bacula-fd
+    - disable-client
+    - remove-client
 
 - name: Ensure correct storage and working directory permissions
   include_tasks: "setup-storage-permissions.yml"
