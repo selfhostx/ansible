@@ -53,6 +53,9 @@ bacula_mail_command_type: "mail"
 bacula_mail_command_bsmtp: "/usr/sbin/bsmtp"  # For Debian packages
 bacula_mail_command_bsmtp_official: "/opt/bacula/bin/bsmtp"  # For official repo
 bacula_mail_command_mail: "/usr/bin/mail"  # System mail command
+# Sender address for system mail command (mail -r option)
+# If not set, defaults to user running bacula-dir (typically 'bacula')
+bacula_mail_from: "root"
 
 # decide what component is needed.
 # fd is default, override via host_vars

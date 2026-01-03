@@ -61,8 +61,8 @@ Messages {
   #  tell (most) people that its coming from an automated source.
   #
 {% if bacula_mail_command_type == "mail" %}
-  mailcommand = "{{ bacula_mail_command_mail }} -s \"Bacula: %t %e of %c %l\" %r"
-  operatorcommand = "{{ bacula_mail_command_mail }} -s \"Bacula: Intervention needed for %j\" %r"
+  mailcommand = "{{ bacula_mail_command_mail }} -r {{ bacula_mail_from }} -s \"Bacula: %t %e of %c %l\" %r"
+  operatorcommand = "{{ bacula_mail_command_mail }} -r {{ bacula_mail_from }} -s \"Bacula: Intervention needed for %j\" %r"
 {% else %}
 {% if bacula_use_official_repo | default(false) | bool %}
   mailcommand = "{{ bacula_mail_command_bsmtp_official }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula: %t %e of %c %l\" %r"
@@ -90,7 +90,7 @@ Messages {
 Messages {
   Name = Daemon
 {% if bacula_mail_command_type == "mail" %}
-  mailcommand = "{{ bacula_mail_command_mail }} -s \"Bacula daemon message\" %r"
+  mailcommand = "{{ bacula_mail_command_mail }} -r {{ bacula_mail_from }} -s \"Bacula daemon message\" %r"
 {% else %}
 {% if bacula_use_official_repo | default(false) | bool %}
   mailcommand = "{{ bacula_mail_command_bsmtp_official }} -h localhost -f \"\(Bacula\) \<%r\>\" -s \"Bacula daemon message\" %r"
