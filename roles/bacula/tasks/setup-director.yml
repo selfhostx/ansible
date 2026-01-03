@@ -64,6 +64,7 @@
     mode: "{{ bacula_dir_filemode }}"
   notify: 'Reload bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Setup DIR | Manage configuration of bacula-dir (schedules)
@@ -75,6 +76,7 @@
     mode: "{{ bacula_dir_filemode }}"
   notify: 'Reload bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Manage configuration of bacula-dir (jobs)
@@ -87,6 +89,7 @@
     # validate: "{{ bacula_dir_binary }} -t -c %s"
   notify: 'Reload bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Setup DIR | Manage configuration of bacula-dir (main config)
@@ -99,6 +102,7 @@
     # validate: "{{ bacula_dir_binary }} -t -c %s"
   notify: 'Restart bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Setup DIR | Enable bacula-dir service
