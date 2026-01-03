@@ -23,6 +23,7 @@
     bacula_workingdirectory: "{{ bacula_workingdirectory_official }}"
     bacula_piddirectory: "{{ bacula_piddirectory_official }}"
     bacula_plugindirectory: "{{ bacula_plugindirectory_official }}"
+    bacula_scripts_dir: "{{ bacula_scripts_dir_official }}"
     bacula_dir_dbimport_pgsql_file: "{{ bacula_dir_dbimport_pgsql_file_official }}"
     bacula_dir_dbimport_mysql_file: "{{ bacula_dir_dbimport_mysql_file_official }}"
   when:

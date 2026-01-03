@@ -10,6 +10,7 @@ bacula_system_service_file: "/etc/services"
 bacula_workingdirectory: "/var/lib/bacula"
 bacula_piddirectory: "/var/run/bacula"
 bacula_plugindirectory: "/usr/lib/bacula"
+bacula_scripts_dir: "/etc/bacula/scripts"
 bacula_fd_package_name: "bacula-fd"
 bacula_fd_packages:
 - bacula-fd
@@ -41,6 +42,7 @@ bacula_fd_auto_psk_file_filename_official: "{{ bacula_config_dir_official }}/bac
 bacula_workingdirectory_official: "/opt/bacula/working"
 bacula_piddirectory_official: "/opt/bacula/working"
 bacula_plugindirectory_official: "/opt/bacula/plugins"
+bacula_scripts_dir_official: "/opt/bacula/scripts"
 bacula_dir_dbimport_mysql_file_official: "/opt/bacula/scripts/make_mysql_tables"
 bacula_dir_dbimport_pgsql_file_official: "/opt/bacula/scripts/make_postgresql_tables"
 

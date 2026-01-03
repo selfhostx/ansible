@@ -15,9 +15,9 @@ Job {
   # This creates an ASCII copy of the catalog
   # Arguments to make_catalog_backup.pl are:
   #  make_catalog_backup.pl <catalog-name>
-  RunBeforeJob = "/etc/bacula/scripts/make_catalog_backup.pl {{ bacula_catalog }}"
+  RunBeforeJob = "{{ bacula_scripts_dir }}/make_catalog_backup.pl {{ bacula_catalog }}"
   # This deletes the copy of the catalog
-  # RunAfterJob  = "/etc/bacula/scripts/delete_catalog_backup"
+  # RunAfterJob  = "{{ bacula_scripts_dir }}/delete_catalog_backup"
   Write Bootstrap = "{{ bacula_workingdirectory }}/%n.bsr"
   Priority = 11                   # run after main backup
 }
