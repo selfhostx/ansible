@@ -1,5 +1,38 @@
 # Install and configure Bacula-fd
 ---
+- name: Disable FD | Mark client as disabled in director configuration
+  lineinfile:
+    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    regexp: '^\s*Enabled\s*='
+    line: '  Enabled = no'
+    insertafter: 'Client {'
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  notify: 'Reload bacula-dir'
+  tags:
+    - never
+    - disable-client
+
+- name: Remove FD | Remove client configuration from director
+  file:
+    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    state: absent
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  notify: 'Reload bacula-dir'
+  tags:
+    - never
+    - remove-client
+
+- name: Remove FD | Remove fileset configuration from director
+  file:
+    path: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
+    state: absent
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  notify: 'Reload bacula-dir'
+  when: bacula_fd_remove_fileset | default(false) | bool
+  tags:
+    - never
+    - remove-client
+
 - name: Setup FD | Install bacula-fd package
   package:
     name: "{{ bacula_fd_packages_official if bacula_use_official_repo | default(false) | bool else bacula_fd_packages }}"

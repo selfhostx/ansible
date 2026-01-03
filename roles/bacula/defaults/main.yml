@@ -216,6 +216,13 @@ bacula_fd_fileset_name: "Standard"
 
 # protect existing filesets?
 bacula_fd_fileset_overwrite: True
+
+# Remove fileset configuration when removing client with --tags remove-client
+# Set to true to also remove the fileset config (only if not shared with other clients)
+# Note: --tags disable-client sets Enabled=no without removing files
+#       --tags remove-client removes the config files completely
+bacula_fd_remove_fileset: False
+
 bacula_fd_fileset_signature: "SHA1"
 bacula_fd_fileset_compression: "GZIP"
 bacula_fd_fileset_verify: "pins1"
