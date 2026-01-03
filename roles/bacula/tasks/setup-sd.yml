@@ -17,6 +17,9 @@
     mode: "{{ bacula_sd_filemode }}"
     validate: "{{ bacula_sd_binary }} -t -c %s"
   notify: 'Restart bacula-sd'
+  tags:
+    - bacula-sd
+    - templates
 
 - name: Setup SD | Create archive device for SD
   file:

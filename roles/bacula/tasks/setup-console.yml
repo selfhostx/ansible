@@ -14,3 +14,6 @@
     owner: "{{ bacula_console_user }}"
     group: "{{ bacula_console_group }}"
     mode: "{{ bacula_console_filemode }}"
+  tags:
+    - bacula-console
+    - templates
