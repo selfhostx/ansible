@@ -25,21 +25,32 @@ Currently only tested on mysql / mariadb and Ubuntu/Debian in LTS-Versions.
 
 ### Overview
 
-Starting with Bacula 10, official packages require registration and GPG key verification. This role supports both:
-- **Distribution packages** (default, older Bacula versions from distro repos)
-- **Official Bacula repository** (newer versions with free registration)
+**Access Key Requirement:** Starting with **Bacula 10** (released 2018), the official Bacula repository requires a free registration access key for downloading packages. This applies to all Bacula versions 10.0.0 and newer.
+
+This role supports both:
+- **Distribution packages** (default) - Older Bacula versions (typically 5.x - 9.x) from distro repos, no access key needed
+- **Official Bacula repository** (Bacula 10+) - Newer versions requiring free registration access key
 
 ### When to Use Official Repository
 
 Use `bacula_use_official_repo: true` when you need:
-- Bacula version 10 or newer
-- Latest features and bug fixes
-- Versions newer than your distribution provides
+- Bacula version 10 or newer (13.0.4 is current as of 2024)
+- Latest features, bug fixes, and security updates
+- Versions newer than your distribution provides (Ubuntu/Debian typically lag behind)
 - Consistent Bacula version across different OS distributions
 
-**Supported Distributions** (latest 2 versions only):
-- Debian: bookworm (12), trixie (13)
-- Ubuntu: jammy (22.04), noble (24.04)
+**Supported Distributions:**
+
+The official Bacula repository provides packages for recent distributions only. For distributions without native packages, this role automatically uses compatible packages from older releases:
+
+| Distribution | Native Packages Available | Fallback Mapping |
+|--------------|--------------------------|------------------|
+| Debian bookworm (12) | ✅ Yes | - |
+| Debian trixie (13) | ❌ No | Uses bookworm packages |
+| Ubuntu jammy (22.04) | ✅ Yes | - |
+| Ubuntu noble (24.04) | ❌ No | Uses jammy packages |
+
+> **Note:** Fallback mappings use LTS-to-LTS compatibility (e.g., jammy packages work on noble). The role handles this automatically.
 
 ### Getting Started with Official Repository
 
@@ -85,16 +96,23 @@ bacula_repo_access_key: "your-key"
 bacula_version: "13.0.4"  # Set desired version
 ```
 
-The role will:
-- Add official repository (if not present)
-- Upgrade existing Bacula packages to specified version
-- Preserve configuration files
-- Restart services only if needed
+The role will automatically:
+1. **Unhold any pinned packages** - Removes apt/dpkg holds that prevent updates
+2. **Remove old distribution packages** - Purges old Debian/Ubuntu bacula packages completely
+3. **Configure repository priority** - Sets apt preferences to prefer Bacula repo over distro repos (priority 1100 vs 100)
+4. **Add official repository** - Configures bacula.org repository with your access key
+5. **Install correct packages** - Uses official package names (bacula-client, bacula-postgresql, etc.)
+6. **Preserve configuration** - Keeps your existing configs during migration
+7. **Restart services** - Only restarts when configuration changes
+
+**Migration is idempotent** - A marker file (`/etc/bacula/.migrated_to_official_repo`) prevents cleanup from running multiple times.
 
 **Important Notes:**
-- Downgrades are not supported
-- Database schema migrations happen automatically (make backups!)
-- Configuration compatibility is maintained by Bacula
+- **Repository Priority:** The role creates `/etc/apt/preferences.d/bacula-official` to ensure Bacula packages always come from the official repo, even if your system has mixed Debian/Ubuntu repositories
+- **Held Packages:** If packages are held/pinned, the role automatically unholds them before migration
+- **Downgrades:** Not supported by Bacula
+- **Database Migrations:** Schema migrations happen automatically (make backups!)
+- **Configuration:** Maintained by Bacula across versions
 
 ### Validation and Safety
 
@@ -179,26 +197,79 @@ ansible-playbook playbook.yml --tags bacula-repository
 
 # Skip repository setup
 ansible-playbook playbook.yml --skip-tags bacula-repository
+
+# Setup specific components
+ansible-playbook playbook.yml --tags bacula-dir   # Director only
+ansible-playbook playbook.yml --tags bacula-sd    # Storage Daemon only
+ansible-playbook playbook.yml --tags bacula-fd    # File Daemon only
+ansible-playbook playbook.yml --tags bacula-console  # Console only
+```
+
+### Client Management
+
+The role supports disabling or removing File Daemon clients from the Bacula Director without uninstalling the FD itself:
+
+**Disable a client (temporary):**
+```bash
+# Marks client as disabled (Enabled = no) in Director config
+# Keeps all configuration files - client can be re-enabled easily
+ansible-playbook playbook.yml --limit client-host --tags disable-client \
+  -e bacula_dir_fqdn=your-director.example.com
+```
+
+**Remove a client (permanent):**
+```bash
+# Completely removes client configuration from Director
+# Optionally removes fileset if bacula_fd_remove_fileset=true
+ansible-playbook playbook.yml --limit client-host --tags remove-client \
+  -e bacula_dir_fqdn=your-director.example.com
+```
+
+**Options:**
+- `bacula_fd_remove_fileset: false` (default) - Keep fileset config when removing client
+- `bacula_fd_remove_fileset: true` - Also remove fileset (only if not shared with other clients)
+
+> **Note:** Both tags use `never` internally, so they only run when explicitly invoked. They won't execute during normal playbook runs.
+
+**Migration workflow example:**
+```bash
+# 1. Disable client on old Bacula Director
+ansible-playbook playbook.yml --limit client.example.com \
+  --tags disable-client \
+  -e bacula_dir_fqdn=old-bacula.example.com
+
+# 2. Configure client for new Bacula Director
+# (update group_vars to point to new director first)
+ansible-playbook playbook.yml --limit client.example.com --tags bacula-fd
+
+# 3. After verifying new setup works, remove from old director
+ansible-playbook playbook.yml --limit client.example.com \
+  --tags remove-client \
+  -e bacula_dir_fqdn=old-bacula.example.com
 ```
 
 **Package Naming Differences:**
 
 Official Bacula repository uses different package names than Debian/Ubuntu:
 
-| Component | Debian Package | Official Bacula Package |
-|-----------|---------------|------------------------|
-| Director (PostgreSQL) | bacula-director<br>bacula-director-pgsql<br>bacula-bscan | bacula-postgresql<br>bacula-common |
-| Director (MySQL) | bacula-director<br>bacula-director-mysql<br>bacula-bscan | bacula-mysql<br>bacula-common |
-| Storage Daemon | bacula-sd | bacula-sd<br>bacula-common |
-| File Daemon (Client) | bacula-fd | bacula-client<br>bacula-common |
-| Console | bacula-console | bacula-console<br>bacula-common |
+| Component | Debian Package | Official Bacula Package | Notes |
+|-----------|---------------|------------------------|-------|
+| Director (PostgreSQL) | bacula-director<br>bacula-director-pgsql<br>bacula-bscan | bacula-postgresql | Includes director + SD |
+| Director (MySQL) | bacula-director<br>bacula-director-mysql<br>bacula-bscan | bacula-mysql | Includes director + SD |
+| Storage Daemon | bacula-sd | Included in director package | - |
+| File Daemon (Client) | bacula-fd | bacula-client | - |
+| Console | bacula-console | bacula-console | - |
+| Common Files | bacula-common | *(auto-installed)* | Dependency, not explicitly listed |
+
+> **Important:** `bacula-common` is **not** explicitly installed by the role. It's automatically pulled in as a dependency by other packages. This ensures apt correctly resolves dependencies from the same repository.
 
 The role automatically selects the correct package names based on `bacula_use_official_repo`.
 
 When upgrading from distribution packages to official repository:
-- Old Debian packages are automatically removed
+- Old Debian packages are automatically purged (including config remnants)
 - Official Bacula packages are installed with correct names
 - Configuration files are preserved during the transition
+- Apt preferences ensure all packages come from bacula.org (not mixed sources)
 
 ## Quick start
 
@@ -246,6 +317,41 @@ bacula_sd_password: ""
 
 Attention: empty passwords are substituted with random values - on very run. Useful for testing - but not in production.
 Exception are the FD-passwords, they will be preserved when bacula_fd_auto_psk is True (default).
+
+### Email Notifications
+
+Configure how the Director sends email notifications:
+
+```yaml
+# Email addresses for notifications
+bacula_dir_email_admin: "root"
+bacula_dir_email_operator: "root"
+
+# Mail command type: "mail" (system mail) or "bsmtp" (Bacula's built-in SMTP)
+bacula_mail_command_type: "mail"
+
+# Sender address (only used with system mail command)
+bacula_mail_from: "root"
+```
+
+**Options:**
+
+- **`bacula_mail_command_type: "mail"`** (default) - Use system mail command
+  - Uses `/usr/bin/mail` with configurable sender address
+  - Best when using existing mail infrastructure (Postfix, etc.)
+  - Sender set via `bacula_mail_from` (defaults to "root")
+
+- **`bacula_mail_command_type: "bsmtp"`** - Use Bacula's built-in SMTP
+  - Sends directly via SMTP
+  - Path automatically adjusted for official repo vs distribution packages
+  - `/usr/sbin/bsmtp` (Debian packages) or `/opt/bacula/bin/bsmtp` (official repo)
+
+**Example with Postfix relay:**
+```yaml
+bacula_mail_command_type: "mail"
+bacula_mail_from: "bacula@example.com"
+bacula_dir_email_admin: "admin@example.com"
+```
 
 ### customize storage device (tape, Filestorage etc.)
 Example: Ringbuffer 
