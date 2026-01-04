@@ -12,6 +12,30 @@
     - packages
     - bacula-cleanup
 
+- name: Cleanup | Unhold any held Debian Bacula packages before removal
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: install
+  loop:
+    - bacula-bscan
+    - bacula-director
+    - bacula-director-mysql
+    - bacula-director-pgsql
+    - bacula-common-mysql
+    - bacula-common-pgsql
+    - bacula-sd
+    - bacula-fd
+    - bacula-console
+    - bacula-common
+  failed_when: false  # Don't fail if package doesn't exist
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+    - not bacula_migration_marker.stat.exists
+  tags:
+    - packages
+    - bacula-cleanup
+
 - name: Cleanup | Remove all old Debian Bacula packages if using official repository
   ansible.builtin.apt:
     name:
