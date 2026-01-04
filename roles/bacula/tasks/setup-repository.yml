@@ -31,7 +31,7 @@
       - Ubuntu: jammy (22.04), noble (24.04)
 
       For older distributions, set bacula_use_official_repo: false to use distribution packages.
-    success_msg: "Distribution '{{ ansible_facts['distribution_release'] }}' is supported"
+    success_msg: "Distribution '{{ ansible_facts['distribution_release'] }}' is supported (using {{ bacula_repo_distribution_map[ansible_facts['distribution_release']] }} packages)"
   tags:
     - bacula-repository
     - bacula-validation

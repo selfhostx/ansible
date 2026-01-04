@@ -24,6 +24,15 @@ bacula_supported_distributions:
   - jammy
   - noble
 
+# Distribution repository mapping
+# Some distributions may not have native packages in Bacula repo yet
+# Map them to compatible older releases
+bacula_repo_distribution_map:
+  bookworm: bookworm
+  trixie: bookworm  # trixie not yet in Bacula repo, use bookworm
+  jammy: jammy
+  noble: jammy  # noble not yet in Bacula repo, use jammy packages
+
 # will be overriden later (see register-facts.yml):
 bacula_fd_fqdn: "{{ ansible_facts['fqdn'] }}"
 bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
