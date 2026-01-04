@@ -1,14 +1,18 @@
 # Install and configure Bacula-dir
 ---
 - name: Setup DIR | Install bacula-dir packages (mysql)
-  package: name="{{ bacula_dir_packages_mysql }}" state=present
+  package:
+    name: "{{ bacula_dir_packages_mysql_official if bacula_use_official_repo | default(false) | bool else bacula_dir_packages_mysql }}"
+    state: "{{ 'latest' if bacula_use_official_repo | default(false) | bool else 'present' }}"
   when: bacula_dir_db_engine == "mysql"
   tags:
   - db
   - packages
 
 - name: Setup DIR | Install bacula-dir packages (pgsql)
-  package: name="{{ bacula_dir_packages_pgsql }}" state=present
+  package:
+    name: "{{ bacula_dir_packages_pgsql_official if bacula_use_official_repo | default(false) | bool else bacula_dir_packages_pgsql }}"
+    state: "{{ 'latest' if bacula_use_official_repo | default(false) | bool else 'present' }}"
   when: bacula_dir_db_engine == "pgsql"
   tags:
   - db
@@ -60,6 +64,7 @@
     mode: "{{ bacula_dir_filemode }}"
   notify: 'Reload bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Setup DIR | Manage configuration of bacula-dir (schedules)
@@ -71,6 +76,7 @@
     mode: "{{ bacula_dir_filemode }}"
   notify: 'Reload bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Manage configuration of bacula-dir (jobs)
@@ -83,6 +89,7 @@
     # validate: "{{ bacula_dir_binary }} -t -c %s"
   notify: 'Reload bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Setup DIR | Manage configuration of bacula-dir (main config)
@@ -95,6 +102,7 @@
     # validate: "{{ bacula_dir_binary }} -t -c %s"
   notify: 'Restart bacula-dir'
   tags:
+  - bacula-dir
   - templates
 
 - name: Setup DIR | Enable bacula-dir service
@@ -102,5 +110,18 @@
     name: "{{ bacula_dir_service_name }}"
     enabled: yes
   notify: 'Start bacula-dir'
+  tags:
+  - packages
+
+- name: Setup DIR | Flush handlers to start services
+  meta: flush_handlers
+
+- name: Setup DIR | Wait for bacula-dir to be running
+  service_facts:
+  register: service_state
+  until: service_state.ansible_facts.services[bacula_dir_service_name + '.service'].state == 'running'
+  retries: 5
+  delay: 2
+  when: bacula_restart_services
   tags:
   - packages

@@ -59,6 +59,59 @@
   tags:
   - db
 
+- name: Setup pgsql | Check if DB exists (pgsql)
+  postgresql_query:
+    query: "SELECT 1 FROM pg_database WHERE datname = '{{ bacula_dir_dbname }}'"
+    db: postgres
+  register: bacula_database_pgsql_check
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup pgsql | Check database encoding (pgsql)
+  postgresql_query:
+    query: "SELECT pg_encoding_to_char(encoding) as encoding FROM pg_database WHERE datname = '{{ bacula_dir_dbname }}'"
+    db: postgres
+  register: bacula_database_pgsql_encoding_check
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  - bacula_database_pgsql_check.rowcount > 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup pgsql | Drop DB if encoding is wrong (pgsql)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: absent
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgres) }}"
+  register: bacula_database_pgsql_dropped_encoding
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  - bacula_database_pgsql_check.rowcount > 0
+  - bacula_database_pgsql_encoding_check.query_result[0].encoding != 'SQL_ASCII'
+  tags:
+  - db
+
 - name: Setup pgsql | Create DB if not exists (pgsql)
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
@@ -79,8 +132,60 @@
   when:
   - bacula_dir_db_engine == "pgsql"
   - bacula_dir_db_adminuser|length == 0
-#  - bacula_database_pgsql_destroyed.changed
-#  - not bacula_database_pgsql_exists.changed
+  - (bacula_database_pgsql_check.rowcount == 0) or (bacula_database_pgsql_dropped_encoding.changed | default(false))
+  tags:
+  - db
+
+- name: Setup pgsql | Check if DB exists (pgsql via bacula_dir_db_adminuser)
+  postgresql_query:
+    query: "SELECT 1 FROM pg_database WHERE datname = '{{ bacula_dir_dbname }}'"
+    db: postgres
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_pgsql_check_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup pgsql | Check database encoding (pgsql via bacula_dir_db_adminuser)
+  postgresql_query:
+    query: "SELECT pg_encoding_to_char(encoding) as encoding FROM pg_database WHERE datname = '{{ bacula_dir_dbname }}'"
+    db: postgres
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_pgsql_encoding_check_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  - bacula_database_pgsql_check_admin.rowcount > 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup pgsql | Drop DB if encoding is wrong (pgsql via bacula_dir_db_adminuser)
+  postgresql_db:
+    name: "{{ bacula_dir_dbname }}"
+    state: absent
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+    maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgres) }}"
+  register: bacula_database_pgsql_dropped_encoding_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  - bacula_database_pgsql_check_admin.rowcount > 0
+  - bacula_database_pgsql_encoding_check_admin.query_result[0].encoding != 'SQL_ASCII'
   tags:
   - db
 
@@ -108,8 +213,7 @@
   when:
   - bacula_dir_db_engine == "pgsql"
   - bacula_dir_db_adminuser|length > 0
-#  - bacula_database_pgsql_destroyed.changed
-#  - not bacula_database_pgsql_exists.changed
+  - (bacula_database_pgsql_check_admin.rowcount == 0) or (bacula_database_pgsql_dropped_encoding_admin.changed | default(false))
   tags:
   - db
 
@@ -180,7 +284,41 @@
   tags:
   - db
 
-- name: Setup pgsql | Create Tables in DB (pgsql)
+- name: Setup pgsql | Check if tables exist (pgsql)
+  postgresql_query:
+    query: "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'version'"
+    db: "{{ bacula_dir_dbname }}"
+  register: bacula_database_pgsql_tables_check
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql) - Official repo via shell script
+  command: "{{ bacula_dir_dbimport_pgsql_file }}"
+  environment:
+    db_name: "{{ bacula_dir_dbname }}"
+  become: True
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  register: bacula_pgsql_tables_created
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length == 0
+  - bacula_use_official_repo | default(false) | bool
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding.changed | default(false)) or (bacula_database_pgsql_tables_check.rowcount == 0)
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql) - Debian repo via SQL file
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
     target: "{{ bacula_dir_dbimport_pgsql_file }}"
@@ -191,14 +329,50 @@
   become_user: postgres
   vars:
     ansible_ssh_pipelining: true
+  register: bacula_pgsql_tables_created
   when:
   - bacula_dir_db_engine == "pgsql"
-  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
   - bacula_dir_db_adminuser|length == 0
+  - not (bacula_use_official_repo | default(false) | bool)
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding.changed | default(false)) or (bacula_database_pgsql_tables_check.rowcount == 0)
   tags:
   - db
 
-- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser)
+- name: Setup pgsql | Check if tables exist (pgsql via bacula_dir_db_adminuser)
+  postgresql_query:
+    query: "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'version'"
+    db: "{{ bacula_dir_dbname }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_port: "{{ bacula_dir_dbport | default(omit) }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_pgsql_tables_check_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser) - Official repo via shell script
+  command: "{{ bacula_dir_dbimport_pgsql_file }}"
+  environment:
+    db_name: "{{ bacula_dir_dbname }}"
+    PGHOST: "{{ bacula_dir_dbaddress | default('localhost') }}"
+    PGPORT: "{{ bacula_dir_dbport | default('5432') }}"
+    PGUSER: "{{ bacula_dir_db_adminuser }}"
+    PGPASSWORD: "{{ bacula_dir_db_adminpass }}"
+  register: bacula_pgsql_tables_created_admin
+  when:
+  - bacula_dir_db_engine == "pgsql"
+  - bacula_dir_db_adminuser|length > 0
+  - bacula_use_official_repo | default(false) | bool
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding_admin.changed | default(false)) or (bacula_database_pgsql_tables_check_admin.rowcount == 0)
+  tags:
+  - db
+
+- name: Setup pgsql | Create Tables in DB (pgsql via bacula_dir_db_adminuser) - Debian repo via SQL file
   postgresql_db:
     name: "{{ bacula_dir_dbname }}"
     target: "{{ bacula_dir_dbimport_pgsql_file }}"
@@ -209,10 +383,12 @@
 #    login_unix_socket: "{{ bacula_dir_pgsql_db_name_unix_socket | default(postgresql_unix_socket_directories[0]) }}"
     maintenance_db: "{{ bacula_dir_pgsql_maintenance_db_name | default(postgresql_user) }}"
     state: "restore"
+  register: bacula_pgsql_tables_created_admin
   when:
   - bacula_dir_db_engine == "pgsql"
-  - bacula_database_pgsql_destroyed.changed or bacula_database_pgsql_exists.changed
   - bacula_dir_db_adminuser|length > 0
+  - not (bacula_use_official_repo | default(false) | bool)
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding_admin.changed | default(false)) or (bacula_database_pgsql_tables_check_admin.rowcount == 0)
   tags:
   - db
 
@@ -255,6 +431,7 @@
 #    port: "{{ bacula_dir_dbport }}"
   when:
   - bacula_dir_db_adminuser|length == 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding.changed | default(false)) or (bacula_pgsql_tables_created.changed | default(false))
   become: True
   become_user: postgres
   vars:
@@ -275,6 +452,7 @@
     login_user: "{{ bacula_dir_db_adminuser }}"
   when:
   - bacula_dir_db_adminuser|length > 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding_admin.changed | default(false)) or (bacula_pgsql_tables_created_admin.changed | default(false))
 
 - name: Setup pgsql | Grant rights to sequences on those tables (pgsql)
   postgresql_privs:
@@ -288,6 +466,7 @@
     port: "{{ bacula_dir_dbport }}"
   when:
   - bacula_dir_db_adminuser|length == 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding.changed | default(false)) or (bacula_pgsql_tables_created.changed | default(false))
   become: True
   become_user: postgres
   vars:
@@ -308,4 +487,5 @@
     login_user: "{{ bacula_dir_db_adminuser }}"
   when:
   - bacula_dir_db_adminuser|length > 0
+  - (bacula_database_pgsql_destroyed.changed | default(false)) or (bacula_database_pgsql_exists.changed | default(false)) or (bacula_database_pgsql_dropped_encoding_admin.changed | default(false)) or (bacula_pgsql_tables_created_admin.changed | default(false))
 

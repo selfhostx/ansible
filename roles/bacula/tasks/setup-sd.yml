@@ -1,7 +1,10 @@
 # Install and configure Bacula-sd
 ---
 - name: Setup SD | Install bacula-sd package
-  package: name="{{ bacula_sd_packages }}" state=present
+  package:
+    name: "{{ bacula_sd_packages_official if bacula_use_official_repo | default(false) | bool else bacula_sd_packages }}"
+    state: "{{ 'latest' if bacula_use_official_repo | default(false) | bool else 'present' }}"
+  when: not (bacula_use_official_repo | default(false) | bool) or (bacula_sd_packages_official | length > 0)
   tags:
   - packages
 
@@ -14,6 +17,9 @@
     mode: "{{ bacula_sd_filemode }}"
     validate: "{{ bacula_sd_binary }} -t -c %s"
   notify: 'Restart bacula-sd'
+  tags:
+    - bacula-sd
+    - templates
 
 - name: Setup SD | Create archive device for SD
   file:

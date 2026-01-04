@@ -1,0 +1,103 @@
+# Cleanup old Debian Bacula packages before installing from official repository
+# This must run BEFORE any package installations to avoid dependency conflicts
+---
+- name: Cleanup | Check if migration to official repo already completed
+  ansible.builtin.stat:
+    path: /etc/bacula/.migrated_to_official_repo
+  register: bacula_migration_marker
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+  tags:
+    - packages
+    - bacula-cleanup
+
+- name: Cleanup | Unhold any held Debian Bacula packages before removal
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: install
+  loop:
+    - bacula-bscan
+    - bacula-director
+    - bacula-director-mysql
+    - bacula-director-pgsql
+    - bacula-common-mysql
+    - bacula-common-pgsql
+    - bacula-sd
+    - bacula-fd
+    - bacula-console
+    - bacula-common
+  failed_when: false  # Don't fail if package doesn't exist
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+    - not bacula_migration_marker.stat.exists
+  tags:
+    - packages
+    - bacula-cleanup
+
+- name: Cleanup | Remove all old Debian Bacula packages if using official repository
+  ansible.builtin.apt:
+    name:
+      # Director packages
+      - bacula-bscan
+      - bacula-director
+      - bacula-director-mysql
+      - bacula-director-pgsql
+      - bacula-common-mysql
+      - bacula-common-pgsql
+      # Storage Daemon
+      - bacula-sd
+      # File Daemon
+      - bacula-fd
+      # Console
+      - bacula-console
+      # Common (remove last to avoid dependency issues)
+      - bacula-common
+    state: absent
+    purge: true  # Purge to remove config files completely
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+    - not bacula_migration_marker.stat.exists
+  register: bacula_cleanup_executed
+  tags:
+    - packages
+    - bacula-cleanup
+
+- name: Cleanup | Remove old config files and create migration README (only if packages were removed)
+  include_tasks: cleanup-old-config-files.yml
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+    - bacula_cleanup_executed is changed
+  tags:
+    - packages
+    - bacula-cleanup
+    - bacula-config
+
+- name: Cleanup | Ensure /etc/bacula directory exists for marker file
+  ansible.builtin.file:
+    path: /etc/bacula
+    state: directory
+    mode: '0755'
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+    - not bacula_migration_marker.stat.exists
+  tags:
+    - packages
+    - bacula-cleanup
+
+- name: Cleanup | Create migration marker file
+  ansible.builtin.file:
+    path: /etc/bacula/.migrated_to_official_repo
+    state: touch
+    mode: '0644'
+  when:
+    - bacula_use_official_repo | default(false) | bool
+    - ansible_facts['os_family'] == 'Debian'
+    - not bacula_migration_marker.stat.exists
+  tags:
+    - packages
+    - bacula-cleanup

@@ -32,7 +32,39 @@
   tags:
   - db
 
-- name: Setup mysql | Create Tables in DB (mysql)
+- name: Setup mysql | Check if tables exist (mysql)
+  mysql_query:
+    query: "SELECT 1 FROM information_schema.tables WHERE table_schema = '{{ bacula_dir_dbname }}' AND table_name = 'Version'"
+    login_db: "{{ bacula_dir_dbname }}"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+    login_password: "{{ bacula_dir_db_adminpass }}"
+    login_user: "{{ bacula_dir_db_adminuser }}"
+  register: bacula_database_mysql_tables_check
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length > 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup mysql | Create Tables in DB (mysql) - Official repo via shell script
+  command: "{{ bacula_dir_dbimport_mysql_file }}"
+  environment:
+    db_name: "{{ bacula_dir_dbname }}"
+    db_user: "{{ bacula_dir_db_adminuser }}"
+    db_password: "{{ bacula_dir_db_adminpass }}"
+  register: bacula_mysql_tables_created
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length > 0
+  - bacula_use_official_repo | default(false) | bool
+  - (bacula_database_mysql_exists.changed | default(false)) or (bacula_database_mysql_tables_check.rowcount[0] == 0)
+  tags:
+  - db
+
+- name: Setup mysql | Create Tables in DB (mysql) - Debian repo via SQL file
   mysql_db:
     name: "{{ bacula_dir_dbname }}"
     state: import
@@ -41,24 +73,56 @@
     login_password: "{{ bacula_dir_db_adminpass }}"
     login_user: "{{ bacula_dir_db_adminuser }}"
     target: "{{ bacula_dir_dbimport_mysql_file }}"
+  register: bacula_mysql_tables_created
   when:
   - bacula_dir_db_engine == "mysql"
-  - bacula_database_mysql_exists.changed
   - bacula_dir_db_adminuser|length > 0
+  - not (bacula_use_official_repo | default(false) | bool)
+  - (bacula_database_mysql_exists.changed | default(false)) or (bacula_database_mysql_tables_check.rowcount[0] == 0)
   tags:
   - db
 
-- name: Setup mysql | Create Tables in DB (mysql, via .my.cnf)
+- name: Setup mysql | Check if tables exist (mysql, via .my.cnf)
+  mysql_query:
+    query: "SELECT 1 FROM information_schema.tables WHERE table_schema = '{{ bacula_dir_dbname }}' AND table_name = 'Version'"
+    login_db: "{{ bacula_dir_dbname }}"
+    login_port: "{{ bacula_dir_dbport }}"
+    login_host: "{{ bacula_dir_dbaddress }}"
+  register: bacula_database_mysql_tables_check_mycnf
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length == 0
+  failed_when: false
+  changed_when: false
+  tags:
+  - db
+
+- name: Setup mysql | Create Tables in DB (mysql, via .my.cnf) - Official repo via shell script
+  command: "{{ bacula_dir_dbimport_mysql_file }}"
+  environment:
+    db_name: "{{ bacula_dir_dbname }}"
+  register: bacula_mysql_tables_created_mycnf
+  when:
+  - bacula_dir_db_engine == "mysql"
+  - bacula_dir_db_adminuser|length == 0
+  - bacula_use_official_repo | default(false) | bool
+  - (bacula_database_mysql_exists.changed | default(false)) or (bacula_database_mysql_tables_check_mycnf.rowcount[0] == 0)
+  tags:
+  - db
+
+- name: Setup mysql | Create Tables in DB (mysql, via .my.cnf) - Debian repo via SQL file
   mysql_db:
     name: "{{ bacula_dir_dbname }}"
     state: import
     login_port: "{{ bacula_dir_dbport }}"
     login_host: "{{ bacula_dir_dbaddress }}"
     target: "{{ bacula_dir_dbimport_mysql_file }}"
+  register: bacula_mysql_tables_created_mycnf
   when:
   - bacula_dir_db_engine == "mysql"
-  - bacula_database_mysql_exists.changed
   - bacula_dir_db_adminuser|length == 0
+  - not (bacula_use_official_repo | default(false) | bool)
+  - (bacula_database_mysql_exists.changed | default(false)) or (bacula_database_mysql_tables_check_mycnf.rowcount[0] == 0)
   tags:
   - db
 

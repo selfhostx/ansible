@@ -10,18 +10,42 @@ bacula_system_service_file: "/etc/services"
 bacula_workingdirectory: "/var/lib/bacula"
 bacula_piddirectory: "/var/run/bacula"
 bacula_plugindirectory: "/usr/lib/bacula"
+bacula_scripts_dir: "/etc/bacula/scripts"
 bacula_fd_package_name: "bacula-fd"
+bacula_fd_packages:
+- bacula-fd
+bacula_fd_packages_official:
+- bacula-client  # bacula-common is pulled as dependency from same repo
 bacula_fd_service_name: "bacula-fd"
 bacula_fd_binary: "/usr/sbin/bacula-fd"
+bacula_fd_binary_official: "/opt/bacula/bin/bacula-fd"
 bacula_dir_binary: "/usr/sbin/bacula-dir"
+bacula_dir_binary_official: "/opt/bacula/bin/bacula-dir"
 bacula_dir_service_name: "bacula-director"
+bacula_dir_service_name_official: "bacula-dir"
 bacula_sd_binary: "/usr/sbin/bacula-sd"
+bacula_sd_binary_official: "/opt/bacula/bin/bacula-sd"
 bacula_sd_service_name: "bacula-sd"
+bacula_sd_service_name_official: "bacula-sd"
 bacula_dir_queryfile: /etc/bacula/scripts/query.sql
 bacula_dir_dbimport_mysql_file: "/usr/share/dbconfig-common/data/bacula-director-mysql/install/mysql"
 bacula_dir_dbimport_pgsql_file: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install/pgsql"
 bacula_dir_dbimport_pgsql_dbsettings: "/usr/share/dbconfig-common/data/bacula-director-pgsql/install-dbadmin/pgsql"
+# Official Bacula repository paths
+bacula_config_dir_official: "/opt/bacula/etc"
+bacula_console_config_official: "{{ bacula_config_dir_official }}/bconsole.conf"
+bacula_dir_config_official: "{{ bacula_config_dir_official }}/bacula-dir.conf"
+bacula_sd_config_official: "{{ bacula_config_dir_official }}/bacula-sd.conf"
+bacula_dir_include_config_dir_official: "{{ bacula_config_dir_official }}/conf.d"
+bacula_fd_auto_psk_file_filename_official: "{{ bacula_config_dir_official }}/bacula_fd_psk_auto.secret"
+bacula_workingdirectory_official: "/opt/bacula/working"
+bacula_piddirectory_official: "/opt/bacula/working"
+bacula_plugindirectory_official: "/opt/bacula/plugins"
+bacula_scripts_dir_official: "/opt/bacula/scripts"
+bacula_dir_dbimport_mysql_file_official: "/opt/bacula/scripts/make_mysql_tables"
+bacula_dir_dbimport_pgsql_file_official: "/opt/bacula/scripts/make_postgresql_tables"
 
+# Debian repository package names
 bacula_dir_packages_mysql:
 - bacula-bscan
 - bacula-director
@@ -34,3 +58,17 @@ bacula_console_packages:
 - bacula-console
 bacula_sd_packages:
 - bacula-sd
+
+# Official Bacula repository package names
+# Note: Official repo uses different package names than Debian
+# Note: bacula-postgresql and bacula-mysql include BOTH director AND storage daemon
+# Note: bacula-common is automatically pulled in as a dependency, do NOT list it explicitly
+bacula_dir_packages_mysql_official:
+- bacula-mysql
+bacula_dir_packages_pgsql_official:
+- bacula-postgresql
+bacula_console_packages_official:
+- bacula-console
+# Storage daemon is included in bacula-postgresql/bacula-mysql packages
+# No separate SD package in official repository
+bacula_sd_packages_official: []

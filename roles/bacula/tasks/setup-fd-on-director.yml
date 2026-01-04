@@ -1,7 +1,11 @@
 # Install and configure Bacula-fd (needed for initial config-validation)
 ---
 - name: Setup FD on director | Install bacula-fd package
-  package: name="{{ bacula_fd_package_name }}" state=present
+  package:
+    name: "{{ bacula_fd_packages_official if bacula_use_official_repo | default(false) | bool else bacula_fd_packages }}"
+    state: "{{ 'latest' if bacula_use_official_repo | default(false) | bool else 'present' }}"
+  tags:
+    - packages
 
 - name: Setup FD on director | Manage configuration of bacula-fd file (*nix)
   template:
@@ -20,9 +24,6 @@
     owner: "{{ bacula_dir_user }}"
     group: "{{ bacula_dir_group }}"
     mode: "{{ bacula_dir_filemode }}"
-  when:
-  - bacula_fd_fileset_includes is defined
-  - bacula_fd_fileset_includes|length > 0
 
 - name: Setup FD on director | Manage bacula-fd service
   service:

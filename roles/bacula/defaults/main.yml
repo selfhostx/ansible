@@ -1,9 +1,46 @@
 ---
 # defaults file for ansible-role-bacula
 
+# Bacula official repository configuration (for Bacula 10+)
+# Set to true to use official Bacula repositories instead of distribution packages
+bacula_use_official_repo: false
+
+# Registration access key from https://www.bacula.org/bacula-binary-package-download/
+# REQUIRED when bacula_use_official_repo is true
+bacula_repo_access_key: ""
+
+# Bacula version to install from official repository
+bacula_version: "13.0.4"
+
+# GPG signing key for Bacula packages
+bacula_gpg_key_url: "https://www.bacula.org/downloads/Bacula-4096-Distribution-Verification-key.asc"
+
+# Supported distributions for official repository (latest 2 versions only)
+# Debian: bookworm (12), trixie (13 - when released)
+# Ubuntu: jammy (22.04), noble (24.04)
+bacula_supported_distributions:
+  - bookworm
+  - trixie
+  - jammy
+  - noble
+
+# Distribution repository mapping
+# Some distributions may not have native packages in Bacula repo yet
+# Map them to compatible older releases
+bacula_repo_distribution_map:
+  bookworm: bookworm
+  trixie: bookworm  # trixie not yet in Bacula repo, use bookworm
+  jammy: jammy
+  noble: jammy  # noble not yet in Bacula repo, use jammy packages
+
 # will be overriden later (see register-facts.yml):
-bacula_fd_fqdn: "{{ ansible_fqdn }}"
-bacula_sd_fqdn: "{{ ansible_fqdn }}"
+bacula_fd_fqdn: "{{ ansible_facts['fqdn'] }}"
+bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
+
+# FD listen address: IP/interface the FD binds to for incoming connections
+# Default: 0.0.0.0 (listen on all interfaces)
+# Note: This is different from bacula_fd_connect_address (used by Director to connect)
+bacula_fd_listen_address: "0.0.0.0"
 
 bacula_dir_name: "bacula-dir"
 bacula_mon_name: "bacula-mon"
@@ -17,6 +54,17 @@ bacula_dir_restore_path: "/var/bacula-restores"
 # you may override the values to a real@domain.tld address
 bacula_dir_email_admin: root
 bacula_dir_email_operator: root
+
+# Mail command configuration
+# Options: "bsmtp" (Bacula's built-in SMTP) or "mail" (system mail command)
+bacula_mail_command_type: "mail"
+# Mail command binary paths
+bacula_mail_command_bsmtp: "/usr/sbin/bsmtp"  # For Debian packages
+bacula_mail_command_bsmtp_official: "/opt/bacula/bin/bsmtp"  # For official repo
+bacula_mail_command_mail: "/usr/bin/mail"  # System mail command
+# Sender address for system mail command (mail -r option)
+# If not set, defaults to user running bacula-dir (typically 'bacula')
+bacula_mail_from: "root"
 
 # decide what component is needed.
 # fd is default, override via host_vars
@@ -180,6 +228,13 @@ bacula_fd_fileset_name: "Standard"
 
 # protect existing filesets?
 bacula_fd_fileset_overwrite: True
+
+# Remove fileset configuration when removing client with --tags remove-client
+# Set to true to also remove the fileset config (only if not shared with other clients)
+# Note: --tags disable-client sets Enabled=no without removing files
+#       --tags remove-client removes the config files completely
+bacula_fd_remove_fileset: False
+
 bacula_fd_fileset_signature: "SHA1"
 bacula_fd_fileset_compression: "GZIP"
 bacula_fd_fileset_verify: "pins1"

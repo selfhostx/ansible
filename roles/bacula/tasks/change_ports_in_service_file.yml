@@ -14,7 +14,7 @@
   fail: msg='Setting for Windows not supported at the moment'
   ignore_errors: yes
   when:
-  - ansible_os_family == "Windows"
+  - ansible_facts['os_family'] == "Windows"
 
 - name: Update dir port in services file (tcp)
   lineinfile:
@@ -27,7 +27,7 @@
   notify: 'Restart bacula-dir'
   when:
   - bacula_dir_port != bacula_dir_port_default
-  - ansible_os_family != "Windows"
+  - ansible_facts['os_family'] != "Windows"
 
 - name: Update dir port in services file (udp)
   lineinfile:
@@ -40,7 +40,7 @@
   notify: 'Restart bacula-dir'
   when:
   - bacula_dir_port != bacula_dir_port_default
-  - ansible_os_family != "Windows"
+  - ansible_facts['os_family'] != "Windows"
 
 - name: Update fd port in services file (tcp)
   lineinfile:
@@ -53,7 +53,7 @@
   notify: 'Restart bacula-fd'
   when:
   - bacula_fd_port != bacula_fd_port_default
-  - ansible_os_family != "Windows"
+  - ansible_facts['os_family'] != "Windows"
 
 - name: Update fd port in services file (udp)
   lineinfile:
@@ -66,7 +66,7 @@
   notify: 'Restart bacula-fd'
   when:
   - bacula_fd_port != bacula_fd_port_default
-  - ansible_os_family != "Windows"
+  - ansible_facts['os_family'] != "Windows"
 
 - name: Update sd port in services file (tcp)
   lineinfile:
@@ -79,7 +79,7 @@
   notify: 'Restart bacula-sd'
   when:
   - bacula_sd_port != bacula_sd_port_default
-  - ansible_os_family != "Windows"
+  - ansible_facts['os_family'] != "Windows"
 
 - name: Update sd port in services file (udp)
   lineinfile:
@@ -92,4 +92,4 @@
   notify: 'Restart bacula-sd'
   when:
   - bacula_sd_port != bacula_sd_port_default
-  - ansible_os_family != "Windows"
+  - ansible_facts['os_family'] != "Windows"

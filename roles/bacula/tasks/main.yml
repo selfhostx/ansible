@@ -1,17 +1,32 @@
 ---
 - name: Include OS specific variables.
-  include_vars: "{{ ansible_os_family }}.yml"
+  include_vars: "{{ ansible_facts['os_family'] }}.yml"
+  tags: always
 
 - name: Setup facts
   include_tasks: "register-facts.yml"
+  tags: always
 
 - name: Change Bacula Definition (when Ports have changed)
   include_tasks: "change_ports_in_service_file.yml"
   when:
   - bacula_fd_port != bacula_fd_port_default or bacula_dir_port != bacula_dir_port_default or bacula_sd_port != bacula_sd_port_default
 
+- name: Setup official Bacula repository
+  include_tasks: "setup-repository.yml"
+  when: bacula_use_official_repo|bool
+  tags:
+    - bacula-repository
+
 - name: Update package cache
   include_tasks: "update-package-cache.yml"
+
+- name: Cleanup old Debian packages (if using official repo)
+  include_tasks: "cleanup-debian-packages.yml"
+  when: bacula_use_official_repo|bool
+  tags:
+    - bacula-cleanup
+    - packages
 
 - name: Setup DIR
   include_tasks: "setup-director.yml"
@@ -36,3 +51,13 @@
   when: bacula_fd_role|bool
   tags:
     - bacula-fd
+    - disable-client
+    - remove-client
+
+- name: Ensure correct storage and working directory permissions
+  include_tasks: "setup-storage-permissions.yml"
+  tags:
+    - bacula-sd
+    - bacula-dir
+    - bacula-fd
+    - bacula-permissions

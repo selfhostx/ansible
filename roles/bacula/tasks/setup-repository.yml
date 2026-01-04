@@ -1,0 +1,156 @@
+---
+# Setup official Bacula repository with GPG key verification
+# This file configures repositories for Bacula 10+ installations
+
+- name: Validate required variables when using official repository
+  ansible.builtin.assert:
+    that:
+      - bacula_repo_access_key is defined
+      - bacula_repo_access_key | length > 0
+      - bacula_version is defined
+      - bacula_version | length > 0
+    fail_msg: |
+      ERROR: Official Bacula repository requires:
+      - bacula_repo_access_key: Get your free access key from https://www.bacula.org/bacula-binary-package-download/
+      - bacula_version: Specify Bacula version (e.g., "13.0.4")
+    success_msg: "Repository configuration validated"
+  tags:
+    - bacula-repository
+    - bacula-validation
+
+- name: Check if distribution is supported for official repository
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution_release'] in bacula_supported_distributions
+    fail_msg: |
+      ERROR: Distribution '{{ ansible_facts['distribution_release'] }}' is not supported for official Bacula repository.
+      Supported distributions: {{ bacula_supported_distributions | join(', ') }}
+
+      This role is limited to the latest two distribution versions:
+      - Debian: bookworm (12), trixie (13)
+      - Ubuntu: jammy (22.04), noble (24.04)
+
+      For older distributions, set bacula_use_official_repo: false to use distribution packages.
+    success_msg: "Distribution '{{ ansible_facts['distribution_release'] }}' is supported (using {{ bacula_repo_distribution_map[ansible_facts['distribution_release']] }} packages)"
+  tags:
+    - bacula-repository
+    - bacula-validation
+
+# Debian/Ubuntu Repository Setup
+- name: Setup Bacula repository for Debian/Ubuntu
+  when: ansible_facts['os_family'] == 'Debian'
+  tags:
+    - bacula-repository
+  block:
+    - name: Ensure keyrings directory exists
+      ansible.builtin.file:
+        path: /usr/share/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download and install Bacula GPG key (modern method)
+      ansible.builtin.shell: |
+        curl -fsSL {{ bacula_gpg_key_url }} | gpg --dearmor > /usr/share/keyrings/bacula-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/bacula-archive-keyring.gpg
+        executable: /bin/bash
+      register: gpg_key_download
+      failed_when: gpg_key_download.rc != 0
+
+    - name: Verify GPG key was installed
+      ansible.builtin.stat:
+        path: /usr/share/keyrings/bacula-archive-keyring.gpg
+      register: bacula_gpg_key_stat
+      failed_when: not bacula_gpg_key_stat.stat.exists
+
+    - name: Configure Bacula official repository
+      ansible.builtin.template:
+        src: bacula-community.list.j2
+        dest: /etc/apt/sources.list.d/bacula-community.list
+        owner: root
+        group: root
+        mode: '0644'
+      register: bacula_repo_configured
+
+    - name: Remove old repository configurations if they exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/sources.list.d/bacula.list
+        - /etc/apt/sources.list.d/bacula-org.list
+      when: bacula_repo_configured is changed
+
+    - name: Configure apt preferences to prioritize Bacula official repository
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/bacula-official
+        mode: '0644'
+        content: |
+          # Prefer Bacula official repository over distribution packages
+          # This ensures bacula-common and other packages come from bacula.org
+          Package: bacula-* libbaccats*
+          Pin: origin www.bacula.org
+          Pin-Priority: 1100
+
+          Package: bacula-* libbaccats*
+          Pin: release o=Ubuntu
+          Pin-Priority: 100
+
+          Package: bacula-* libbaccats*
+          Pin: release o=Debian
+          Pin-Priority: 100
+      tags:
+        - bacula-repository
+
+    - name: Update apt cache after repository change
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 0
+      when: bacula_repo_configured is changed
+
+# RHEL/CentOS Repository Setup
+- name: Setup Bacula repository for RHEL/CentOS
+  when: ansible_facts['os_family'] == 'RedHat'
+  tags:
+    - bacula-repository
+  block:
+    - name: Import Bacula GPG key for RHEL/CentOS
+      ansible.builtin.rpm_key:
+        state: present
+        key: "{{ bacula_gpg_key_url }}"
+
+    - name: Configure Bacula official repository for RHEL/CentOS
+      ansible.builtin.template:
+        src: bacula-community.repo.j2
+        dest: /etc/yum.repos.d/bacula-community.repo
+        owner: root
+        group: root
+        mode: '0644'
+      register: bacula_repo_configured_rhel
+
+    - name: Remove old repository configurations if they exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/yum.repos.d/bacula.repo
+        - /etc/yum.repos.d/bacula-org.repo
+      when: bacula_repo_configured_rhel is changed
+
+    - name: Clean yum cache after repository change
+      ansible.builtin.command: yum clean all
+      when: bacula_repo_configured_rhel is changed
+      changed_when: true
+
+- name: Display repository setup status
+  ansible.builtin.debug:
+    msg: |
+      Bacula official repository configured successfully:
+      - Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_release'] }}
+      - Bacula version: {{ bacula_version }}
+      - Repository: https://www.bacula.org/packages/.../
+
+      This configuration will work for both new installations and upgrades.
+      Existing Bacula installations will be upgraded to version {{ bacula_version }}.
+  tags:
+    - bacula-repository

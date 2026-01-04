@@ -1,14 +1,14 @@
 ---
 - name: update the package cache (Debian)
   apt: update_cache=yes
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
   changed_when: false
   tags:
   - packages
 
 - name: update the package cache (Redhat)
   yum: update_cache=yes
-  when: ansible_os_family == "Redhat"
+  when: ansible_facts['os_family'] == "Redhat"
   changed_when: false
   tags:
   - packages
