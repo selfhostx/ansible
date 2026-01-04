@@ -31,7 +31,7 @@
       # Common (remove last to avoid dependency issues)
       - bacula-common
     state: absent
-    purge: false
+    purge: true  # Purge to remove config files completely
   when:
     - bacula_use_official_repo | default(false) | bool
     - ansible_facts['os_family'] == 'Debian'

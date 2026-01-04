@@ -81,6 +81,27 @@
         - /etc/apt/sources.list.d/bacula-org.list
       when: bacula_repo_configured is changed
 
+    - name: Configure apt preferences to prioritize Bacula official repository
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/bacula-official
+        mode: '0644'
+        content: |
+          # Prefer Bacula official repository over distribution packages
+          # This ensures bacula-common and other packages come from bacula.org
+          Package: bacula-* libbaccats*
+          Pin: origin www.bacula.org
+          Pin-Priority: 1100
+
+          Package: bacula-* libbaccats*
+          Pin: release o=Ubuntu
+          Pin-Priority: 100
+
+          Package: bacula-* libbaccats*
+          Pin: release o=Debian
+          Pin-Priority: 100
+      tags:
+        - bacula-repository
+
     - name: Update apt cache after repository change
       ansible.builtin.apt:
         update_cache: true

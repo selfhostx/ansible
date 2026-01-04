@@ -15,8 +15,7 @@ bacula_fd_package_name: "bacula-fd"
 bacula_fd_packages:
 - bacula-fd
 bacula_fd_packages_official:
-- bacula-client
-- bacula-common
+- bacula-client  # bacula-common is pulled as dependency from same repo
 bacula_fd_service_name: "bacula-fd"
 bacula_fd_binary: "/usr/sbin/bacula-fd"
 bacula_fd_binary_official: "/opt/bacula/bin/bacula-fd"
@@ -63,15 +62,13 @@ bacula_sd_packages:
 # Official Bacula repository package names
 # Note: Official repo uses different package names than Debian
 # Note: bacula-postgresql and bacula-mysql include BOTH director AND storage daemon
+# Note: bacula-common is automatically pulled in as a dependency, do NOT list it explicitly
 bacula_dir_packages_mysql_official:
 - bacula-mysql
-- bacula-common
 bacula_dir_packages_pgsql_official:
 - bacula-postgresql
-- bacula-common
 bacula_console_packages_official:
 - bacula-console
-- bacula-common
 # Storage daemon is included in bacula-postgresql/bacula-mysql packages
 # No separate SD package in official repository
 bacula_sd_packages_official: []
