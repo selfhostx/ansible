@@ -1,29 +1,73 @@
 # Install and configure Bacula-fd
 ---
+- name: Disable FD | Check if client configuration exists on director
+  ansible.builtin.stat:
+    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  register: bacula_client_config_stat
+  tags:
+    - never
+    - disable-client
+
+- name: Disable FD | Warn if client configuration does not exist
+  ansible.builtin.debug:
+    msg: |
+      WARNING: Client configuration does not exist on director {{ bacula_dir_fqdn }}
+      Expected file: {{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf
+
+      This client was never configured on this director - nothing to disable.
+  when: not bacula_client_config_stat.stat.exists
+  tags:
+    - never
+    - disable-client
+
 - name: Disable FD | Mark client as disabled in director configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
     regexp: '^\s*Enabled\s*='
     line: '  Enabled = no'
     insertafter: 'Client {'
   delegate_to: "{{ bacula_dir_fqdn }}"
   notify: 'Reload bacula-dir'
+  when: bacula_client_config_stat.stat.exists
   tags:
     - never
     - disable-client
 
+- name: Remove FD | Check if client configuration exists on director
+  ansible.builtin.stat:
+    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+  delegate_to: "{{ bacula_dir_fqdn }}"
+  register: bacula_remove_client_config_stat
+  tags:
+    - never
+    - remove-client
+
+- name: Remove FD | Warn if client configuration does not exist
+  ansible.builtin.debug:
+    msg: |
+      WARNING: Client configuration does not exist on director {{ bacula_dir_fqdn }}
+      Expected file: {{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf
+
+      This client was never configured on this director - nothing to remove.
+  when: not bacula_remove_client_config_stat.stat.exists
+  tags:
+    - never
+    - remove-client
+
 - name: Remove FD | Remove client configuration from director
-  file:
+  ansible.builtin.file:
     path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
     state: absent
   delegate_to: "{{ bacula_dir_fqdn }}"
   notify: 'Reload bacula-dir'
+  when: bacula_remove_client_config_stat.stat.exists
   tags:
     - never
     - remove-client
 
 - name: Remove FD | Remove fileset configuration from director
-  file:
+  ansible.builtin.file:
     path: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
     state: absent
   delegate_to: "{{ bacula_dir_fqdn }}"
