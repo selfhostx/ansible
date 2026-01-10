@@ -42,6 +42,14 @@ bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
 # Note: This is different from bacula_fd_connect_address (used by Director to connect)
 bacula_fd_listen_address: "0.0.0.0"
 
+# Director listen address: IP/interface the Director binds to for incoming connections
+# Default: 0.0.0.0 (listen on all interfaces for Console connections)
+bacula_dir_listen_address: "0.0.0.0"
+
+# Storage Daemon listen address: IP/interface the SD binds to for incoming connections
+# Default: 0.0.0.0 (listen on all interfaces for FD/Director connections)
+bacula_sd_listen_address: "0.0.0.0"
+
 bacula_dir_name: "bacula-dir"
 bacula_mon_name: "bacula-mon"
 bacula_sd_name: "bacula-sd"
