@@ -442,6 +442,61 @@ set source IP (default: the kernel will choose the best address according to the
 bacula_fd_source_address: "IP_or_FQDN"
 ```
 
+### Mixed Network Setups (LAN/WAN/VPN)
+
+For environments with multiple network paths (LAN, WireGuard VPN, public internet), you may need to separate:
+- **Connection addresses**: What Bacula clients/director/SD use to connect to each other
+- **SSH delegation addresses**: What Ansible uses to reach the director/SD for configuration changes
+
+**Use case example:** Director runs on a VM with both LAN and public IPs. Internal clients should use the LAN IP for backups, but your Ansible control machine connects via WireGuard.
+
+**Solution:** Use the SSH delegation variables:
+
+```yaml
+# Group vars for LAN clients
+bacula_dir_fqdn: "10.30.0.25"                    # Clients connect via LAN IP
+bacula_sd_fqdn: "10.30.0.25"                     # Storage Daemon on same LAN IP
+bacula_dir_fqdn_ssh: "bacdir-wg.example.com"     # Ansible SSH via WireGuard
+bacula_sd_fqdn_ssh: "bacdir-wg.example.com"      # Ansible SSH via WireGuard
+```
+
+**Available variables:**
+- `bacula_dir_fqdn_ssh` - Ansible SSH target for director (defaults to `bacula_dir_fqdn`)
+- `bacula_sd_fqdn_ssh` - Ansible SSH target for storage daemon (defaults to `bacula_sd_fqdn`)
+
+**Example inventory structure:**
+```yaml
+all:
+  children:
+    bacula_clients:
+      children:
+        bacula_clients_lan:        # Internal VMs/LXC
+          hosts:
+            internal-vm1.example.com:
+            internal-vm2.example.com:
+          vars:
+            bacula_dir_fqdn: "10.30.0.25"
+            bacula_sd_fqdn: "10.30.0.25"
+            bacula_dir_fqdn_ssh: "bacdir-wg.example.com"
+            bacula_sd_fqdn_ssh: "bacdir-wg.example.com"
+
+        bacula_clients_wireguard:  # VPN clients
+          hosts:
+            remote-server1.example.com:
+          vars:
+            bacula_dir_fqdn: "10.20.30.1"  # WireGuard IP
+            bacula_sd_fqdn: "10.20.30.1"
+            bacula_dir_fqdn_ssh: "bacdir-wg.example.com"
+
+        bacula_clients_public:     # External clients
+          hosts:
+            external-server.example.com:
+          vars:
+            bacula_dir_fqdn: "bacdir.example.com"  # Public FQDN
+            bacula_sd_fqdn: "bacdir.example.com"
+            # No _ssh override needed - same address works
+```
+
 specific schedule for a host:
 - set a (valid!) name for var bacula_fd_schedule (i.e. in host_vars/$hostname.yml with content "bacula_fd_schedule: MoreFrequentSchedule").
 

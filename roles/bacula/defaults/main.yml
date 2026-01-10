@@ -37,6 +37,14 @@ bacula_repo_distribution_map:
 bacula_fd_fqdn: "{{ ansible_facts['fqdn'] }}"
 bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
 
+# Ansible SSH delegation targets for director and SD
+# These are used by delegate_to in tasks that modify configs on director/SD
+# Default: same as bacula_dir_fqdn/bacula_sd_fqdn
+# Override when Ansible control machine cannot reach the same address clients use
+# Example: clients use LAN IP, but Ansible must use WireGuard FQDN
+bacula_dir_fqdn_ssh: "{{ bacula_dir_fqdn }}"
+bacula_sd_fqdn_ssh: "{{ bacula_sd_fqdn }}"
+
 # FD listen address: IP/interface the FD binds to for incoming connections
 # Default: 0.0.0.0 (listen on all interfaces)
 # Note: This is different from bacula_fd_connect_address (used by Director to connect)

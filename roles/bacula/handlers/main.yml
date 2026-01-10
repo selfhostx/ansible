@@ -3,13 +3,13 @@
   command: "{{ bacula_dir_binary }} -t -c {{ bacula_dir_config }}"
   register: bacula_dir_config_check
   ignore_errors: yes
-  delegate_to: "{{ bacula_dir_fqdn }}"
+  delegate_to: "{{ bacula_dir_fqdn_ssh }}"
 
 - name: "Start bacula-dir"
   service:
     name: "{{ bacula_dir_service_name }}"
     state: started
-  delegate_to: "{{ bacula_dir_fqdn }}"
+  delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   run_once: true
   when:
   - bacula_restart_services
@@ -18,7 +18,7 @@
   service:
     name: "{{ bacula_dir_service_name }}"
     state: restarted
-  delegate_to: "{{ bacula_dir_fqdn }}"
+  delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   run_once: true
   when:
   - bacula_restart_services
@@ -28,7 +28,7 @@
     name: "{{ bacula_dir_service_name }}"
     state: reloaded
   run_once: true
-  delegate_to: "{{ bacula_dir_fqdn }}"
+  delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   when:
   - bacula_reload_services
 
