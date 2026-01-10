@@ -463,6 +463,24 @@ bacula_sd_fqdn_ssh: "bacdir-wg.example.com"      # Ansible SSH via WireGuard
 **Available variables:**
 - `bacula_dir_fqdn_ssh` - Ansible SSH target for director (defaults to `bacula_dir_fqdn`)
 - `bacula_sd_fqdn_ssh` - Ansible SSH target for storage daemon (defaults to `bacula_sd_fqdn`)
+- `bacula_dir_listen_address` - IP/interface Director binds to (defaults to `0.0.0.0` - all interfaces)
+- `bacula_sd_listen_address` - IP/interface Storage Daemon binds to (defaults to `0.0.0.0` - all interfaces)
+- `bacula_fd_listen_address` - IP/interface File Daemon binds to (defaults to `0.0.0.0` - all interfaces)
+
+**Listen address configuration:**
+
+By default, all Bacula components listen on all network interfaces (`0.0.0.0`). For security or routing reasons, you can bind to specific IPs:
+
+```yaml
+# On the Director/SD server
+bacula_dir_listen_address: "10.30.0.25"   # Bind Director to LAN IP only
+bacula_sd_listen_address: "10.30.0.25"    # Bind SD to LAN IP only
+
+# On File Daemon clients
+bacula_fd_listen_address: "0.0.0.0"       # Listen on all interfaces (default)
+```
+
+**Note:** Listen addresses control what the service binds to locally. Connection addresses (`bacula_dir_fqdn`, `bacula_sd_fqdn`) control what clients use to reach those services.
 
 **Example inventory structure:**
 ```yaml

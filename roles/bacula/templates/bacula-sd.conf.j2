@@ -8,7 +8,7 @@ Storage {                             # definition of myself
   Pid Directory = "{{ bacula_piddirectory }}"
   Plugin Directory = "{{ bacula_plugindirectory }}"
   Maximum Concurrent Jobs = {{ bacula_sd_max_jobs }}
-  SDAddress = {{ bacula_sd_fqdn }}
+  SDAddress = {{ bacula_sd_listen_address }}
 }
 
 #

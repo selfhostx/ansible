@@ -11,7 +11,7 @@
 
 Director {                            # define myself
   Name = {{ bacula_dir_name }}
-  DirAddress = {{ bacula_dir_fqdn }}            # bind to this address
+  DirAddress = {{ bacula_dir_listen_address }}  # bind to this address
   DIRport = {{ bacula_dir_port }}               # where we listen for UA connections
   QueryFile = "{{ bacula_dir_queryfile }}"
   WorkingDirectory = "{{ bacula_workingdirectory }}"
