@@ -36,6 +36,23 @@
     - bacula-repository
     - bacula-validation
 
+- name: Check if architecture is supported for official repository
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['architecture'] in ['x86_64', 'amd64']
+    fail_msg: |
+      ERROR: Architecture '{{ ansible_facts['architecture'] }}' is not supported by official Bacula repository.
+      Supported architectures: x86_64, amd64 (Intel/AMD 64-bit only)
+
+      ARM architectures (arm64, armhf, aarch64) are NOT available from bacula.org.
+
+      Solution: Set bacula_use_official_repo: false to use distribution packages instead.
+      Distribution packages support ARM and will be installed from Debian/Ubuntu repositories.
+    success_msg: "Architecture '{{ ansible_facts['architecture'] }}' is supported by official repository"
+  tags:
+    - bacula-repository
+    - bacula-validation
+
 # Debian/Ubuntu Repository Setup
 - name: Setup Bacula repository for Debian/Ubuntu
   when: ansible_facts['os_family'] == 'Debian'

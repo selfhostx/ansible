@@ -52,6 +52,18 @@ The official Bacula repository provides packages for recent distributions only. 
 
 > **Note:** Fallback mappings use LTS-to-LTS compatibility (e.g., jammy packages work on noble). The role handles this automatically.
 
+**Supported Architectures:**
+
+The official Bacula repository **only supports x86_64/amd64** (Intel/AMD 64-bit) architecture.
+
+| Architecture | Official Repository Support | Alternative |
+|--------------|----------------------------|-------------|
+| x86_64 / amd64 | ✅ Yes | - |
+| ARM64 / aarch64 | ❌ No | Use distribution packages |
+| ARMhf (32-bit ARM) | ❌ No | Use distribution packages |
+
+> **Important for Raspberry Pi and ARM systems:** Set `bacula_use_official_repo: false` to use distribution packages. Debian and Ubuntu provide ARM-compatible Bacula packages in their repositories.
+
 ### Getting Started with Official Repository
 
 **Step 1: Register for access key**

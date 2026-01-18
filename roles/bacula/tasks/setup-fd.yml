@@ -93,8 +93,19 @@
   tags:
   - packages
 
+- name: Setup FD | Ensure Bacula config directory exists
+  ansible.builtin.file:
+    path: "{{ bacula_config_dir }}"
+    state: directory
+    owner: "{{ bacula_fd_user }}"
+    group: "{{ bacula_fd_group }}"
+    mode: '0750'
+  when: ansible_facts['os_family'] != "Windows"
+  tags:
+    - bacula-fd
+
 - name: FD AutoPSK | Template new PSK into file
-  copy:
+  ansible.builtin.copy:
     dest: "{{ bacula_fd_auto_psk_file_filename }}"
     content: "{{ bacula_fd_password }}"
     owner: "{{ bacula_fd_user }}"
