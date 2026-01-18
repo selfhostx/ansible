@@ -2,7 +2,7 @@
 ---
 - name: Disable FD | Check if client configuration exists on director
   ansible.builtin.stat:
-    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    path: "{{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf"
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   register: bacula_client_config_stat
   tags:
@@ -13,7 +13,7 @@
   ansible.builtin.debug:
     msg: |
       WARNING: Client configuration does not exist on director {{ bacula_dir_fqdn }}
-      Expected file: {{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf
+      Expected file: {{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf
 
       This client was never configured on this director - nothing to disable.
   when: not bacula_client_config_stat.stat.exists
@@ -23,7 +23,7 @@
 
 - name: Disable FD | Mark client as disabled in director configuration
   ansible.builtin.lineinfile:
-    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    path: "{{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf"
     regexp: '^\s*Enabled\s*='
     line: '  Enabled = no'
     insertafter: 'Client {'
@@ -36,7 +36,7 @@
 
 - name: Remove FD | Check if client configuration exists on director
   ansible.builtin.stat:
-    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    path: "{{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf"
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   register: bacula_remove_client_config_stat
   tags:
@@ -47,7 +47,7 @@
   ansible.builtin.debug:
     msg: |
       WARNING: Client configuration does not exist on director {{ bacula_dir_fqdn }}
-      Expected file: {{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf
+      Expected file: {{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf
 
       This client was never configured on this director - nothing to remove.
   when: not bacula_remove_client_config_stat.stat.exists
@@ -57,7 +57,7 @@
 
 - name: Remove FD | Remove client configuration from director
   ansible.builtin.file:
-    path: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    path: "{{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf"
     state: absent
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   notify: 'Reload bacula-dir'
@@ -68,7 +68,7 @@
 
 - name: Remove FD | Remove fileset configuration from director
   ansible.builtin.file:
-    path: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
+    path: "{{ bacula_dir_include_config_dir_delegated }}/fileset-{{ bacula_fd_fileset_name }}.conf"
     state: absent
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   notify: 'Reload bacula-dir'
@@ -119,15 +119,17 @@
     - bacula-fd
 
 - name: Setup FD | Check if Fileset Config exists on director
-  stat:
-    path: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
+  ansible.builtin.stat:
+    path: "{{ bacula_dir_include_config_dir_delegated }}/fileset-{{ bacula_fd_fileset_name }}.conf"
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   register: bacula_fd_fileset_exists
+  tags:
+    - bacula-fd
 
 - name: Setup FD | Register Fileset Config for FD on director
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/bacula-dir-fileset.conf.j2"
-    dest: "{{ bacula_dir_include_config_dir }}/fileset-{{ bacula_fd_fileset_name }}.conf"
+    dest: "{{ bacula_dir_include_config_dir_delegated }}/fileset-{{ bacula_fd_fileset_name }}.conf"
     owner: "{{ bacula_dir_user }}"
     group: "{{ bacula_dir_group }}"
     mode: "{{ bacula_dir_filemode }}"
@@ -171,9 +173,9 @@
     - templates
 
 - name: Setup FD | Register FD Config on director
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/bacula-dir-clientconfig.conf.j2"
-    dest: "{{ bacula_dir_include_config_dir }}/client-{{ bacula_fd_name }}.conf"
+    dest: "{{ bacula_dir_include_config_dir_delegated }}/client-{{ bacula_fd_name }}.conf"
     owner: "{{ bacula_dir_user }}"
     group: "{{ bacula_dir_group }}"
     mode: "{{ bacula_dir_filemode }}"

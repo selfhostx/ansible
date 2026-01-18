@@ -51,6 +51,12 @@ bacula_sd_fqdn_ssh: "{{ bacula_sd_fqdn }}"
 bacula_dir_service_name_delegated: "bacula-dir"
 bacula_sd_service_name_delegated: "bacula-sd"
 
+# Config paths for delegated operations (used in FD client registration tasks)
+# These should match the paths on the director/SD servers
+# Defaults assume official repository paths
+bacula_dir_config_dir_delegated: "/opt/bacula/etc"
+bacula_dir_include_config_dir_delegated: "/opt/bacula/etc/conf.d"
+
 # FD listen address: IP/interface the FD binds to for incoming connections
 # Default: 0.0.0.0 (listen on all interfaces)
 # Note: This is different from bacula_fd_connect_address (used by Director to connect)
