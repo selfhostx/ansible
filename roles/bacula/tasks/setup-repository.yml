@@ -42,26 +42,46 @@
   tags:
     - bacula-repository
   block:
-    - name: Ensure keyrings directory exists
+    - name: Ensure APT keyrings directory exists
       ansible.builtin.file:
-        path: /usr/share/keyrings
+        path: /etc/apt/keyrings
         state: directory
         mode: '0755'
 
-    - name: Download and install Bacula GPG key (modern method)
-      ansible.builtin.shell: |
-        curl -fsSL {{ bacula_gpg_key_url }} | gpg --dearmor > /usr/share/keyrings/bacula-archive-keyring.gpg
-      args:
-        creates: /usr/share/keyrings/bacula-archive-keyring.gpg
-        executable: /bin/bash
-      register: gpg_key_download
-      failed_when: gpg_key_download.rc != 0
-
-    - name: Verify GPG key was installed
+    - name: Check if Bacula GPG keyring exists
       ansible.builtin.stat:
+        path: /etc/apt/keyrings/bacula.gpg
+      register: bacula_keyring_stat
+
+    - name: Download Bacula ASCII GPG key
+      ansible.builtin.get_url:
+        url: "{{ bacula_gpg_key_url }}"
+        dest: /tmp/bacula.asc
+        mode: '0644'
+      when: not bacula_keyring_stat.stat.exists
+
+    - name: Dearmor Bacula GPG key into keyring
+      ansible.builtin.command:
+        cmd: gpg --dearmor -o /etc/apt/keyrings/bacula.gpg /tmp/bacula.asc
+        creates: /etc/apt/keyrings/bacula.gpg
+      when: not bacula_keyring_stat.stat.exists
+
+    - name: Set permissions on Bacula keyring
+      ansible.builtin.file:
+        path: /etc/apt/keyrings/bacula.gpg
+        mode: '0644'
+      when: not bacula_keyring_stat.stat.exists
+
+    - name: Verify Bacula GPG keyring was installed
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/bacula.gpg
+      register: bacula_keyring_verify
+      failed_when: not bacula_keyring_verify.stat.exists
+
+    - name: Remove old keyring location if present
+      ansible.builtin.file:
         path: /usr/share/keyrings/bacula-archive-keyring.gpg
-      register: bacula_gpg_key_stat
-      failed_when: not bacula_gpg_key_stat.stat.exists
+        state: absent
 
     - name: Configure Bacula official repository
       ansible.builtin.template:
