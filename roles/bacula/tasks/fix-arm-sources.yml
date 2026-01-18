@@ -1,0 +1,60 @@
+---
+# Fix APT sources for ARM architecture
+# Ensures distribution package sources have explicit architecture specification
+# Only runs on ARM systems using distribution packages
+
+- name: Check for existing Bacula sources files
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns: 'bacula*.list'
+  register: bacula_sources_files
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - ansible_facts['architecture'] in ['aarch64', 'arm64', 'armv7l', 'armhf']
+  tags:
+    - bacula-repository
+    - bacula-fd
+    - packages
+
+- name: Fix architecture specification in Bacula sources (ARM)
+  ansible.builtin.lineinfile:
+    path: "{{ item.path }}"
+    regexp: '^deb\s+\[(?!arch=)(.*)?\]\s+'
+    line: 'deb [arch={{ "arm64" if ansible_facts["architecture"] in ["aarch64", "arm64"] else "armhf" }} \1] '
+    backrefs: yes
+  loop: "{{ bacula_sources_files.files }}"
+  when:
+    - bacula_sources_files.files is defined
+    - bacula_sources_files.files | length > 0
+  register: bacula_sources_fixed
+  tags:
+    - bacula-repository
+    - bacula-fd
+    - packages
+
+- name: Add architecture specification if completely missing (ARM)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^(deb)\s+([^[].*)$'
+    replace: '\1 [arch={{ "arm64" if ansible_facts["architecture"] in ["aarch64", "arm64"] else "armhf" }}] \2'
+  loop: "{{ bacula_sources_files.files }}"
+  when:
+    - bacula_sources_files.files is defined
+    - bacula_sources_files.files | length > 0
+    - bacula_sources_fixed is defined
+  tags:
+    - bacula-repository
+    - bacula-fd
+    - packages
+
+- name: Update apt cache if sources were modified
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 0
+  when:
+    - bacula_sources_fixed is defined
+    - bacula_sources_fixed is changed
+  tags:
+    - bacula-repository
+    - bacula-fd
+    - packages

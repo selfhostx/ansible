@@ -21,6 +21,14 @@
 - name: Update package cache
   include_tasks: "update-package-cache.yml"
 
+- name: Fix ARM architecture sources (Raspberry Pi)
+  include_tasks: "fix-arm-sources.yml"
+  when: not bacula_use_official_repo|bool
+  tags:
+    - bacula-repository
+    - bacula-fd
+    - packages
+
 - name: Cleanup old Debian packages (if using official repo)
   include_tasks: "cleanup-debian-packages.yml"
   when: bacula_use_official_repo|bool
