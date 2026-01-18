@@ -7,7 +7,7 @@
 
 - name: "Start bacula-dir"
   service:
-    name: "{{ bacula_dir_service_name }}"
+    name: "{{ bacula_dir_service_name_delegated }}"
     state: started
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   run_once: true
@@ -16,7 +16,7 @@
 
 - name: "Restart bacula-dir"
   service:
-    name: "{{ bacula_dir_service_name }}"
+    name: "{{ bacula_dir_service_name_delegated }}"
     state: restarted
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"
   run_once: true
@@ -25,7 +25,7 @@
 
 - name: "Reload bacula-dir"
   service:
-    name: "{{ bacula_dir_service_name }}"
+    name: "{{ bacula_dir_service_name_delegated }}"
     state: reloaded
   run_once: true
   delegate_to: "{{ bacula_dir_fqdn_ssh }}"

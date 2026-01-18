@@ -45,6 +45,12 @@ bacula_sd_fqdn: "{{ ansible_facts['fqdn'] }}"
 bacula_dir_fqdn_ssh: "{{ bacula_dir_fqdn }}"
 bacula_sd_fqdn_ssh: "{{ bacula_sd_fqdn }}"
 
+# Service names for delegated operations (used in handlers)
+# These should match the service names on the director/SD servers
+# Override these in director/SD host_vars if using distribution packages
+bacula_dir_service_name_delegated: "bacula-dir"
+bacula_sd_service_name_delegated: "bacula-sd"
+
 # FD listen address: IP/interface the FD binds to for incoming connections
 # Default: 0.0.0.0 (listen on all interfaces)
 # Note: This is different from bacula_fd_connect_address (used by Director to connect)
