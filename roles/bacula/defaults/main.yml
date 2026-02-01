@@ -15,6 +15,12 @@ bacula_version: "13.0.4"
 # GPG signing key for Bacula packages
 bacula_gpg_key_url: "https://www.bacula.org/downloads/Bacula-4096-Distribution-Verification-key.asc"
 
+# Allow insecure repository (bypass GPG verification)
+# WARNING: Only use this as a workaround when Bacula's GPG key is rejected
+# due to SHA1 deprecation (affects Debian 13+/Ubuntu 24.04+ as of 2026)
+# This uses trusted=yes instead of signed-by, which disables signature verification
+bacula_repo_allow_insecure: false
+
 # Supported distributions for official repository (latest 2 versions only)
 # Debian: bookworm (12), trixie (13 - when released)
 # Ubuntu: jammy (22.04), noble (24.04)

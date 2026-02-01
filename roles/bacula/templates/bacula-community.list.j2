@@ -9,5 +9,15 @@
 # Architecture: {{ ansible_facts['architecture'] }}
 #
 # For more information: https://www.bacula.org/bacula-binary-package-download/
+{% if bacula_repo_allow_insecure | default(false) %}
+#
+# WARNING: GPG signature verification is DISABLED (bacula_repo_allow_insecure=true)
+# This is a workaround for Bacula's GPG key using SHA1, which is rejected by modern systems.
+# Re-enable verification once Bacula updates their GPG key to use SHA256+.
+{% endif %}
 
+{% if bacula_repo_allow_insecure | default(false) %}
+deb [arch=amd64 trusted=yes] https://www.bacula.org/packages/{{ bacula_repo_access_key }}/debs/{{ bacula_version }}/ {{ bacula_repo_distribution_map[ansible_facts['distribution_release']] }} main
+{% else %}
 deb [arch=amd64 signed-by=/etc/apt/keyrings/bacula.gpg] https://www.bacula.org/packages/{{ bacula_repo_access_key }}/debs/{{ bacula_version }}/ {{ bacula_repo_distribution_map[ansible_facts['distribution_release']] }} main
+{% endif %}

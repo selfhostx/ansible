@@ -54,6 +54,25 @@
     - bacula-validation
 
 # Debian/Ubuntu Repository Setup
+- name: Warn about insecure repository mode
+  ansible.builtin.debug:
+    msg: |
+      WARNING: Bacula repository GPG verification is DISABLED!
+
+      You have set bacula_repo_allow_insecure: true
+      This bypasses GPG signature verification using 'trusted=yes'.
+
+      Reason: Bacula's GPG key uses SHA1 for its binding signature, which is
+      rejected by modern Debian/Ubuntu systems (sqv/Sequoia) as of 2026-02-01.
+
+      Recommendation: Monitor Bacula's repository for a GPG key update using
+      SHA256+ signatures, then set bacula_repo_allow_insecure: false
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - bacula_repo_allow_insecure | default(false)
+  tags:
+    - bacula-repository
+
 - name: Setup Bacula repository for Debian/Ubuntu
   when: ansible_facts['os_family'] == 'Debian'
   tags:
@@ -65,40 +84,43 @@
         state: directory
         mode: '0755'
 
-    - name: Check if Bacula GPG keyring exists
-      ansible.builtin.stat:
-        path: /etc/apt/keyrings/bacula.gpg
-      register: bacula_keyring_stat
+    - name: Setup GPG keyring for secure repository
+      when: not (bacula_repo_allow_insecure | default(false))
+      block:
+        - name: Check if Bacula GPG keyring exists
+          ansible.builtin.stat:
+            path: /etc/apt/keyrings/bacula.gpg
+          register: bacula_keyring_stat
 
-    - name: Download Bacula ASCII GPG key
-      ansible.builtin.get_url:
-        url: "{{ bacula_gpg_key_url }}"
-        dest: /tmp/bacula.asc
-        mode: '0644'
-      when: not bacula_keyring_stat.stat.exists
+        - name: Download Bacula ASCII GPG key
+          ansible.builtin.get_url:
+            url: "{{ bacula_gpg_key_url }}"
+            dest: /tmp/bacula.asc
+            mode: '0644'
+          when: not bacula_keyring_stat.stat.exists
 
-    - name: Dearmor Bacula GPG key into keyring
-      ansible.builtin.command:
-        cmd: gpg --dearmor -o /etc/apt/keyrings/bacula.gpg /tmp/bacula.asc
-        creates: /etc/apt/keyrings/bacula.gpg
-      when: not bacula_keyring_stat.stat.exists
+        - name: Dearmor Bacula GPG key into keyring
+          ansible.builtin.command:
+            cmd: gpg --dearmor -o /etc/apt/keyrings/bacula.gpg /tmp/bacula.asc
+            creates: /etc/apt/keyrings/bacula.gpg
+          when: not bacula_keyring_stat.stat.exists
 
-    - name: Set permissions on Bacula keyring
-      ansible.builtin.file:
-        path: /etc/apt/keyrings/bacula.gpg
-        mode: '0644'
-      when: not bacula_keyring_stat.stat.exists
+        - name: Set permissions on Bacula keyring
+          ansible.builtin.file:
+            path: /etc/apt/keyrings/bacula.gpg
+            mode: '0644'
+          when: not bacula_keyring_stat.stat.exists
 
-    - name: Verify Bacula GPG keyring was installed
-      ansible.builtin.stat:
-        path: /etc/apt/keyrings/bacula.gpg
-      register: bacula_keyring_verify
-      failed_when: not bacula_keyring_verify.stat.exists
+        - name: Verify Bacula GPG keyring was installed
+          ansible.builtin.stat:
+            path: /etc/apt/keyrings/bacula.gpg
+          register: bacula_keyring_verify
+          failed_when: not bacula_keyring_verify.stat.exists
 
-    - name: Remove old keyring location if present
-      ansible.builtin.file:
-        path: /usr/share/keyrings/bacula-archive-keyring.gpg
-        state: absent
+        - name: Remove old keyring location if present
+          ansible.builtin.file:
+            path: /usr/share/keyrings/bacula-archive-keyring.gpg
+            state: absent
 
     - name: Configure Bacula official repository
       ansible.builtin.template:
