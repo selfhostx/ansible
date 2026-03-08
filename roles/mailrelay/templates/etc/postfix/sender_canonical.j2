@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+# Sender canonical map — rewrite sender addresses in outgoing mail
+{% for entry in postfix_sender_canonical_map_entries %}
+{{ entry.pattern }}    {{ entry.result }}
+{% endfor %}

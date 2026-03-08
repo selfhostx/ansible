@@ -109,6 +109,12 @@ message_size_limit = {{ postfix_message_size_limit }}
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 
+{% if postfix_sender_canonical_map_entries | default([]) | length > 0 %}
+sender_canonical_maps = hash:{{ postfix_sender_canonical_maps_file }}
+sender_canonical_classes = envelope_sender, header_sender
+smtp_header_checks = regexp:{{ postfix_smtp_header_checks_file }}
+{% endif %}
+
 {% if ansible_os_family == "Debian" %}
 # Debian specific:  Specifying a file name will cause the first
 # line of that file to be used as the name.  The Debian default

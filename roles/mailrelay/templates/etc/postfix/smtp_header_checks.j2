@@ -1,0 +1,3 @@
+# {{ ansible_managed }}
+# Rewrite From header display name for system mail
+/^From:\s+root\s+(<.*>)/ REPLACE From: {{ inventory_hostname_short }} $1

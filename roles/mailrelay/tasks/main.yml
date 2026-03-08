@@ -173,6 +173,33 @@
   - postfix_relay_role == "master"
   - not postfix_mailrelay_unmanaged_config
 
+- name: Configure sender canonical maps
+  ansible.builtin.template:
+    src: etc/postfix/sender_canonical.j2
+    dest: "{{ postfix_sender_canonical_maps_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - postmap sender_canonical
+    - restart postfix
+  when:
+    - postfix_sender_canonical_map_entries | default([]) | length > 0
+    - not postfix_mailrelay_unmanaged_config
+
+- name: Configure smtp header checks
+  ansible.builtin.template:
+    src: etc/postfix/smtp_header_checks.j2
+    dest: "{{ postfix_smtp_header_checks_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart postfix
+  when:
+    - postfix_sender_canonical_map_entries | default([]) | length > 0
+    - not postfix_mailrelay_unmanaged_config
+
 - name: Guess myorigin from System
   ansible.builtin.set_fact:
     postfix_myorigin: "{{ ansible_domain | default('localhost') }}"

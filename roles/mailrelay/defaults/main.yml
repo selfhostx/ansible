@@ -162,6 +162,15 @@ postfix_set_compatibility_level: True
 # debian buster did set level 0:
 postfix_compatibility_level: 2
 
+# Sender canonical maps — rewrite sender addresses in outgoing mail
+# Example:
+# postfix_sender_canonical_map_entries:
+#   - pattern: "root"
+#     result: "pve-myhost@example.com"
+postfix_sender_canonical_map_entries: []
+postfix_sender_canonical_maps_file: "/etc/postfix/sender_canonical"
+postfix_smtp_header_checks_file: "/etc/postfix/smtp_header_checks"
+
 # add extra config for postfix (free text):
 # example for rspamd (milter):
 #postfix_extra_config: |+

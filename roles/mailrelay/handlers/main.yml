@@ -11,3 +11,6 @@
 - name: postmap postfix_relaydomains_file
   command: postmap "{{ postfix_relaydomains_file }}"
 
+- name: postmap sender_canonical
+  command: postmap "{{ postfix_sender_canonical_maps_file }}"
+
