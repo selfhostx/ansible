@@ -62,6 +62,7 @@ semaphore_email_port: 25
 semaphore_email_alert: true
 
 semaphore_slack_alert: false
+semaphore_slack_url: ""
 semaphore_telegram_chat: ""
 semaphore_telegram_token: ""
 semaphore_telegram_alert: false

@@ -16,9 +16,10 @@ None. But for a production environment you should install a webserver as proxy f
   - semaphore
 
   vars:
-    semaphore_addn_config:
-      email_alert: true
-      email_sender: "semaphore@example.com"
+    semaphore_email_alert: true
+    semaphore_email_sender: "semaphore@example.com"
+    semaphore_slack_alert: true
+    semaphore_slack_url: "https://mattermost.example.com/hooks/xxx"
 ````
 
 ### Using an existing database/mariadb
@@ -49,6 +50,14 @@ None of the variables below are required.
 | `semaphore_default_user_password` | admin | the password |
 | `semaphore_default_user_mail` | admin@example.com | and mail adress |
 | `semaphore_default_user_password` | `admin` | change to a secure value! |
+| :---                     | :---      | :---    |
+| `semaphore_email_alert`  | `true`    | enable email notifications |
+| `semaphore_email_sender` | `semaphore@domain.tld` | sender address for email alerts |
+| `semaphore_slack_alert`  | `false`   | enable Slack/Mattermost notifications |
+| `semaphore_slack_url`    | `""`      | webhook URL (works with Slack and Mattermost incoming webhooks) |
+| `semaphore_telegram_alert` | `false` | enable Telegram notifications |
+| `semaphore_telegram_token` | `""`    | Telegram bot token |
+| `semaphore_telegram_chat`  | `""`    | Telegram chat ID |
 | :---                     | :---      | :---    |
 | `semaphore_nginx_deploy_reverseconfig` | false | set to true to enable nginx |
 | `semaphore_nginx_config_filename` | `semaphore` | filename of nginx vhost-config |
