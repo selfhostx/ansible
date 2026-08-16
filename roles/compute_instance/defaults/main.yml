@@ -10,7 +10,7 @@
 # compute_instance_distribution: "debian"
 
 # name of the template-VM to clone from (cloud image)
-# compute_instance_cloudinit_image: "template-cloudinit-deb12-latest"
+compute_instance_cloudinit_image: "template-cloudinit-deb13-latest"
 
 # memory (max.) for VM (in MB), example with 2G:
 # compute_instance_memory_max: 2048
@@ -159,8 +159,6 @@ proxmox_upgrade_packages_on_create: true
 
 # move config from /etc/network/interfaces.d/50-cloud-init to /etc/network/interfaces (or /etc/netplan/50-cloud-init.yaml or ):
 cloudinit_move_network_to_main_file: true
-
-compute_instance_cloudinit_image: "template-cloudinit-deb12-latest"
 
 proxmox_snippet_dir: /var/lib/vz/snippets
 proxmox_snippet_storage: local
