@@ -29,7 +29,7 @@
     - cloudinit_download_image
 
 - name: Destroy old cloud-init template
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     name: "{{ compute_instance_cloudinit_image }}"
     state: absent
     api_user: "{{ proxmox_api_user }}"
@@ -41,7 +41,7 @@
     - compute_instance_cloudinit_image_destroy_old
 
 - name: Create empty VM for cloud-init
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     name: "{{ compute_instance_cloudinit_image }}"
     description: "{{ cloudinit_template_description }}"
@@ -85,7 +85,7 @@
   ansible.builtin.command: "qm set {{ proxvm.vmid }} --{{ proxmox_vm_diskdevice }} {{ proxmox_imported_disk_name }}"
 
 - name: Convert cloud-init VM to template
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     name: "{{ compute_instance_cloudinit_image }}"
     template: true

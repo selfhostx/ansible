@@ -41,7 +41,7 @@
     mode: '0640'
 
 - name: Proxmox - clone or create instance
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_create_node }}"
     name: "{{ compute_instance_hostname }}"
     clone: '{{ omit if compute_instance_cloudinit_image == "none" else compute_instance_cloudinit_image }}'
@@ -72,7 +72,7 @@
     - compute_instance_cloudinit_image != "none"
 
 - name: Proxmox - Configure instance
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     vmid: "{{ proxvm.vmid }}"
     name: "{{ compute_instance_hostname }}"
@@ -93,12 +93,10 @@
     # state: present
     cicustom: "user={{ proxmox_snippet_storage }}:snippets/{{ proxmox_snippet_user_data_file }}"
     # disabled since it does not work (see extra task)
-    # docs: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#parameter-net
     # net:
       # net[n]: 'model="XX:XX:XX:XX:XX:XX",bridge="value",rate="value",tag="value",firewall="1|0",trunks="vlanid"'
       # net0: '{{ proxmox_net }}'
     ipconfig:
-      # doku: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html#parameter-ipconfig
       # ipconfig[n]='[gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,ip=<IPv4Format/CIDR>] [,ip6=<IPv6Format/CIDR>]'
       ipconfig0: '{{ proxmox_vm_ip_cloud_init_string }}'
 
@@ -136,7 +134,7 @@
 
 # if "state: started" in create-task, not all config is correct (i.e. bootorder), so start it afterwards:
 - name: Proxmox - start VM
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     vmid: "{{ proxvm.vmid }}"
     state: started
