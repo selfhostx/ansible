@@ -55,9 +55,8 @@ compute_instance_bridge: vmbr0
 compute_instance_virtualization_provider: proxmox
 # valid choices: netbox
 compute_instance_ipam_provider: netbox
-# valid choices: hetzner, inwx
-compute_instance_dns_provider: hetzner
-
+# valid choices: hetzner, inwx, manual
+compute_instance_dns_provider: manual
 
 # install required pip modules?
 compute_instance_install_requirements: true
