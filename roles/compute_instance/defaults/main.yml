@@ -22,6 +22,16 @@
 # for more information see: https://pve.proxmox.com/pve-docs/chapter-qm.html#qm_cpu
 # compute_instance_cpu: kvm64
 
+# Specify emulated CPU type (if none is selected proxmox will choose "kvm64" by itself,
+# plattforms like "EPYC", "SandyBridge-IBRS", ... have more features and still allow live-migration with (slightly) different Host-CPUs
+# for more information see: https://pve.proxmox.com/pve-docs/chapter-qm.html#qm_cpu
+# compute_instance_cpu: kvm64
+
+# you should set a machinetype on newer proxmox (9.x). because the default ("LATEST") depends on patchlevel!
+# possible values: "pc-i440fx-11.1", pc-i440fx-11.0+pve1", minimum supported on 9.2.x is "pc-i440fx-5.0"
+# FIXME compare to lowest value on PVE 8.x! for 9.x maybe "pc-i440fx-10.0" is fine
+# proxmox_vm_machine_type: "LATEST"
+
 # disk size in GB (example: 20G):
 # compute_instance_disksize: 20
 

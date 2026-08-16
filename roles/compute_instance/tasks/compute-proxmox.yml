@@ -45,7 +45,7 @@
     node: "{{ proxmox_create_node }}"
     name: "{{ compute_instance_hostname }}"
     clone: '{{ omit if compute_instance_cloudinit_image == "none" else compute_instance_cloudinit_image }}'
-    machine: "type={{ proxmox_vm_machine_type }}"
+    machine: "type={{ proxmox_vm_machine_type | default(omit) }}"
     pool: "{{ proxmox_pool | default(omit) }}"
     storage: "{{ compute_instance_storage }}"
     scsihw: "{{ proxmox_vm_scsihw }}"
