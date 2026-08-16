@@ -171,6 +171,8 @@ proxmox_snippet_storage: local
 proxmox_snippet_user_data_file: user-data-{{ compute_instance_hostname }}.yml
 proxmox_snippet_user_data_dest: "{{ proxmox_snippet_dir }}/{{ proxmox_snippet_user_data_file }}"
 proxmox_snippet_user_data_template: "templates/proxmox_cloudinit_user_data.j2"
+# avoid showing sensible information on diff-mode:
+proxmox_snippet_no_log: true
 
 # enable DNS-record creation:
 compute_instance_dns_create_records_enable: false

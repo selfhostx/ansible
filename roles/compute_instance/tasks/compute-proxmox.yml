@@ -39,6 +39,7 @@
     src: "{{ proxmox_snippet_user_data_template }}"
     dest: "{{ proxmox_snippet_user_data_dest }}"
     mode: '0640'
+  no_log: "{{ proxmox_snippet_no_log }}"
 
 - name: Proxmox - clone or create instance
   community.proxmox.proxmox_kvm:
