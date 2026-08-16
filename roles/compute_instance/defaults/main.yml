@@ -93,6 +93,11 @@ netbox_bridge_query_term: "prox_bridge"
 
 # Proxmox and clout-init ====
 
+# set this variables to allow api usage (no defaults here)
+# proxmox_api_user: root
+# proxmox_api_pass: secret
+# proxmox_api_host: hostname.tld
+
 # where to create the instance:
 proxmox_create_node: localhost
 # set if node name is not equal to ansible ssh-connection (usually a FQDN is used here):
