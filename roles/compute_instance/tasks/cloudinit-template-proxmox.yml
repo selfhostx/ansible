@@ -4,8 +4,8 @@
 - name: Create download directory
   ansible.builtin.file:
     path: "{{ cloudinit_download_folder }}"
-    owner: root
-    group: root
+    owner: "root"
+    group: "root"
     mode: '700'
     state: directory
 
