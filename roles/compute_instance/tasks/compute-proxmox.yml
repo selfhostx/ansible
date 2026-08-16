@@ -54,6 +54,7 @@
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
+    api_port: "{{ proxmox_api_port | default(omit) }}"
     validate_certs: "{{ proxmox_api_validate_certs }}"
   register: proxvm
 
@@ -113,6 +114,7 @@
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
+    api_port: "{{ proxmox_api_port | default(omit) }}"
     validate_certs: "{{ proxmox_api_validate_certs }}"
 
 - name: Proxmox - configure network adapter (no vlan) # noqa no-changed-when
@@ -141,5 +143,6 @@
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
+    api_port: "{{ proxmox_api_port | default(omit) }}"
     validate_certs: "{{ proxmox_api_validate_certs }}"
   when: proxmox_start
