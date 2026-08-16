@@ -45,6 +45,7 @@
     node: "{{ proxmox_create_node }}"
     name: "{{ compute_instance_hostname }}"
     clone: '{{ omit if compute_instance_cloudinit_image == "none" else compute_instance_cloudinit_image }}'
+    machine: "type={{ proxmox_vm_machine_type }}"
     pool: "{{ proxmox_pool | default(omit) }}"
     storage: "{{ compute_instance_storage }}"
     scsihw: "{{ proxmox_vm_scsihw }}"
@@ -53,6 +54,7 @@
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
+    validate_certs: "{{ proxmox_api_validate_certs }}"
   register: proxvm
 
 #  - name: Waiting to start virtual server machine completely
@@ -111,6 +113,7 @@
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
+    validate_certs: "{{ proxmox_api_validate_certs }}"
 
 - name: Proxmox - configure network adapter (no vlan) # noqa no-changed-when
   # workaround since net0 is ignored on update (see shttps://github.com/ansible-collections/community.general/issues/1342)
@@ -138,4 +141,5 @@
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"
     api_host: "{{ proxmox_api_host }}"
+    validate_certs: "{{ proxmox_api_validate_certs }}"
   when: proxmox_start

@@ -97,6 +97,8 @@ netbox_bridge_query_term: "prox_bridge"
 # proxmox_api_user: root
 # proxmox_api_pass: secret
 # proxmox_api_host: hostname.tld
+# if you use self-signed (or untrusted) certs for proxmox set this to "false":
+proxmox_api_validate_certs: true
 
 # where to create the instance:
 proxmox_create_node: localhost
