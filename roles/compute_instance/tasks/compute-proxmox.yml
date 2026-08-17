@@ -39,6 +39,7 @@
     src: "{{ proxmox_snippet_user_data_template }}"
     dest: "{{ proxmox_snippet_user_data_dest }}"
     mode: '0640'
+  become: true
   no_log: "{{ proxmox_snippet_no_log }}"
 
 - name: Proxmox - clone or create instance
@@ -67,6 +68,7 @@
 - name: Proxmox - resize Disk
   ansible.builtin.command: "qm resize {{ proxvm.vmid }} {{ proxmox_vm_diskdevice }}  {{ compute_instance_disksize }}G"
   changed_when: true
+  become: true
   when:
     - proxmox_resize
     - compute_instance_cloudinit_image is defined
@@ -127,11 +129,13 @@
   # workaround since net0 is ignored on update (see shttps://github.com/ansible-collections/community.general/issues/1342)
   # ansible.builtin.command: "qm set {{ proxvm.vmid }} -net0 {{ proxmox_net0 }}"
   ansible.builtin.command: "qm set {{ proxvm.vmid }} -net0 {{ proxmox_net0 }},tag={{ compute_instance_vlan }}"
+  become: true
   when:
     - compute_instance_vlan is defined
 
 - name: Add cloud-init drive on proxmox_snippet_storage # noqa no-changed-when
   ansible.builtin.command: "qm set {{ proxvm.vmid }} --ide2 {{ proxmox_snippet_storage }}:cloudinit"
+  become: true
 
 # if "state: started" in create-task, not all config is correct (i.e. bootorder), so start it afterwards:
 - name: Proxmox - start VM
