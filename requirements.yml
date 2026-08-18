@@ -1,0 +1,23 @@
+# installs dependencies used in all roles:
+# pip install -r requirements.yml [--ignore-errors]
+ansible==9.13.0
+ansible-lint
+# apt is only available in packages python3-apt
+# -> solution: https://github.com/python-poetry/poetry/issues/1363
+# python3-apt (from 24.04) for python3.12:
+# pushd /tmp
+# apt-get download python3-apt
+# dpkg -x python3-apt_2.7.7ubuntu4_amd64.deb python3-apt
+# popd
+# cd ~/python-venv/ansible/
+# cp -r /tmp/python3-apt/usr/lib/python3/dist-packages/* lib/python3.12/site-packages/
+
+dnspython
+passlib
+requests
+six
+# possibly additional packages: https://stackoverflow.com/questions/76585758/mysqlclient-cannot-install-via-pip-cannot-find-pkg-config-name-in-ubuntu
+mysql-connector
+mysqlclient
+proxmoxer>=2.3.0
+pynetbox
