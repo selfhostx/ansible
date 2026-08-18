@@ -85,7 +85,7 @@
   ansible.builtin.command: "qm set {{ proxvm.vmid }} --{{ proxmox_vm_diskdevice }} {{ proxmox_imported_disk_name }}"
 
 - name: Convert cloud-init VM to template
-  community.proxmox.proxmox_kvm
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_create_node | default(proxmox_create_node_ansible) }}"
     name: "{{ compute_instance_cloudinit_image }}"
     template: true
