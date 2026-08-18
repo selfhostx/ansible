@@ -172,6 +172,7 @@
         mode: '0600'
       when:
         - baserole_bashrc_configure
+        - item.shell is defined
         - item.shell == "/bin/bash"
       tags:
         - bash
