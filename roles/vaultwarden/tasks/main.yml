@@ -128,6 +128,7 @@
   become: true
   notify: Restart nginx
   when:
+    - vaultwarden_nginx_deploy_reverseconfig
     - vaultwarden_nginx_remove_default_config
     - ansible_os_family == 'Debian'
 
@@ -140,6 +141,8 @@
     src: "{{ vaultwarden_nginx_template }}"
   become: true
   notify: Reload nginx
+  when:
+    - vaultwarden_nginx_deploy_reverseconfig
 
 - name: Enable nginx config via symbolic link
   ansible.builtin.file:
@@ -150,3 +153,4 @@
   notify: Reload nginx
   when:
     - ansible_os_family == 'Debian'
+    - vaultwarden_nginx_deploy_reverseconfig
