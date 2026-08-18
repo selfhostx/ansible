@@ -18,7 +18,7 @@
   ansible.builtin.set_fact:
     compute_instance_ip_v4_is: "ip"
   when:
-    - compute_instance_ip_v4 | ansible.utils.ipaddr
+    - (compute_instance_ip_v4 | string | ansible.utils.ipaddr) != false
 
 - name: Compute_instance_ip_v4 is a name
   ansible.builtin.set_fact:

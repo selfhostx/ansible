@@ -42,7 +42,7 @@
         proxmox_network_ip_v4_prefixed: "{{ compute_instance_ip_v4 }}"
       when:
         - compute_instance_ip_v4 != "no"
-        - compute_instance_ip_v6_is == "ip"
+        - compute_instance_ip_v4_is == "ip"
 
     - name: IP given - lookup prefix address and and set network config as facts (v6)
       ansible.builtin.set_fact:
