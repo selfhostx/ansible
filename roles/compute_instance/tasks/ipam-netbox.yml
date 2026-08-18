@@ -78,13 +78,23 @@
       when:
         - netbox_bridge_query_method == "variable"
 
-    - name: Set compute_instance_bridge from query to netbox via custom field (FIXME untested)
+    - name: Query compute_instance_bridge from netbox via custom field (FIXME)
       ansible.builtin.set_fact:
-        # proxmox_net0: "virtio,bridge={{ query('netbox.netbox.nb_lookup', 'custom-fields', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) | length > 0 }}"
-        # FIXME: use var "netbox_bridge_query_term"!
-        proxmox_net0: "virtio,bridge={{ netbox_result_prefix_v4.value.custom_fields.bridge }}"
+        compute_instance_bridge: "{{ query('netbox.netbox.nb_lookup', 'custom-fields', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) | length > 0 }}"
       vars:
         netbox_api_query_filter: "name={{ netbox_bridge_query_term }}"
+      when:
+        - netbox_bridge_query_method == "custom_field"
+
+    - name: Set compute_instance_bridge from query to netbox via custom field (FIXME untested)
+      ansible.builtin.debug:
+      # ansible.builtin.set_fact:
+        # proxmox_net0: "virtio,bridge={{ query('netbox.netbox.nb_lookup', 'custom-fields', api_filter=netbox_api_query_filter, api_endpoint=netbox_url, token=netbox_token, validate_certs=netbox_validate_certs) | length > 0 }}"
+        # FIXME: use var "netbox_bridge_query_term"!
+        # proxmox_net0: "virtio,bridge={{ netbox_result_prefix_v4.value.custom_fields.bridge }}"
+        # proxmox_net0: "virtio,bridge={{ netbox_result_prefix_v4.value.custom_fields.bridge }}"
+        # proxmox_net0: "virtio,bridge={{ netbox_result_prefix_v4.value.custom_fields.bridge }}"
+        msg: "{{ compute_instance_bridge }}"
       when:
         - netbox_bridge_query_method == "custom_field"
 
