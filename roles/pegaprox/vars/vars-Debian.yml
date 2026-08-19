@@ -1,0 +1,5 @@
+---
+# vars specific for Debian systems
+pegaprox_nginx_default_config: "/etc/nginx/sites-enabled/default"
+pegaprox_nginx_config_src_dir: "/etc/nginx/sites-available"
+pegaprox_nginx_config_dst_dir: "/etc/nginx/sites-enabled"

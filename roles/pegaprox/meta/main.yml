@@ -1,0 +1,16 @@
+galaxy_info:
+  author: Stefan Schwarz <st@stefanux.de>
+  description: Pegaprox installation and configuration
+
+  license: MIT
+
+  min_ansible_version: 2.1
+
+  platforms:
+   - name: Debian
+     versions:
+     - 13
+
+  galaxy_tags: []
+
+dependencies: []

@@ -1,0 +1,142 @@
+---
+# tasks file for pegaprox
+
+- name: Include OS-family specific variables
+  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+# Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
+- name: Include distribution major version specific variables (if present)
+  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+  failed_when: false
+  tags:
+    - always
+
+- name: Create keyring directory
+  ansible.builtin.file:
+    path: "{{ pegaprox_repo_keyring_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Fetch repository key
+  ansible.builtin.get_url:
+    url: "{{ pegaprox_repo_key_url }}"
+    dest: "{{ pegaprox_repo_keyring_dir }}/{{ pegaprox_repo_keyring_filename }}"
+    mode: "0644"
+
+- name: Add APT repository
+  ansible.builtin.deb822_repository:
+    name: gyptazy
+    types: [deb]
+    uris: "{{ pegaprox_repo_uri }}"
+    suites: "{{ pegaprox_repo_suite }}"
+    components: [main]
+    signed_by: "{{ pegaprox_repo_keyring_dir }}/{{ pegaprox_repo_keyring_filename }}"
+    state: present
+
+- name: Install PegaProx
+  ansible.builtin.apt:
+    name: pegaprox
+    state: "{{ pegaprox_package_state }}"
+    update_cache: true
+  notify: Restart pegaprox
+
+- name: Create configuration directory
+  ansible.builtin.file:
+    path: /etc/pegaprox
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Check if keyfile pegaprox_secret_keyfile_dest already exists
+  ansible.builtin.stat:
+    path: "{{ pegaprox_secret_keyfile_dest }}"
+  register: pegaprox_secret_keyfile_dest_present
+
+- name: Create Key
+  ansible.builtin.set_fact:
+    pegaprox_secret_key: >-
+      {{ lookup('ansible.builtin.password',
+                '/dev/null',
+                chars=['ascii_letters', 'digits', '-', '_'],
+                length=43) }}=
+  when:
+    - pegaprox_secret_key | default('') | length == 0
+    - not pegaprox_secret_keyfile_dest_present.stat.exists
+  no_log: true
+
+- name: Deploy DB master key
+  ansible.builtin.copy:
+    content: "{{ pegaprox_secret_key }}"
+    dest: "{{ pegaprox_secret_keyfile_dest }}"
+    owner: root
+    group: root
+    mode: "0600"    # less strict permissions are silently skipped by PegaProx
+  when:
+    - not pegaprox_secret_keyfile_dest_present.stat.exists
+    - pegaprox_secret_key | length > 0
+  no_log: true
+  notify: Restart pegaprox
+
+- name: Write environment variables
+  ansible.builtin.copy:
+    dest: /etc/default/pegaprox
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # ansible managed
+      {% for key, value in pegaprox_env | dictsort %}
+      {% if value is not none and value | string | length > 0 %}
+      {{ key }}={{ value }}
+      {% endif %}
+      {% endfor %}
+  notify: Restart pegaprox
+
+- name: Enable and start the service
+  ansible.builtin.systemd_service:
+    name: pegaprox
+    enabled: true
+    state: started
+
+- name: Wait for the web UI
+  ansible.builtin.wait_for:
+    port: "{{ pegaprox_env.PEGAPROX_PORT }}"
+    host: 127.0.0.1
+    timeout: 90
+
+- name: Remove default config (when enabled)
+  ansible.builtin.file:
+    path: "{{ pegaprox_nginx_default_config }}"
+    state: absent
+  become: true
+  notify: Restart nginx
+  when:
+    - ansible_os_family == 'Debian'
+    - pegaprox_nginx_remove_default_config
+    - pegaprox_nginx_deploy_reverseconfig
+
+- name: Ensure nginx config is present
+  ansible.builtin.template:
+    dest: "{{ pegaprox_nginx_config_src_dir }}/{{ pegaprox_nginx_config_filename }}"
+    owner: root
+    group: root
+    mode: "0644"
+    src: "{{ pegaprox_nginx_template }}"
+  become: true
+  notify: Reload nginx
+  when:
+    - pegaprox_nginx_deploy_reverseconfig
+
+- name: Enable nginx config via symbolic link
+  ansible.builtin.file:
+    src: "{{ pegaprox_nginx_config_src_dir }}/{{ pegaprox_nginx_config_filename }}"
+    dest: "{{ pegaprox_nginx_config_dst_dir }}/{{ pegaprox_nginx_config_filename }}"
+    state: link
+  become: true
+  notify: Reload nginx
+  when:
+    - ansible_os_family == 'Debian'
+    - pegaprox_nginx_deploy_reverseconfig

@@ -1,0 +1,90 @@
+---
+# defaults file for pegaprox
+
+pegaprox_hostname: "pegaprox.domain.tld"
+# pegaprox_listen:
+
+# repo
+pegaprox_repo_key_url: "https://git.gyptazy.com/api/packages/gyptazy/debian/repository.key"
+pegaprox_repo_uri: "https://packages.gyptazy.com/api/packages/gyptazy/debian"
+pegaprox_repo_suite: "trixie"
+pegaprox_repo_keyring_filename: "gyptazy.asc"
+pegaprox_repo_keyring_dir: "/etc/apt/keyrings"
+pegaprox_package_state: present          # present, latest, specific version like "0.9.14.1-1"
+
+# ----------------------------------------------------------------------
+# reverse-proxy-config, nginx is used
+# ----------------------------------------------------------------------
+
+pegaprox_nginx_deploy_reverseconfig: true
+pegaprox_nginx_template: "nginx-pegaprox.conf.j2"
+# only on debian:
+pegaprox_nginx_remove_default_config: false
+# debian includes everything, centos only *.conf:
+pegaprox_nginx_config_filename: "pegaprox.conf"
+
+# if you use our nginx_common role, use "true" here:
+pegaprox_nginx_use_nginx_common_snippet: false
+
+pegaprox_nginx_snippet_directory: "{{ nginx_snippet_directory | default('/etc/nginx/snippets') }}"
+pegaprox_nginx_tls_hardening_snippet: "{{ pegaprox_nginx_snippet_directory }}/tls-hardening.conf"
+# enable HSTS (not used when pegaprox_nginx_use_nginx_common_snippet: true):
+pegaprox_tls_hsts_enable: true
+pegaprox_tls_hsts_time: 31536000
+
+# path to ssl certificates, defaults to letsencrypt paths:
+pegaprox_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ pegaprox_hostname }}/fullchain.pem"
+pegaprox_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ pegaprox_hostname }}/privkey.pem"
+
+# hide nginx version number from server-header ("server: nginx" will still be present):
+# remove others vhosts to prevent leaking the version number from them (i.e. with var "pegaprox_nginx_remove_default_config")
+pegaprox_hide_nginx_version: true
+
+pegaprox_port: 5000
+pegaprox_bind: "127.0.0.1"
+
+# ------------------------------------------------------------------------------
+# Core environment variables (defaults per the docs)
+# Variable reference: https://docs.pegaprox.com/configuration/environment/
+# Leave a value empty to keep PegaProx's own default
+# ------------------------------------------------------------------------------
+pegaprox_env:
+  # --- Network / server ---
+  PEGAPROX_PORT: "{{ pegaprox_port }}"   # web UI + API; VNC: 5001 (port+1), SSH: 5002 (port+2)
+  PEGAPROX_HOST: "{{ pegaprox_bind }}"   # bind address
+  PEGAPROX_HTTP_PORT: 80                 # HTTP port for redirect to HTTPS
+  PEGAPROX_URL: "{{ pegaprox_hostname }}"   # self-URL for VNC/SSH websocket callbacks
+  PEGAPROX_SERVER: "auto"                # gevent | flask | auto
+  PEGAPROX_NO_GEVENT: ""                 # "1" disables gevent
+  PEGAPROX_WORKERS: ""                   # default: max(32, CPU*16); set only to tighten the cap
+
+  # --- Reverse proxy -> change this if "pegaprox_nginx_deploy_reverseconfig: true" ---
+  PEGAPROX_BEHIND_PROXY: "false"         # true = no built-in SSL, binds to 127.0.0.1
+  PEGAPROX_TRUSTED_PROXIES: ""           # e.g. "192.168.0.123/24" - never 0.0.0.0
+  PEGAPROX_ALLOWED_ORIGINS: ""           # comma-separated CORS origins, i.e. "{{ pegaprox_hostname }}"
+
+  # --- Limits ---
+  PEGAPROX_API_RATE_LIMIT: 1200          # requests per window
+  PEGAPROX_API_RATE_WINDOW: 60           # window in seconds
+  PEGAPROX_SSH_MAX_CONCURRENT: 25        # concurrent SSH sessions
+  PEGAPROX_MAX_REQUEST_SIZE: "10MB"      # max API request size
+  PEGAPROX_MAX_UPLOAD_SIZE: "100GB"      # max upload (ISO); must match client_max_body_size
+
+  # --- Logging / debug ---
+  PEGAPROX_DEBUG: "false"
+  PEGAPROX_LOG_LEVEL: "INFO"             # DEBUG | INFO | WARNING | ERROR
+  PEGAPROX_FILE_LOG_LEVEL: "DEBUG"       # level for logs/<cluster-id>.log
+  PEGAPROX_DISABLE_FILE_LOG: ""          # "1" = no per-cluster log file (SIEM/journald)
+
+  # --- Encryption ---
+  PEGAPROX_CIPHER_MEMORY_SECURITY: "auto"   # auto | on | off (SQLCipher mlock())
+  PEGAPROX_DISABLE_AUTO_ENCRYPT: ""         # "1" = skip auto-encryption on first boot
+
+# DB master key: optional because it will be auto generated if not present"
+# needs to be a 0600-file
+# pegaprox_secret_key: "secret_from_vault" 
+# manual creation with:
+# head -c 32 /dev/urandom | base64 | tr '+/' '-_'
+#  or:
+# openssl rand -base64 32 | tr '+/' '-_'
+pegaprox_secret_keyfile_dest: "/etc/pegaprox/secret.key"

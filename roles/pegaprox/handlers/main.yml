@@ -1,0 +1,21 @@
+---
+# handlers file for pegaprox
+
+- name: Reload nginx
+  ansible.builtin.systemd:
+    state: reloaded
+    name: nginx
+  become: true
+
+- name: Restart nginx
+  ansible.builtin.systemd:
+    state: restarted
+    name: nginx
+  become: true
+
+- name: Restart pegaprox
+  ansible.builtin.systemd_service:
+    name: pegaprox
+    state: restarted
+    daemon_reload: true
+  become: true
