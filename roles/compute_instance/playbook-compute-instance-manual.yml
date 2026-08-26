@@ -66,7 +66,7 @@
     compute_instance_ipam_provider: manual
 
     # DNS
-    compute_instance_dns_provider: hetzner
+    # compute_instance_dns_provider: hetzner
     # compute_instance_dns_hetzner_api_token: "-> vault"
     # compute_instance_dns_inwx_username: "-> vault"
     # compute_instance_dns_inwx_password: "-> vault"
