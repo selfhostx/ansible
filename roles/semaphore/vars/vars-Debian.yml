@@ -1,5 +1,9 @@
 ---
 # vars specific for Debian systems
-semaphore_nginx_default_config: "/etc/nginx/sites-enabled/default"
-semaphore_nginx_config_src_dir: "/etc/nginx/sites-available"
-semaphore_nginx_config_dst_dir: "/etc/nginx/sites-enabled"
+#
+# The three nginx path variables used to live here. They are exactly what the role's
+# own note above `include_vars` in tasks/main.yml warns about: "dont put vars here
+# which the user overrides since include_vars has a high precedence". Role vars beat
+# play vars AND host vars, so setting them in a playbook had no effect and no error —
+# the playbook read as if it configured conf.d while the role kept using
+# sites-available. They now live in defaults/main.yml, where an override works.

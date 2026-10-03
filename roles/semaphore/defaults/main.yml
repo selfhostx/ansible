@@ -118,6 +118,21 @@ semaphore_access_key_encryption: "{{ lookup('password', '/dev/null length=32') |
 # use nginx to make a ssl reverse-proxy-config:
 semaphore_nginx_deploy_reverseconfig: true
 semaphore_nginx_template: "nginx-semaphore.j2"
+
+# Where the vhost is rendered, and where it is enabled.
+#
+# Defaults follow each distribution's convention: Debian splits
+# sites-available/sites-enabled, RedHat includes conf.d directly. Both are only
+# defaults — an installation whose nginx.conf is rendered by another role may include
+# conf.d alone, and then both values belong on conf.d and no symlink is needed (see
+# the guard in tasks/nginx.yml).
+#
+# These deliberately live in defaults and not in vars/: role vars outrank play vars
+# and host vars, so a value set there cannot be overridden from a playbook — it is
+# simply ignored, without an error.
+semaphore_nginx_config_src_dir: "{{ '/etc/nginx/sites-available' if ansible_os_family == 'Debian' else '/etc/nginx/conf.d' }}"
+semaphore_nginx_config_dst_dir: "{{ '/etc/nginx/sites-enabled' if ansible_os_family == 'Debian' else '/etc/nginx/conf.d' }}"
+semaphore_nginx_default_config: "{{ '/etc/nginx/sites-enabled/default' if ansible_os_family == 'Debian' else '/etc/nginx/conf.d/default.conf' }}"
 semaphore_nginx_remove_default_config: false
 semaphore_nginx_config_filename: semaphore
 
