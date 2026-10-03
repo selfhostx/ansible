@@ -13,9 +13,21 @@
     src: "{{ semaphore_nginx_template }}"
   notify: Restart nginx
 
+# Only when the two directories actually differ.
+#
+# The sites-available/sites-enabled split is a Debian convention, not an nginx one.
+# A distribution — or a role that owns nginx.conf — may include conf.d directly, and
+# then there is nothing to enable: the rendered file is already in the right place.
+#
+# Without this guard, src_dir == dst_dir makes the task point the symlink at itself,
+# which REPLACES the file rendered one task earlier. Everything reports changed, the
+# config is gone, and nginx serves whatever its catch-all says. Observed 2026-10-03
+# on an installation whose nginx.conf is rendered by another role and includes only
+# conf.d.
 - name: Enable nginx config via symbolic link
   ansible.builtin.file:
     src: "{{ semaphore_nginx_config_src_dir }}/{{ semaphore_nginx_config_filename }}"
     dest: "{{ semaphore_nginx_config_dst_dir }}/{{ semaphore_nginx_config_filename }}"
     state: link
   notify: Restart nginx
+  when: semaphore_nginx_config_src_dir != semaphore_nginx_config_dst_dir
