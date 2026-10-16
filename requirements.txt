@@ -1,5 +1,5 @@
 # installs dependencies used in all roles:
-# pip install -r requirements.yml [--ignore-errors]
+# pip install -r requirements.txt [--ignore-errors]
 ansible==9.13.0
 ansible-lint
 # apt is only available in packages python3-apt

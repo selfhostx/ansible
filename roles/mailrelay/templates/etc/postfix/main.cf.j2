@@ -11,19 +11,16 @@ biff = no
 append_dot_mydomain = no
 readme_directory = no
 
-compatibility_level = 2
 {% if postfix_default_destination_concurrency_limit is defined and postfix_default_destination_concurrency_limit| type_debug == "int" %}
 default_destination_concurrency_limit = {{ postfix_default_destination_concurrency_limit }}
 {% endif %}
 
 # TLS parameters =========
 
-smtpd_use_tls=yes
-
 # enable STARTTLS outgoing:
 smtp_tls_security_level = {{ postfix_smtp_tls_security_level }}
 # enable STARTTLS incoming:
-smtpd_tls_security_level = {{ postfix_smtp_tls_security_level }}
+smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level }}
 
 {% if postfix_smtpd_tls_debug %}
 smtpd_tls_loglevel = 1
@@ -41,14 +38,14 @@ smtp_tls_mandatory_protocols = {{ postfix_tls_mandatory_protocols }}
 {% if postfix_smtpd_tls_key_file is defined %}
 smtpd_tls_key_file = {{ postfix_smtpd_tls_key_file }}
 {% else %}
-{% if ansible_os_family == "Debian" %}
+{% if ansible_facts['os_family'] == "Debian" %}
 smtpd_tls_key_file = {{ postfix_smtpd_tls_key_file_debian }}
 {% endif %}
 {% endif %}
 {% if postfix_smtpd_tls_cert_file is defined %}
 smtpd_tls_cert_file = {{ postfix_smtpd_tls_cert_file }}
 {% else %}
-{% if ansible_os_family == "Debian" %}
+{% if ansible_facts['os_family'] == "Debian" %}
 smtpd_tls_cert_file = {{ postfix_smtpd_tls_cert_file_debian }}
 {% endif %}
 {% endif %}
@@ -75,7 +72,7 @@ smtp_sasl_password_maps = {{ postfix_smtp_sasl_password_maps }}
 smtp_sasl_security_options = noanonymous
 {% endif %}
 
-myhostname = {{ ansible_fqdn | default('localhost') }}
+myhostname = {{ ansible_facts['fqdn'] | default('localhost') }}
 mydomain = {{ postfix_myorigin }}
 
 {% if postfix_additional_mynetworks is defined %}
@@ -99,7 +96,7 @@ error_notice_recipient = {{ postfix_error_notice_recipient }}
 maximal_queue_lifetime = {{ postfix_maximal_queue_lifetime }}
 bounce_queue_lifetime = {{ postfix_bounce_queue_lifetime }}
 
-{% if postfix_additional_mynetworks is defined %}
+{% if postfix_delay_warnings %}
 # generate "delayed mail" warnings:
 delay_warning_time = {{ postfix_delay_warning_time }}
 {% endif %}
@@ -115,13 +112,13 @@ sender_canonical_classes = envelope_sender, header_sender
 smtp_header_checks = regexp:{{ postfix_smtp_header_checks_file }}
 {% endif %}
 
-{% if ansible_os_family == "Debian" %}
+{% if ansible_facts['os_family'] == "Debian" %}
 # Debian specific:  Specifying a file name will cause the first
 # line of that file to be used as the name.  The Debian default
 # is /etc/mailname.
 myorigin = /etc/mailname
 {% else %}
-myorigin = {{ postfix_myorigin | default(ansible_domain) }}
+myorigin = {{ postfix_myorigin | default(ansible_facts['domain']) }}
 {% endif %}
 
 mydestination = {{ postfix_mydestination }}
