@@ -1,16 +1,22 @@
 ---
-- name: restart postfix
-  service: name=postfix state=restarted
+- name: Restart postfix
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
 
-- name: restart saslauthd
-  service: name="{{ postfix_saslauthd_daemon_name }}" state=restarted
+- name: Restart saslauthd
+  ansible.builtin.service:
+    name: "{{ postfix_saslauthd_daemon_name }}"
+    state: restarted
 
-- name: postmap postfix_smtp_sasl_password_maps
-  command: postmap "{{ postfix_smtp_sasl_password_maps }}"
+- name: Postmap postfix_smtp_sasl_password_maps
+  ansible.builtin.command: postmap "{{ postfix_smtp_sasl_password_maps }}"
+  changed_when: true
 
-- name: postmap postfix_relaydomains_file
-  command: postmap "{{ postfix_relaydomains_file }}"
+- name: Postmap postfix_relaydomains_file
+  ansible.builtin.command: postmap "{{ postfix_relaydomains_file }}"
+  changed_when: true
 
-- name: postmap sender_canonical
-  command: postmap "{{ postfix_sender_canonical_maps_file }}"
-
+- name: Postmap sender_canonical
+  ansible.builtin.command: postmap "{{ postfix_sender_canonical_maps_file }}"
+  changed_when: true

@@ -4,44 +4,28 @@
     name: postfix
     state: present
 
-- name: Take myorigin from ansible_name
+- name: Set myorigin fallback
   ansible.builtin.set_fact:
-    postfix_myorigin: "{{ inventory_hostname }}"
-  when:
-  - postfix_myorigin is not defined
-  - postfix_myorigin | length = 0
-  - postfix_myorigin == none
-  - postfix_take_ansible_name_as_myorigin
-
-- name: Take myorigin from ansible_domain
-  ansible.builtin.set_fact:
-    postfix_myorigin: "{{ ansible_domain }}"
-  when:
-  - postfix_myorigin is not defined
-  - postfix_myorigin | length = 0
-  - postfix_myorigin == none
-  - not postfix_take_ansible_name_as_myorigin
+    postfix_myorigin: "{{ inventory_hostname if postfix_take_ansible_name_as_myorigin else ansible_facts['domain'] }}"
+  when: postfix_myorigin | default('', true) | length == 0
 
 - name: Warn if domainname is missing
-  ansible.builtin.debug: msg='Warning - domainname is not set (usually in /etc/hosts), most MTAs will refuse non-FQDN-senders...'
+  ansible.builtin.debug:
+    msg: 'Warning - domainname is not set (usually in /etc/hosts), most MTAs will refuse non-FQDN-senders...'
   when:
-  - postfix_myorigin is not defined
-  - postfix_myorigin | length = 0
-  - postfix_myorigin == none
-  - not postfix_fail_if_domainname_is_missing
+    - postfix_myorigin | default('', true) in ['', 'localdomain']
+    - not postfix_fail_if_domainname_is_missing
 
 - name: Show some important vars
   ansible.builtin.debug:
-    msg: ansible_fqdn is {{ ansible_fqdn }}, ansible_domain is {{ ansible_domain }}, postfix_myorigin is {{ postfix_myorigin }}
+    msg: fqdn is {{ ansible_facts['fqdn'] }}, domain is {{ ansible_facts['domain'] }}, postfix_myorigin is {{ postfix_myorigin }}
 
 - name: Fail if domainname is missing
-  ansible.builtin.fail: msg='Failing - ansible_domain is not set up properly (usually in /etc/hosts) for postfix_myorigin, most MTAs will refuse non-FQDN-senders...'
+  ansible.builtin.fail:
+    msg: 'Failing - domain is not set up properly (usually in /etc/hosts) for postfix_myorigin, most MTAs will refuse non-FQDN-senders...'
   when:
-  - postfix_myorigin is not defined
-  - postfix_myorigin | length = 0
-  - postfix_myorigin == none
-  - ansible_domain == "localdomain"
-  - postfix_fail_if_domainname_is_missing
+    - postfix_myorigin | default('', true) in ['', 'localdomain']
+    - postfix_fail_if_domainname_is_missing
 
 # FIXME Check for existing Files (register facts and check for it in template main.cf.j2):
 #postfix_smtpd_tls_cert_file: "/etc/letsencrypt/live/FQDN/cert.pem"
@@ -56,31 +40,33 @@
     dest: "{{ postfix_main_config_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: true
-  notify: restart postfix
+  notify: Restart postfix
   when:
-  - postfix_relay_role is defined
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_relay_role is defined
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Install sasl packages (Debian-family)
-  ansible.builtin.package: name={{ item }} state=present
-  with_items:
-    - libsasl2-2
-    - sasl2-bin
-    - libsasl2-modules
+  ansible.builtin.package:
+    name:
+      - libsasl2-2
+      - sasl2-bin
+      - libsasl2-modules
+    state: present
   when:
-  - postfix_smtp_sasl_auth_enable|bool or postfix_smtpd_sasl_auth
-  - ansible_os_family == "Debian"
+    - postfix_smtp_sasl_auth_enable | bool or postfix_smtpd_sasl_auth
+    - ansible_facts['os_family'] == "Debian"
 
 - name: Install sasl packages (RedHat-family)
-  ansible.builtin.package: name={{ item }} state=present
-  with_items:
-    - cyrus-sasl
-    - cyrus-sasl-plain
+  ansible.builtin.package:
+    name:
+      - cyrus-sasl
+      - cyrus-sasl-plain
+    state: present
   when:
-  - postfix_smtp_sasl_auth_enable|bool or postfix_smtpd_sasl_auth
-  - ansible_os_family == "RedHat"
+    - postfix_smtp_sasl_auth_enable | bool or postfix_smtpd_sasl_auth
+    - ansible_facts['os_family'] == "RedHat"
 
 - name: Add the user postfix to group sasl
   ansible.builtin.user:
@@ -88,9 +74,9 @@
     groups: sasl
     append: true
   notify:
-    - restart postfix
+    - Restart postfix
   when:
-  - postfix_smtpd_sasl_auth
+    - postfix_smtpd_sasl_auth
 
 - name: Configure sasl file for postfix
   ansible.builtin.template:
@@ -98,13 +84,13 @@
     dest: "{{ postfix_smtpd_sasl_auth_default_file }}"
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   no_log: true
   notify:
-    - restart saslauthd
+    - Restart saslauthd
   when:
-  - postfix_smtpd_sasl_auth
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_smtpd_sasl_auth
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Configure sasl default file
   ansible.builtin.template:
@@ -112,20 +98,23 @@
     dest: "{{ postfix_smtpd_sasl_auth_conf_file }}"
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   no_log: true
   notify:
-    - restart postfix
+    - Restart postfix
   when:
-  - postfix_smtpd_sasl_auth
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_smtpd_sasl_auth
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Add sasl user
-  ansible.builtin.shell: echo "{{ postfix_sasl_password }}" | saslpasswd2 -p -c -u "{{ ansible_fqdn | default('localhost') }}" "{{ postfix_sasl_user }}"
+  ansible.builtin.command: saslpasswd2 -p -c -u "{{ ansible_facts['fqdn'] | default('localhost') }}" "{{ postfix_sasl_user }}"
+  args:
+    stdin: "{{ postfix_sasl_password }}"
+  changed_when: true
   no_log: true
   when:
-  - postfix_smtpd_sasl_auth
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_smtpd_sasl_auth
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Configure sasl client username/password
   ansible.builtin.template:
@@ -133,15 +122,15 @@
     dest: "{{ postfix_smtp_sasl_password_maps_file }}"
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   no_log: true
   notify:
-    - postmap postfix_smtp_sasl_password_maps
-    - restart postfix
+    - Postmap postfix_smtp_sasl_password_maps
+    - Restart postfix
   when:
-  - postfix_smtp_sasl_password_maps is defined
-  - postfix_smtp_sasl_auth_enable|bool
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_smtp_sasl_password_maps is defined
+    - postfix_smtp_sasl_auth_enable | bool
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Not using chroot for Postfix
   ansible.builtin.template:
@@ -149,14 +138,14 @@
     dest: "{{ postfix_master_config_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: true
   notify:
-    - restart postfix
+    - Restart postfix
   when:
-  - postfix_master_config_file is defined
-  - postfix_relay_role == "master"
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_master_config_file is defined
+    - postfix_relay_role == "master"
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Configure relaydomains
   ansible.builtin.template:
@@ -164,14 +153,14 @@
     dest: "{{ postfix_relaydomains_file }}"
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   notify:
-    - postmap postfix_relaydomains_file
-    - restart postfix
+    - Postmap postfix_relaydomains_file
+    - Restart postfix
   when:
-  - postfix_relaydomains_file is defined
-  - postfix_relay_role == "master"
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_relaydomains_file is defined
+    - postfix_relay_role == "master"
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Configure sender canonical maps
   ansible.builtin.template:
@@ -179,10 +168,10 @@
     dest: "{{ postfix_sender_canonical_maps_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
-    - postmap sender_canonical
-    - restart postfix
+    - Postmap sender_canonical
+    - Restart postfix
   when:
     - postfix_sender_canonical_map_entries | default([]) | length > 0
     - not postfix_mailrelay_unmanaged_config
@@ -193,20 +182,12 @@
     dest: "{{ postfix_smtp_header_checks_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
-    - restart postfix
+    - Restart postfix
   when:
     - postfix_sender_canonical_map_entries | default([]) | length > 0
     - not postfix_mailrelay_unmanaged_config
-
-- name: Guess myorigin from System
-  ansible.builtin.set_fact:
-    postfix_myorigin: "{{ ansible_domain | default('localhost') }}"
-  when:
-  - postfix_myorigin is not defined
-  - postfix_myorigin | length = 0
-  - postfix_myorigin == none
 
 - name: Create myorigin-file (Debian-family)
   ansible.builtin.template:
@@ -214,14 +195,12 @@
     dest: "{{ postfix_myorigin_file_debian }}"
     owner: root
     group: root
-    mode: 0644
-  notify: restart postfix
+    mode: "0644"
+  notify: Restart postfix
   when:
-  - postfix_myorigin is defined
-  - postfix_myorigin | length > 0
-  - postfix_myorigin != none
-  - ansible_os_family == "Debian"
-  - not postfix_mailrelay_unmanaged_config
+    - postfix_myorigin | default('', true) | length > 0
+    - ansible_facts['os_family'] == "Debian"
+    - not postfix_mailrelay_unmanaged_config
 
 - name: Ensure postfix is started and enabled at boot.
   ansible.builtin.service:
@@ -229,17 +208,17 @@
     state: "{{ postfix_service_state }}"
     enabled: "{{ postfix_service_enabled }}"
 
-- name: Force handlers to run before testing'
-  meta: flush_handlers
+- name: Force handlers to run before testing
+  ansible.builtin.meta: flush_handlers
 
 - name: Send a success email
-  ansible.builtin.mail:
-   host: "{{ postfix_send_test_mail_host }}"
-   secure: never
-   port: "{{ postfix_send_test_mail_port }}"
-   from: "{{ postfix_send_test_mail_from }}"
-   to: "{{ postfix_send_test_mail_to }}"
-   subject: "{{ postfix_send_test_mail_subject }} {{ ansible_fqdn }}"
-   body: "{{ postfix_send_test_mail_body }}"
+  community.general.mail:
+    host: "{{ postfix_send_test_mail_host }}"
+    secure: never
+    port: "{{ postfix_send_test_mail_port }}"
+    from: "{{ postfix_send_test_mail_from }}"
+    to: "{{ postfix_send_test_mail_to }}"
+    subject: "{{ postfix_send_test_mail_subject }} {{ ansible_facts['fqdn'] }}"
+    body: "{{ postfix_send_test_mail_body }}"
   when:
     - postfix_send_test_mail
