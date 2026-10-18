@@ -1,0 +1,10 @@
+---
+# handlers file for transmission
+# (settings are applied inline with a stop/copy/start sequence, a plain restart
+#  would let the daemon overwrite settings.json with its in-memory state)
+
+- name: Restart transmission-daemon
+  ansible.builtin.systemd_service:
+    name: "{{ transmission_service }}"
+    state: restarted
+  become: true

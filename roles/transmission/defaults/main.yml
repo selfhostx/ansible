@@ -1,0 +1,85 @@
+---
+# defaults file for transmission
+
+transmission_package_state: present  # present | latest
+
+# --- directories --------------------------------------------------------
+transmission_download_dir: "/var/lib/transmission-daemon/downloads"
+
+transmission_incomplete_dir_enabled: false
+transmission_incomplete_dir: "/var/lib/transmission-daemon/incomplete"
+
+# torrents dropped in this directory are added automatically
+transmission_watch_dir_enabled: false
+transmission_watch_dir: "/var/lib/transmission-daemon/watch"
+
+# create the directories above (owned by the transmission user)?
+transmission_manage_dirs: true
+# setgid + group-writable, so other members of the transmission group can work with the files
+transmission_dir_mode: "2775"
+
+# umask for files transmission creates, as DECIMAL number (18 = 022, 2 = 002)
+transmission_umask: 2
+
+# --- RPC / web interface --------------------------------------------------
+transmission_rpc_enabled: true
+transmission_rpc_bind_address: "0.0.0.0"
+transmission_rpc_port: 9091
+transmission_rpc_url: "/transmission/"
+
+transmission_rpc_authentication_required: true
+transmission_rpc_username: "transmission"
+# required when authentication is enabled - put it into ansible-vault!
+# plaintext gets hashed by transmission on first start,
+# a hash (starting with "{") is accepted as well.
+transmission_rpc_password: ""
+
+# IP-based access control (wildcards allowed, e.g. "192.168.*.*")
+transmission_rpc_whitelist_enabled: true
+transmission_rpc_whitelist:
+  - "127.0.0.1"
+  - "::1"
+
+# protection against DNS rebinding: hostnames allowed in the HTTP Host-header
+# (needed when accessing via FQDN or a reverse proxy)
+transmission_rpc_host_whitelist_enabled: true
+transmission_rpc_host_whitelist: []
+#  - "torrent.example.com"
+
+# --- peers / network ------------------------------------------------------
+transmission_peer_port: 51413
+transmission_peer_port_random_on_start: false
+transmission_port_forwarding_enabled: false  # UPnP / NAT-PMP
+# 0 = prefer unencrypted, 1 = prefer encrypted, 2 = require encrypted
+transmission_encryption: 1
+transmission_dht_enabled: true
+transmission_pex_enabled: true
+transmission_lpd_enabled: false
+transmission_utp_enabled: true
+
+# --- limits ---------------------------------------------------------------
+# speeds in kB/s
+transmission_speed_limit_down_enabled: false
+transmission_speed_limit_down: 100
+transmission_speed_limit_up_enabled: false
+transmission_speed_limit_up: 100
+
+transmission_ratio_limit_enabled: false
+transmission_ratio_limit: 2
+
+transmission_download_queue_enabled: true
+transmission_download_queue_size: 5
+
+# --- free-form settings ---------------------------------------------------
+# any key from https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md
+# merged last, so it overrides everything above
+transmission_settings_extra: {}
+#  cache-size-mb: 16
+#  message-level: 2
+#  rename-partial-files: true
+
+# --- system tuning --------------------------------------------------------
+# transmission complains about too small UDP buffers (uTP) - raise them via sysctl
+transmission_sysctl_udp_buffers: true
+transmission_sysctl_rmem_max: 4194304
+transmission_sysctl_wmem_max: 1048576

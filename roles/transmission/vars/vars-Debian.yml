@@ -1,0 +1,10 @@
+---
+# vars specific for Debian family (Debian, Ubuntu, ...)
+transmission_package: "transmission-daemon"
+transmission_service: "transmission-daemon"
+transmission_user: "debian-transmission"
+transmission_group: "debian-transmission"
+transmission_config_dir: "/etc/transmission-daemon"
+transmission_config_file: "{{ transmission_config_dir }}/settings.json"
+# desired state rendered by ansible, copied to settings.json while the daemon is stopped
+transmission_config_file_managed: "{{ transmission_config_dir }}/settings.ansible.json"

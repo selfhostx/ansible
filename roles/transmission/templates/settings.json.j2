@@ -1,0 +1,42 @@
+{#- {{ ansible_managed }} -- JSON has no comments, so the marker is not rendered -#}
+{%- set settings = {
+    "download-dir": transmission_download_dir,
+    "incomplete-dir": transmission_incomplete_dir,
+    "incomplete-dir-enabled": transmission_incomplete_dir_enabled | bool,
+    "watch-dir": transmission_watch_dir,
+    "watch-dir-enabled": transmission_watch_dir_enabled | bool,
+    "umask": transmission_umask | int,
+
+    "rpc-enabled": transmission_rpc_enabled | bool,
+    "rpc-bind-address": transmission_rpc_bind_address,
+    "rpc-port": transmission_rpc_port | int,
+    "rpc-url": transmission_rpc_url,
+    "rpc-authentication-required": transmission_rpc_authentication_required | bool,
+    "rpc-username": transmission_rpc_username,
+    "rpc-whitelist-enabled": transmission_rpc_whitelist_enabled | bool,
+    "rpc-whitelist": transmission_rpc_whitelist | join(","),
+    "rpc-host-whitelist-enabled": transmission_rpc_host_whitelist_enabled | bool,
+    "rpc-host-whitelist": transmission_rpc_host_whitelist | join(","),
+
+    "peer-port": transmission_peer_port | int,
+    "peer-port-random-on-start": transmission_peer_port_random_on_start | bool,
+    "port-forwarding-enabled": transmission_port_forwarding_enabled | bool,
+    "encryption": transmission_encryption | int,
+    "dht-enabled": transmission_dht_enabled | bool,
+    "pex-enabled": transmission_pex_enabled | bool,
+    "lpd-enabled": transmission_lpd_enabled | bool,
+    "utp-enabled": transmission_utp_enabled | bool,
+
+    "speed-limit-down-enabled": transmission_speed_limit_down_enabled | bool,
+    "speed-limit-down": transmission_speed_limit_down | int,
+    "speed-limit-up-enabled": transmission_speed_limit_up_enabled | bool,
+    "speed-limit-up": transmission_speed_limit_up | int,
+    "ratio-limit-enabled": transmission_ratio_limit_enabled | bool,
+    "ratio-limit": transmission_ratio_limit | float,
+    "download-queue-enabled": transmission_download_queue_enabled | bool,
+    "download-queue-size": transmission_download_queue_size | int,
+} -%}
+{%- if transmission_rpc_password | length > 0 -%}
+{%-   set settings = settings | combine({"rpc-password": transmission_rpc_password}) -%}
+{%- endif -%}
+{{ settings | combine(transmission_settings_extra) | to_nice_json(indent=4, sort_keys=true) }}

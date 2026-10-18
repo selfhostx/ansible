@@ -1,0 +1,118 @@
+---
+# tasks file for transmission
+
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  tags:
+    - always
+
+- name: Check requirements
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Debian"
+      - not (transmission_rpc_enabled | bool and transmission_rpc_authentication_required | bool)
+        or transmission_rpc_password | length > 0
+    fail_msg: >-
+      Only the Debian family is supported, and transmission_rpc_password must be set
+      when the RPC interface requires authentication.
+    quiet: true
+  tags:
+    - always
+
+- name: Install transmission-daemon
+  ansible.builtin.apt:
+    name: "{{ transmission_package }}"
+    state: "{{ transmission_package_state }}"
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  tags:
+    - transmission_install
+
+- name: Create transmission directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ transmission_user }}"
+    group: "{{ transmission_group }}"
+    mode: "{{ transmission_dir_mode }}"
+  loop:
+    - path: "{{ transmission_download_dir }}"
+      enabled: true
+    - path: "{{ transmission_incomplete_dir }}"
+      enabled: "{{ transmission_incomplete_dir_enabled }}"
+    - path: "{{ transmission_watch_dir }}"
+      enabled: "{{ transmission_watch_dir_enabled }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - transmission_manage_dirs | bool
+    - item.enabled | bool
+  become: true
+  tags:
+    - transmission_config
+
+- name: Raise UDP buffer sizes (uTP)
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/60-transmission.conf
+    sysctl_set: true
+    state: present
+  loop:
+    - name: net.core.rmem_max
+      value: "{{ transmission_sysctl_rmem_max }}"
+    - name: net.core.wmem_max
+      value: "{{ transmission_sysctl_wmem_max }}"
+  when: transmission_sysctl_udp_buffers | bool
+  become: true
+  tags:
+    - transmission_config
+
+# transmission rewrites settings.json on shutdown (and hashes the rpc-password),
+# so templating settings.json directly would never be idempotent and changes made
+# while the daemon runs get lost. Instead render the desired state to a separate file
+# and only apply it (daemon stopped) when that file changed.
+- name: Render desired transmission settings
+  ansible.builtin.template:
+    src: settings.json.j2
+    dest: "{{ transmission_config_file_managed }}"
+    owner: root
+    group: "{{ transmission_group }}"
+    mode: "0640"
+  register: transmission_settings_rendered
+  diff: false  # contains the rpc password
+  become: true
+  tags:
+    - transmission_config
+
+- name: Apply transmission settings  # noqa: no-handler -- must run before the service task, see comment above
+  when: transmission_settings_rendered is changed
+  become: true
+  tags:
+    - transmission_config
+  block:
+    - name: Stop transmission-daemon before writing settings
+      ansible.builtin.systemd_service:
+        name: "{{ transmission_service }}"
+        state: stopped
+
+    - name: Copy settings into place
+      ansible.builtin.copy:
+        src: "{{ transmission_config_file_managed }}"
+        dest: "{{ transmission_config_file }}"
+        remote_src: true
+        follow: true
+        owner: "{{ transmission_user }}"
+        group: "{{ transmission_group }}"
+        mode: "0600"
+      diff: false
+
+- name: Enable and start transmission-daemon
+  ansible.builtin.systemd_service:
+    name: "{{ transmission_service }}"
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - transmission_service

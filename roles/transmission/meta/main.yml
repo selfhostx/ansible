@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  role_name: transmission
+  author: selfhostx
+  description: transmission-daemon (bittorrent client with web interface)
+  company: none
+  license: BSD-3-Clause
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  galaxy_tags:
+    - transmission
+    - bittorrent
+    - torrent
+    - selfhosting
+
+dependencies: []

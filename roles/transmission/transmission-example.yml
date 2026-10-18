@@ -1,0 +1,29 @@
+---
+- name: Install transmission
+  hosts: transmission
+  become: true
+
+  roles:
+    - role: selfhostx.ansible.transmission
+
+  vars:
+    transmission_download_dir: /srv/torrents/complete
+    transmission_incomplete_dir_enabled: true
+    transmission_incomplete_dir: /srv/torrents/incomplete
+    transmission_watch_dir_enabled: true
+    transmission_watch_dir: /srv/torrents/watch
+
+    transmission_rpc_username: admin
+    transmission_rpc_password: "{{ vault_transmission_rpc_password }}"
+    transmission_rpc_whitelist:
+      - "127.0.0.1"
+      - "::1"
+      - "192.168.*.*"
+    transmission_rpc_host_whitelist:
+      - "torrent.example.com"
+
+    transmission_speed_limit_up_enabled: true
+    transmission_speed_limit_up: 500
+
+    transmission_settings_extra:
+      cache-size-mb: 16
