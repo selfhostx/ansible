@@ -1,0 +1,52 @@
+---
+- name: Check that nginx is installed
+  ansible.builtin.command: nginx -v
+  register: vaultwarden_nginx_version_raw
+  changed_when: false
+  check_mode: false
+  become: true
+
+- name: Choose http2 syntax by nginx version
+  ansible.builtin.set_fact:
+    vaultwarden_nginx_http2_on: "{{ (vaultwarden_nginx_version_raw.stderr | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') | default('0.0.0', true)) is version('1.25.1', '>=') }}"
+
+- name: Remove legacy vhost from sites-available/sites-enabled
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/etc/nginx/sites-enabled/{{ vaultwarden_nginx_config_filename }}"
+    - "/etc/nginx/sites-available/{{ vaultwarden_nginx_config_filename }}"
+  become: true
+  notify: Reload nginx
+  when:
+    - vaultwarden_nginx_remove_legacy_config | bool
+    - vaultwarden_nginx_config_src_dir != '/etc/nginx/sites-available'
+    - vaultwarden_nginx_config_dst_dir != '/etc/nginx/sites-enabled'
+
+- name: Remove default config (when enabled)
+  ansible.builtin.file:
+    path: "{{ vaultwarden_nginx_default_config }}"
+    state: absent
+  become: true
+  notify: Restart nginx
+  when: vaultwarden_nginx_remove_default_config | bool
+
+- name: Ensure nginx config is present
+  ansible.builtin.template:
+    dest: "{{ vaultwarden_nginx_config_src_dir }}/{{ vaultwarden_nginx_config_filename }}"
+    owner: root
+    group: root
+    mode: "0644"
+    src: "{{ vaultwarden_nginx_template }}"
+  become: true
+  notify: Reload nginx
+
+- name: Enable nginx config via symbolic link
+  ansible.builtin.file:
+    src: "{{ vaultwarden_nginx_config_src_dir }}/{{ vaultwarden_nginx_config_filename }}"
+    dest: "{{ vaultwarden_nginx_config_dst_dir }}/{{ vaultwarden_nginx_config_filename }}"
+    state: link
+  become: true
+  notify: Reload nginx
+  when: vaultwarden_nginx_config_src_dir != vaultwarden_nginx_config_dst_dir

@@ -1,5 +1,6 @@
 ---
 # vars specific for RedHat systems
-vaultwarden_nginx_default_config: "/etc/nginx/conf.d/default.conf"
-vaultwarden_nginx_config_src_dir: "/etc/nginx/conf.d"
-vaultwarden_nginx_config_dst_dir: "/etc/nginx/conf.d"
+vaultwarden_packages_base:
+  - argon2
+vaultwarden_packages_backup:
+  - sqlite

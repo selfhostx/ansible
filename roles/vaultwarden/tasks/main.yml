@@ -2,16 +2,22 @@
 # tasks file for roles/vaultwarden
 
 - name: Include OS-family specific variables
-  ansible.builtin.include_vars: "vars-{{ ansible_os_family }}.yml"
+  ansible.builtin.include_vars: "vars-{{ ansible_facts['os_family'] }}.yml"
   tags:
     - always
 
-# Read distro specific vars, dont put vars here which the user overrides since include_vars has a high precedence
-- name: Include distribution major version specific variables (if present)
-  ansible.builtin.include_vars: "vars-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-  failed_when: false
-  tags:
-    - always
+- name: Include EPEL role for RedHat family
+  ansible.builtin.include_role:
+    name: "{{ vaultwarden_epel_rolename }}"
+  when:
+    - vaultwarden_epel_include_role | bool
+    - ansible_facts['os_family'] == 'RedHat'
+
+- name: Install required packages
+  ansible.builtin.package:
+    name: "{{ vaultwarden_packages_base + (vaultwarden_packages_backup if vaultwarden_backup_enable | bool else []) }}"
+    state: present
+  become: true
 
 - name: Create directory structure
   ansible.builtin.file:
@@ -25,68 +31,29 @@
     - "{{ vaultwarden_project_src }}"
     - "{{ vaultwarden_project_src }}/data"
 
-- name: Clone vaultwarden repo
-  ansible.builtin.git:
-    clone: true
-    dest: "{{ vaultwarden_project_src }}/repo"
-    force: true
-    repo: "{{ vaultwarden_git_src }}"
-    update: true
-    version: "{{ vaultwarden_version | default(omit) }}"
-  notify:
-    - Create service vaultwarden
-    - Create service vaultwarden command
-    - Build vaultwarden
-    - Build vaultwarden command
-
-- name: Install Docker SDK for Python
-  ansible.builtin.pip:
-    name:
-      - docker
-    extra_args: "{{ vaultwarden_pip_extra_vars | default(omit) }}"
-
-- name: Install Docker compose for Python
-  ansible.builtin.pip:
-    name:
-      - docker-compose
-    extra_args: "{{ vaultwarden_pip_extra_vars | default(omit) }}"
-  when:
-    - vaultwarden_install_docker_compose_via_pip
-
-- name: Include Epel Role for RedHat-Family
-  # FIXME make name changeable, optional
-  ansible.builtin.include_role:
-    name: geerlingguy.repo-epel
-  when:
-    - vaultwarden_epel_include_role|bool
-    - ansible_os_family == 'RedHat'
-
-- name: Pull vaultwarden image
-  community.docker.docker_image:
-    name: "{{ vaultwarden_image }}:{{ vaultwarden_version | default('latest') }}"
-    repository: "{{ vaultwarden_docker_registy | default(omit) }}"
-    source: pull
-  notify:
-    - Restart vaultwarden
-    - Restart vaultwarden command
-
-- name: Install argon2 package
-  ansible.builtin.package:
-    name: argon2
-  become: true
-  tags:
-    - env
-
-- name: Hash vaultwarden_admin_token into argon2 and escape for docker-compose (if not present)
-  ansible.builtin.shell: echo -n {{ vaultwarden_admin_token }} | argon2 {{ lookup('password', '/dev/null length=32 chars=ascii_letters') }} -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
-  args:
-    executable: /bin/bash
+- name: Hash admin token with argon2
+  ansible.builtin.command:
+    argv:
+      - argon2
+      - "{{ vaultwarden_admin_token_salt[:32] }}"
+      - -e
+      - -id
+      - -k
+      - "65540"
+      - -t
+      - "3"
+      - -p
+      - "4"
+    stdin: "{{ vaultwarden_admin_token }}"
+    stdin_add_newline: false
   register: vaultwarden_admin_token_argon2
+  changed_when: false
+  check_mode: false
   no_log: true
   tags:
     - env
-  # skip if a pre-hashed value is already set (to prevent "always changed" + handler-restart):
   when:
+    - vaultwarden_admin_token is defined
     - vaultwarden_admin_token_argon2_prehashed is not defined
 
 - name: Template .env file
@@ -96,9 +63,7 @@
     owner: root
     group: root
     mode: '0640'
-  notify:
-    - Restart vaultwarden
-    - Restart vaultwarden command
+  become: true
   tags:
     - env
 
@@ -109,48 +74,25 @@
     owner: root
     group: root
     mode: '0640'
-  notify:
-    - Create service vaultwarden
-    - Create service vaultwarden command
-    - Restart vaultwarden
-    - Restart vaultwarden command
-
-#- name: Link Dockerfile
-#  ansible.builtin.file:
-#    src: "{{ vaultwarden_project_src }}/repo/Dockerfile"
-#    dest: "{{ vaultwarden_project_src }}/Dockerfile"
-#    state: link
-
-- name: Remove default config (when enabled)
-  ansible.builtin.file:
-    path: "{{ vaultwarden_nginx_default_config }}"
-    state: absent
   become: true
-  notify: Restart nginx
-  when:
-    - vaultwarden_nginx_deploy_reverseconfig
-    - vaultwarden_nginx_remove_default_config
-    - ansible_os_family == 'Debian'
 
-- name: Ensure nginx config is present
-  ansible.builtin.template:
-    dest: "{{ vaultwarden_nginx_config_src_dir }}/{{ vaultwarden_nginx_config_filename }}"
-    owner: root
-    group: root
-    mode: "0644"
-    src: "{{ vaultwarden_nginx_template }}"
+# recreates the container on changed image, compose file or env
+- name: Start vaultwarden
+  community.docker.docker_compose_v2:
+    project_src: "{{ vaultwarden_project_src }}"
+    state: present
+    pull: "{{ 'always' if vaultwarden_version == 'latest' else 'missing' }}"
+    remove_orphans: true
   become: true
-  notify: Reload nginx
-  when:
-    - vaultwarden_nginx_deploy_reverseconfig
+  tags:
+    - env
 
-- name: Enable nginx config via symbolic link
-  ansible.builtin.file:
-    src: "{{ vaultwarden_nginx_config_src_dir }}/{{ vaultwarden_nginx_config_filename }}"
-    dest: "{{ vaultwarden_nginx_config_dst_dir }}/{{ vaultwarden_nginx_config_filename }}"
-    state: link
-  become: true
-  notify: Reload nginx
+- name: Configure nginx
+  ansible.builtin.import_tasks: nginx.yml
+  when: vaultwarden_nginx_deploy_reverseconfig | bool
+
+- name: Configure backup
+  ansible.builtin.import_tasks: backup.yml
   when:
-    - ansible_os_family == 'Debian'
-    - vaultwarden_nginx_deploy_reverseconfig
+    - vaultwarden_backup_enable | bool
+    - vaultwarden_database_url | length == 0

@@ -1,0 +1,34 @@
+---
+- name: Install vaultwarden
+  hosts: vaultwarden.DOMAIN.TLD
+  become: true
+  roles:
+    # - { role: selfhostx.ansible.baserole, tags: baserole }
+    - { role: geerlingguy.docker, tags: docker }
+    - { role: selfhostx.certbot, tags: certbot }
+    - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+    - { role: selfhostx.ansible.vaultwarden, tags: vaultwarden }
+
+  vars_files:
+    - YOUR-vault.yml
+    # includes vaultwarden_admin_token
+
+  vars:
+    vaultwarden_nginx_use_nginx_common_snippet: true
+    nginx_ssl_protocols: "TLSv1.3"
+
+    vaultwarden_backup_enable: true
+
+    vaultwarden_env_extra: |
+      SIGNUPS_ALLOWED=false
+
+    # letsencrypt:
+    certbot_create_method: nginx
+    certbot_create_if_missing: true
+    certbot_install_from_source: false
+    certbot_admin_email: mail@DOMAIN.TLD
+    certbot_auto_renew_minute: 17
+    certbot_auto_renew_hour: 3
+    certbot_certs:
+      - domains:
+          - "{{ vaultwarden_hostname }}"

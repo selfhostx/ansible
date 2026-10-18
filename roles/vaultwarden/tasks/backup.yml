@@ -1,0 +1,28 @@
+---
+- name: Create backup directory
+  ansible.builtin.file:
+    path: "{{ vaultwarden_backup_dir }}"
+    owner: root
+    group: root
+    mode: '0700'
+    state: directory
+  become: true
+
+- name: Deploy backup script
+  ansible.builtin.template:
+    src: vaultwarden-backup.sh.j2
+    dest: /usr/local/sbin/vaultwarden-backup
+    owner: root
+    group: root
+    mode: '0750'
+  become: true
+
+- name: Schedule backup
+  ansible.builtin.cron:
+    name: vaultwarden backup
+    cron_file: vaultwarden-backup
+    user: root
+    hour: "{{ vaultwarden_backup_hour }}"
+    minute: "{{ vaultwarden_backup_minute }}"
+    job: /usr/local/sbin/vaultwarden-backup
+  become: true

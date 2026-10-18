@@ -1,9 +1,7 @@
 # {{ ansible_managed }}
-version: '3'
-
 services:
   vaultwarden:
-    image: {{ vaultwarden_image }}:{{ vaultwarden_version | default('latest') }}
+    image: {{ vaultwarden_image }}:{{ vaultwarden_version }}
     container_name: {{ vaultwarden_container_name }}
     restart: always
     env_file:

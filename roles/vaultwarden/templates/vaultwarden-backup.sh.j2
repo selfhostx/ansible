@@ -1,0 +1,11 @@
+#!/bin/bash
+# {{ ansible_managed }}
+set -euo pipefail
+
+data="{{ vaultwarden_project_src }}/data"
+dest="{{ vaultwarden_backup_dir }}"
+stamp="$(date +%F_%H%M)"
+
+sqlite3 "${data}/db.sqlite3" ".backup '${dest}/db-${stamp}.sqlite3'"
+tar -czf "${dest}/data-${stamp}.tar.gz" -C "${data}" --exclude='db.sqlite3*' .
+find "${dest}" -maxdepth 1 -type f \( -name 'db-*.sqlite3' -o -name 'data-*.tar.gz' \) -mtime +{{ vaultwarden_backup_retention_days }} -delete
