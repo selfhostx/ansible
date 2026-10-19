@@ -160,7 +160,7 @@ baserole_package_source_enable: true
 # PACKAGES Install defaults ===
 baserole_package_install_default_enable: true
 # update the apt cache if it is older than the cache_valid_time (in seconds):
-baserole_package_cache_valid_time: 86400
+baserole_package_cache_valid_time: 300
 baserole_package_defaults_debian:
   - bzip2
   - curl
