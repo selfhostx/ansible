@@ -343,6 +343,7 @@ baserole_usercreate_config_enable: true
 #    password: $6$normaluser_hash
 #    shell: /bin/bash
 
+baserole_skip_this_user: false
 baserole_authorizedkeys: []
 
 # minimal example (see README.md for more details)
