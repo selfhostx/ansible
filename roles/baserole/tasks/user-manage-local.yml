@@ -1,7 +1,7 @@
 ---
-- name: Check if conditional_hostgroup is present
+- name: Check if conditional_hostgroup is present (and set skip_this_user if match)
   ansible.builtin.set_fact:
-    item.skip_this_user: true
+    baserole_skip_this_user: true
   when: item.conditional_hostgroup is defined and not item.conditional_hostgroup in group_names
   tags:
     - htop
@@ -40,7 +40,9 @@
     ssh_key_file:       '{{ item.ssh_key_file_name  | d(omit) }}'
     ssh_key_passphrase: '{{ item.ssh_key_passphrase | d(omit) }}'
     ssh_key_type:       '{{ item.ssh_key_type       | d(omit) }}'
-  when: item.skip_this_user is undefined or not item.skip_this_user | bool
+  when:
+    - item.skip_this_user is undefined or not item.skip_this_user | bool
+    - not baserole_skip_this_user | bool
 # yamllint enable rule:colon
 
 - name: Remove sudoers file (with password)
@@ -70,13 +72,15 @@
 
 - name: Set skip if state (of user) is set to absent
   ansible.builtin.set_fact:
-    item.skip_this_user: true
+    baserole_skip_this_user: true
   when:
     - item.state is defined
     - item.state == "absent"
 
 - name: User Create block
-  when: item.skip_this_user is undefined or not item.skip_this_user | bool
+  when:
+    - item.skip_this_user is undefined or not item.skip_this_user | bool
+    - not baserole_skip_this_user | bool
   block:
     - name: Create .ssh dir
       ansible.builtin.file:
@@ -172,7 +176,6 @@
         mode: '0600'
       when:
         - baserole_bashrc_configure
-        - item.shell is defined
         - item.shell == "/bin/bash"
       tags:
         - bash
@@ -186,8 +189,7 @@
         mode: '0600'
       when:
         - baserole_vimrc_configure
-        - item.default_editor is defined
-        - item.default_editor == "vi" or baserole_default_editor == "vim"
+        - item.default_editor is defined and item.default_editor == "vi" or baserole_default_editor == "vim"
       tags:
         - vim
 
@@ -200,8 +202,7 @@
         mode: '0600'
       when:
         - baserole_nanorc_configure
-        - item.default_editor is defined
-        - item.default_editor == "nano" or baserole_default_editor == "nano"
+        - item.default_editor is defined and item.default_editor == "nano" or baserole_default_editor == "nano"
       tags:
         - nano
 
@@ -236,3 +237,18 @@
         - baserole_users_optional_tasks_enable
         - baserole_users_optional_tasks_template is defined
         - baserole_users_optional_tasks_template|length > 0
+
+
+- name: Reset local var baserole_skip_this_user
+  ansible.builtin.set_fact:
+    baserole_skip_this_user: false
+  when:
+    - baserole_skip_this_user
+  tags:
+    - htop
+    - nano
+    - pubkey
+    - ssh
+    - sudo
+    - userlocal
+    - vim
