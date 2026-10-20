@@ -1,34 +1,39 @@
 ---
 # defaults for vaultwarden
 
-vaultwarden_hostname: "{{ ansible_fqdn | default (inventory_hostname) }}"
+vaultwarden_hostname: "{{ ansible_facts['fqdn'] | default(inventory_hostname) }}"
 
-# specify version or just leave blank for latest:
-# vaultwarden_version: '1.28.1'
+# image tag, see https://github.com/dani-garcia/vaultwarden/releases
+# "latest" is pulled on every run
+vaultwarden_version: "latest"
 
-# Token for the admin interface (will be hashed with argon2). If not set, the admin panel is disabled.
+# Token for the admin interface (hashed with argon2). If not set, the admin panel is disabled.
 # preferably use a long random string: openssl rand -base64 48
-# Example (DO NOT USE this value):
-# vaultwarden_admin_token: "MHQTX+2xhRoIbh55VpmmbA7vbCg6GUwwsp7NBSysjEYPNP85hbow7MZHPxIsFtAN"
+# vaultwarden_admin_token: "-> vault"
 
-# better way: you can provide a hashed argon2 admin-token to prevent re-hashing (and restarting of service) on every run:
-# just use output from diff-mode or manual creation from linux (need argon2 package installed):
-# echo -n YOUR_SECRET_PASSWORD | argon2 $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c32) -e -id -k 65540 -t 3 -p 4 | sed 's#\$#\$\$#g'
-# example output:
-# vaultwarden_admin_token_argon2_prehashed: "$$argon2id$$v=19$$m=65540,t=3,p=4$$ZUhGT2FLblBJYVdjWmhSY3dYRXlJaG9XUk5sUnFZbHk$$3kiP1DmMFL8TkkXYckCKiDZbecWpwOqiJ2ur1fXGVmE"
+# salt for hashing the admin token, fixed per host to keep the hash stable
+vaultwarden_admin_token_salt: "{{ (inventory_hostname ~ '-vaultwarden') | hash('sha256') }}"
 
-# define all other vars here, Example:
+# alternatively provide an argon2 PHC string directly, e.g. from `vaultwarden hash`:
+# vaultwarden_admin_token_argon2_prehashed: "$argon2id$v=19$m=65540,t=3,p=4$..."
+
+# empty = SQLite in {{ vaultwarden_project_src }}/data
+# example: "mysql://vaultwarden:PASSWORD@DBHOST/vaultwarden" (URL-encode the password)
+vaultwarden_database_url: ""
+
+# additional environment, see https://github.com/dani-garcia/vaultwarden/blob/main/.env.template
 # vaultwarden_env_extra: |
 #   SIGNUPS_ALLOWED=false
 #   SIGNUPS_DOMAINS_WHITELIST=my-domain.tld
+vaultwarden_env_extra: ""
 
 vaultwarden_project_src: "/opt/vaultwarden"
-vaultwarden_git_src: "https://github.com/dani-garcia/vaultwarden.git"
 vaultwarden_docker_compose_template: "docker-compose.j2"
 vaultwarden_docker_env_template: "docker-env.j2"
 # filename or relative path to env-file:
 vaultwarden_docker_env_file: ".env"
 
+# prefix with a registry if needed, e.g. "registry.example.com/vaultwarden/server"
 vaultwarden_image: "vaultwarden/server"
 vaultwarden_container_name: "vaultwarden"
 vaultwarden_listen: "127.0.0.1:8080"
@@ -36,13 +41,25 @@ vaultwarden_listen: "127.0.0.1:8080"
 vaultwarden_epel_include_role: true
 vaultwarden_epel_rolename: "geerlingguy.repo-epel"
 
-# reverse-proxy-config, use nginx to make a ssl reverse-proxy-config:
+# reverse proxy (nginx must already be installed, e.g. via selfhostx.ansible.nginx_common):
 vaultwarden_nginx_deploy_reverseconfig: true
 vaultwarden_nginx_template: "nginx-vaultwarden.conf.j2"
-# only on debian:
+
+# conf.d is included by nginx.conf on Debian, Ubuntu, RedHat and nginx.org packages.
+# For the Debian layout use sites-available / sites-enabled (a symlink is created).
+vaultwarden_nginx_config_src_dir: "/etc/nginx/conf.d"
+vaultwarden_nginx_config_dst_dir: "/etc/nginx/conf.d"
+# conf.d only includes *.conf:
+vaultwarden_nginx_config_filename: "vaultwarden.conf"
+
+# remove vhost left in sites-available/sites-enabled by older versions of this role:
+vaultwarden_nginx_remove_legacy_config: true
+
 vaultwarden_nginx_remove_default_config: false
-# debian includes everything, centos only *.conf:
-vaultwarden_nginx_config_filename: vaultwarden.conf
+vaultwarden_nginx_default_config: "{{ '/etc/nginx/sites-enabled/default' if ansible_facts['os_family'] == 'Debian' else '/etc/nginx/conf.d/default.conf' }}"
+
+# max upload size (attachments, sends):
+vaultwarden_nginx_client_max_body_size: "525M"
 
 # if you use our nginx_common role, use "true" here:
 vaultwarden_nginx_use_nginx_common_snippet: false
@@ -61,10 +78,9 @@ vaultwarden_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ vaultwarden_hos
 # remove others vhosts to prevent leaking the version number from them (i.e. with var "vaultwarden_nginx_remove_default_config")
 vaultwarden_hide_nginx_version: true
 
-# workaround for failed pip install docker-compose (failed build of dependency PyYAML with "AttributeError: cython_sources" https://github.com/yaml/pyyaml/issues/736 ):
-vaultwarden_install_docker_compose_via_pip: false
-vaultwarden_user_docker_compose_cmd: true
-
-# optional custom docker registry:
-# (more information: https://docs.ansible.com/ansible/latest/collections/community/docker/docker_image_module.html#ansible-collections-community-docker-docker-image-module )
-# vaultwarden_docker_registy: "localhost:5000/centos"
+# daily backup of the SQLite database and data directory (only without vaultwarden_database_url):
+vaultwarden_backup_enable: false
+vaultwarden_backup_dir: "/var/backups/vaultwarden"
+vaultwarden_backup_retention_days: 14
+vaultwarden_backup_hour: 3
+vaultwarden_backup_minute: 30

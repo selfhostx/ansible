@@ -1,19 +1,19 @@
 # {{ ansible_managed }}
-# see original for more options : https://github.com/dani-garcia/vaultwarden/blob/main/.env.template
+# more options: https://github.com/dani-garcia/vaultwarden/blob/main/.env.template
 
 DOMAIN=https://{{ vaultwarden_hostname }}
 
-## Token for the admin interface, preferably an Argon2 PCH string
-## Vaultwarden has a built-in generator by calling `vaultwarden hash`
-## For details see: https://github.com/dani-garcia/vaultwarden/wiki/Enabling-admin-page#secure-the-admin_token
-## If not set, the admin panel is disabled
-## New Argon2 PHC string
-## Note that for some environments, like docker-compose you need to escape all the dollar signs `$` with an extra dollar sign like `$$`
-## Also, use single quotes (') instead of double quotes (") to enclose the string when needed
-# ADMIN_TOKEN='$argon2id$v=19$m=65540,t=3,p=4$MmeKRnGK5RW5mJS7h3TOL89GrpLPXJPAtTK8FTqj9HM$DqsstvoSAETl9YhnsXbf43WeaUwJC6JhViIvuPoig78'
-## Old plain text string (Will generate warnings in favor of Argon2)
-# ADMIN_TOKEN=Vy2VyYTTsKPv8W5aEOWUbB/Bt3DEKePbHmI4m9VcemUMS2rEviDowNAFqYi1xjmp
-ADMIN_TOKEN={{ vaultwarden_admin_token_argon2_prehashed if vaultwarden_admin_token_argon2_prehashed is defined else vaultwarden_admin_token_argon2.stdout}}
+{% if vaultwarden_admin_token_argon2_prehashed is defined %}
+ADMIN_TOKEN='{{ vaultwarden_admin_token_argon2_prehashed | replace('$$', '$') }}'
+{% elif vaultwarden_admin_token is defined and vaultwarden_admin_token_argon2 is skipped %}
+{# check mode on a fresh host only #}
+ADMIN_TOKEN='check-mode-placeholder'
+{% elif vaultwarden_admin_token is defined %}
+ADMIN_TOKEN='{{ vaultwarden_admin_token_argon2.stdout }}'
+{% endif %}
+{% if vaultwarden_database_url | length > 0 %}
+DATABASE_URL='{{ vaultwarden_database_url }}'
+{% endif %}
 
 # EXTRA Vars:
 {{ vaultwarden_env_extra }}

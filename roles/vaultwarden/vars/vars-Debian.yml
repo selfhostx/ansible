@@ -1,5 +1,6 @@
 ---
 # vars specific for Debian systems
-vaultwarden_nginx_default_config: "/etc/nginx/sites-enabled/default"
-vaultwarden_nginx_config_src_dir: "/etc/nginx/sites-available"
-vaultwarden_nginx_config_dst_dir: "/etc/nginx/sites-enabled"
+vaultwarden_packages_base:
+  - argon2
+vaultwarden_packages_backup:
+  - sqlite3
