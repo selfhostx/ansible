@@ -5,6 +5,8 @@ Deploys vaultwarden via Docker Compose with an nginx reverse proxy vhost.
 
 Additional manual configuration will be required at `https://{{ vaultwarden_hostname }}/admin` !
 
+Settings saved in the admin panel are written to `data/config.json` and override the `.env` rendered by this role.
+
 Requirements
 ------------
 
