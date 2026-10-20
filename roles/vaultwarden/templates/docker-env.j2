@@ -5,6 +5,9 @@ DOMAIN=https://{{ vaultwarden_hostname }}
 
 {% if vaultwarden_admin_token_argon2_prehashed is defined %}
 ADMIN_TOKEN='{{ vaultwarden_admin_token_argon2_prehashed | replace('$$', '$') }}'
+{% elif vaultwarden_admin_token is defined and vaultwarden_admin_token_argon2 is skipped %}
+{# check mode on a fresh host only #}
+ADMIN_TOKEN='check-mode-placeholder'
 {% elif vaultwarden_admin_token is defined %}
 ADMIN_TOKEN='{{ vaultwarden_admin_token_argon2.stdout }}'
 {% endif %}

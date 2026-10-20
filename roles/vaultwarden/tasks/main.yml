@@ -31,6 +31,19 @@
     - "{{ vaultwarden_project_src }}"
     - "{{ vaultwarden_project_src }}/data"
 
+# check mode on a fresh host: argon2 not installed yet, hash is skipped
+- name: Check whether argon2 is available
+  ansible.builtin.shell: command -v argon2  # noqa: command-instead-of-shell
+  register: vaultwarden_argon2_probe
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  tags:
+    - env
+  when:
+    - vaultwarden_admin_token is defined
+    - vaultwarden_admin_token_argon2_prehashed is not defined
+
 - name: Hash admin token with argon2
   ansible.builtin.command:
     argv:
@@ -55,7 +68,9 @@
   when:
     - vaultwarden_admin_token is defined
     - vaultwarden_admin_token_argon2_prehashed is not defined
+    - not ansible_check_mode or vaultwarden_argon2_probe.rc == 0
 
+# no diff: contains admin token hash and secrets from vaultwarden_env_extra
 - name: Template .env file
   ansible.builtin.template:
     src: "{{ vaultwarden_docker_env_template }}"
@@ -64,6 +79,7 @@
     group: root
     mode: '0640'
   become: true
+  diff: false
   tags:
     - env
 
@@ -76,6 +92,14 @@
     mode: '0640'
   become: true
 
+- name: Check whether the project directory exists
+  ansible.builtin.stat:
+    path: "{{ vaultwarden_project_src }}"
+  register: vaultwarden_project_dir
+  check_mode: false
+  tags:
+    - env
+
 # recreates the container on changed image, compose file or env
 - name: Start vaultwarden
   community.docker.docker_compose_v2:
@@ -86,6 +110,7 @@
   become: true
   tags:
     - env
+  when: not (ansible_check_mode and not vaultwarden_project_dir.stat.exists)
 
 - name: Configure nginx
   ansible.builtin.import_tasks: nginx.yml
