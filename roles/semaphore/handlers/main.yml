@@ -4,6 +4,12 @@
     name: "{{ semaphore_identifier }}"
     daemon_reload: true
     state: restarted
+  when: semaphore_restart | bool
+
+- name: Semaphore daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: not semaphore_restart | bool
 
 - name: Restart nginx
   ansible.builtin.service:

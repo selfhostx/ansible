@@ -40,6 +40,7 @@ None of the variables below are required.
 | `semaphore_db_user`   | semaphore | the mysql user |
 | `semaphore_db_password` | semaphore | the mysql user password |
 | `semaphore_user`         | semaphore | the user and systemd identifier semaphore runs as |
+| `semaphore_restart`      | `true`    | `false`: never restart the service, fact `semaphore_restart_needed` tells whether binary, config, migrations or unit changed |
 | `semaphore_listen_ip`     | `127.0.0.1`    | the IP semaphore binds to |
 | `semaphore_port`   | `3000`    | the port semaphore binds to |
 | `semaphore_path`         | /opt/semaphore | destination for the binary |

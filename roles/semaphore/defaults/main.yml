@@ -104,6 +104,10 @@ semaphore_version_dir: "{{ semaphore_executable }}_{{ semaphore_version }}"
 semaphore_identifier: "{{ semaphore_user }}"
 semaphore_systemd_unit_path: "/etc/systemd/system/{{ semaphore_identifier }}.service"
 
+# false: never restart the service (e.g. when updated from a semaphore task),
+# see fact semaphore_restart_needed
+semaphore_restart: true
+
 # mysql command lines to create default user
 semaphore_mysql_client_package: "{% if ansible_distribution == 'CentOS' or ansible_distribution == 'Redhat' %}mariadb{% elif ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' %}mysql-client{% endif %}"
 semaphore_mysql_server_package: "{% if ansible_distribution == 'CentOS' or ansible_distribution == 'Redhat' %}mariadb-server{% elif ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' %}mysql-server{% endif %}"

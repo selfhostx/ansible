@@ -101,6 +101,7 @@
     src: "{{ semaphore_version_dir }}/semaphore"
     dest: "{{ semaphore_executable }}"
     state: "link"
+  register: semaphore_symlink_result
   notify:
     - Semaphore restart
 
@@ -111,6 +112,7 @@
     owner: "{{ semaphore_user }}"
     group: "{{ semaphore_group }}"
     mode: '0644'
+  register: semaphore_config_result
   no_log: true
   notify:
     - Semaphore restart
@@ -139,8 +141,14 @@
     src: "{{ semaphore_systemd_template }}"
     dest: "{{ semaphore_systemd_unit_path }}"
     mode: '0644'
+  register: semaphore_unit_result
   notify:
     - Semaphore restart
+    - Semaphore daemon reload
+
+- name: Record whether a restart is needed
+  ansible.builtin.set_fact:
+    semaphore_restart_needed: "{{ [semaphore_symlink_result, semaphore_config_result, semaphore_migrations, semaphore_unit_result] | selectattr('changed', 'defined') | selectattr('changed') | list | length > 0 }}"
 
 - name: Service start
   ansible.builtin.systemd:
