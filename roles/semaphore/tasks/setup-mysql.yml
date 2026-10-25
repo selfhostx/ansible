@@ -5,7 +5,7 @@
     name: "{{ semaphore_mysql_server_package }}"
     update_cache: true
     state: present
-  register: mysql_install
+  register: semaphore_mysql_install_result
   when: semaphore_mysql_install
 
 - name: Install MySQL-Client
@@ -40,24 +40,24 @@
 - name: Get MySQL server version
   become: true
   ansible.builtin.command: "mysql -NBe 'SELECT VERSION();'"
-  register: mysql_version_cmd
+  register: semaphore_mysql_version_cmd
   changed_when: false
   failed_when: false
   when: semaphore_mysql_install or semaphore_mysql_create_db
 
 - name: Set MySQL version facts
   ansible.builtin.set_fact:
-    mysql_server_version: "{{ mysql_version_cmd.stdout | default('0.0.0') }}"
-    mysql_use_socket_auth: "{{ (mysql_version_cmd.stdout | default('0.0.0')) is version('8.4', '>=') }}"
+    semaphore_mysql_server_version: "{{ semaphore_mysql_version_cmd.stdout | default('0.0.0') }}"
+    semaphore_mysql_use_socket_auth: "{{ (semaphore_mysql_version_cmd.stdout | default('0.0.0')) is version('8.4', '>=') }}"
   when:
-    - mysql_version_cmd is defined
-    - mysql_version_cmd.rc == 0
+    - semaphore_mysql_version_cmd is defined
+    - semaphore_mysql_version_cmd.rc == 0
 
 - name: "Fallback: disable socket auth usage if version detection failed"
   ansible.builtin.set_fact:
-    mysql_use_socket_auth: false
+    semaphore_mysql_use_socket_auth: false
   when:
-    - mysql_use_socket_auth is not defined
+    - semaphore_mysql_use_socket_auth is not defined
 
 # ---------------------------------------------------------
 # Root-Accounts aktualisieren – je nach Auth-Methode
@@ -78,8 +78,8 @@
     - ::1
     - localhost
   when:
-    - mysql_install.changed    # noqa: no-handler
-    - mysql_use_socket_auth
+    - semaphore_mysql_install_result.changed    # noqa: no-handler
+    - semaphore_mysql_use_socket_auth
 
 - name: Update mysql root password for all root accounts (password auth, MySQL < 8.4)
   become: true
@@ -97,8 +97,8 @@
     - ::1
     - localhost
   when:
-    - mysql_install.changed    # noqa: no-handler
-    - not mysql_use_socket_auth
+    - semaphore_mysql_install_result.changed    # noqa: no-handler
+    - not semaphore_mysql_use_socket_auth
 
 # ---------------------------------------------------------
 # Semaphore-Datenbank anlegen
@@ -113,7 +113,7 @@
     check_implicit_admin: true
   when:
     - semaphore_mysql_create_db
-    - mysql_use_socket_auth
+    - semaphore_mysql_use_socket_auth
 
 - name: Setup semaphore database (password auth, MySQL < 8.4)
   become: true
@@ -126,7 +126,7 @@
     login_port: "{{ semaphore_db_port }}"
   when:
     - semaphore_mysql_create_db
-    - not mysql_use_socket_auth
+    - not semaphore_mysql_use_socket_auth
 
 # ---------------------------------------------------------
 # Semaphore-DB-User anlegen
@@ -143,7 +143,7 @@
     priv: "{{ semaphore_db_name }}.*:ALL,GRANT"
   when:
     - semaphore_mysql_create_db
-    - mysql_use_socket_auth
+    - semaphore_mysql_use_socket_auth
 
 - name: Setup semaphore database user (password auth, MySQL < 8.4)
   become: true
@@ -158,4 +158,4 @@
     priv: "{{ semaphore_db_name }}.*:ALL,GRANT"
   when:
     - semaphore_mysql_create_db
-    - not mysql_use_socket_auth
+    - not semaphore_mysql_use_socket_auth
