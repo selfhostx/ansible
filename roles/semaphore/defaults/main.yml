@@ -37,7 +37,7 @@ semaphore_mysql_create_db: true
 semaphore_mysql_allowed_host: "localhost"
 
 # whether to install mysql on the host and the root password to set
-mysql_root_password: "root"
+mysql_root_password: "root"  # noqa: var-naming[no-role-prefix]  # shared with geerlingguy.mysql
 semaphore_mysql_install: true
 
 

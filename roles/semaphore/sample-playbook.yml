@@ -2,17 +2,17 @@
 - name: Install ansible semaphore
   hosts: semaphore.DOMAIN.TLD
   roles:
-     - { role: selfhostx.ansible.baserole, tags: baserole }
-     - geerlingguy.git
-     - geerlingguy.pip
+    - { role: selfhostx.ansible.baserole, tags: baserole }
+    - geerlingguy.git
+    - geerlingguy.pip
      # - { role: selfhostx.certbot }
-     - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
-     - geerlingguy.mysql
+    - { role: selfhostx.ansible.nginx_common, tags: nginx_common }
+    - geerlingguy.mysql
      # - stefanux.mysqlbackup
-     - { role: selfhostx.ansible.semaphore, tags: semaphore }
+    - { role: selfhostx.ansible.semaphore, tags: semaphore }
 
   vars_files:
-     - my-vault.yml
+    - my-vault.yml
 
   vars:
     semaphore_hostname: "semaphore.DOMAIN.TLD"
@@ -40,7 +40,7 @@
     certbot_create_method: nginx
     certbot_certs:
       - domains:
-        - "{{ semaphore_hostname }}"
+          - "{{ semaphore_hostname }}"
     certbot_auto_renew_minute: 17
     certbot_auto_renew_hour: 3
     certbot_admin_email: "mail@DOMAIN.TLD"
