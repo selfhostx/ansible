@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Test mattermost role
+  hosts: localhost
   remote_user: root
   roles:
-    - mattermost
+    - selfhostx.ansible.mattermost

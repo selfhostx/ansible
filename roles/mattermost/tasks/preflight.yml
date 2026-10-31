@@ -1,0 +1,56 @@
+---
+- name: Read current link to the running version
+  ansible.builtin.stat:
+    path: "{{ mattermost_app_path }}"
+    follow: false
+  register: mattermost_app_link
+
+- name: Read version and edition from the running service
+  ansible.builtin.uri:
+    url: "{{ mattermost_verify_url }}"
+    return_content: true
+    validate_certs: false
+    timeout: 10
+  register: mattermost_running_api
+  failed_when: false
+  changed_when: false
+  check_mode: false
+
+- name: Determine running and target state
+  ansible.builtin.set_fact:
+    mattermost_previous_path: "{{ mattermost_app_link.stat.lnk_source | default('') if mattermost_app_link.stat.islnk | default(false) else '' }}"
+    mattermost_target_path: "{{ mattermost_download_path }}/mattermost"
+    mattermost_api_ok: "{{ mattermost_running_api.status | default(-1) == 200 and mattermost_running_api.json is defined }}"
+
+- name: Determine running version and edition (directory name if the service is down)
+  ansible.builtin.set_fact:
+    mattermost_running_version: >-
+      {{ mattermost_running_api.json.Version if mattermost_api_ok
+         else (mattermost_previous_path | regex_search('[0-9]+\.[0-9]+\.[0-9]+') | default('', true)) }}
+    mattermost_running_edition: >-
+      {{ ('enterprise' if mattermost_running_api.json.BuildEnterpriseReady | string | lower == 'true' else 'team') if mattermost_api_ok
+         else ('team' if 'mattermost-team-' in mattermost_previous_path else 'enterprise') }}
+    mattermost_switch_pending: "{{ mattermost_previous_path | length > 0 and mattermost_previous_path != mattermost_target_path }}"
+
+- name: Refuse an unrequested edition change
+  ansible.builtin.fail:
+    msg: >-
+      Running edition is {{ mattermost_running_edition }}, requested is {{ mattermost_edition }}.
+      Set mattermost_edition, or mattermost_allow_edition_change: true.
+  when:
+    - mattermost_switch_pending
+    - mattermost_running_edition != mattermost_edition
+    - not mattermost_allow_edition_change | bool
+
+- name: Refuse a version change beyond patch level
+  ansible.builtin.fail:
+    msg: >-
+      Change from {{ mattermost_running_version | default('unknown', true) }} to {{ mattermost_version }}
+      is not a patch upgrade. Set mattermost_allow_version_jump: true after reading the upgrade notes.
+  when:
+    - mattermost_switch_pending
+    - not mattermost_allow_version_jump | bool
+    - >-
+      mattermost_running_version | length == 0
+      or (mattermost_running_version.split('.')[:2] != (mattermost_version | string).split('.')[:2])
+      or (mattermost_version | string) is version(mattermost_running_version, '<')

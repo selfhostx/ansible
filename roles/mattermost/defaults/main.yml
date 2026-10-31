@@ -12,12 +12,15 @@
 # use any valid version here:
 # mattermost_version: "6.3.6"
 
+# team (mattermost-team tarball, no license needed) or enterprise (without license: Entry, shows only the last 10000 messages since v11)
+mattermost_edition: "enterprise"
+
 
 # 32-character salt for public links, current behaviour is to generate a new salt every time mattermost is restarted until it is set
 # https://docs.mattermost.com/configure/configuration-settings.html#public-link-salt :
 # mattermost_publiclinksalt: "32 character Salt"
 
-# 32-character key for encrypting and decrypting sensitive fields in the database (setting most likely not used but is is re-generated if empty and config changes) 
+# 32-character key for encrypting and decrypting sensitive fields in the database (setting most likely not used but is is re-generated if empty and config changes)
 # https://docs.mattermost.com/configure/configuration-settings.html#at-rest-encrypt-key https://forum.mattermost.com/t/solved-at-rest-encryption/2960
 # mattermost_atrestencryptkey: "32 character Salt"
 
@@ -40,7 +43,7 @@ mattermost_db_user: "mattermost"
 mattermost_db_password: ""
 mattermost_db_database: "mattermost"
 # enable user invites etc: https://docs.mattermost.com/configure/configuration-settings.html#enable-account-creation
-mattermost_enableusercreation: True
+mattermost_enableusercreation: true
 
 
 mattermost_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ mattermost_hostname }}/fullchain.pem"
@@ -88,17 +91,40 @@ mattermost_sendpushnotifications_content: "full"
 
 # optional vars ====
 # should ansible manage config/config.json?
-# recommended is True (uor override template with var "mattermost_config_json_template"):
-mattermost_managed_config: True
+# true overwrites changes made in the System Console; template is based on v11.7 (override with "mattermost_config_json_template"):
+mattermost_managed_config: true
 
 mattermost_userstatusawaytimeout: 300
 
 mattermost_user: "mattermost"
 mattermost_group: "mattermost"
 
+# download:
+mattermost_download_name: "mattermost{{ '-team' if mattermost_edition == 'team' else '' }}-{{ mattermost_version }}"
+mattermost_download_url: "https://releases.mattermost.com/{{ mattermost_version }}/{{ mattermost_download_name }}-linux-amd64.tar.gz"
+# empty disables the check (old releases have no .sha256 file):
+mattermost_download_checksum: "sha256:{{ mattermost_download_url }}.sha256"
+
+# update safety:
+# change of major.minor and downgrades:
+mattermost_allow_version_jump: false
+# change between team and enterprise:
+mattermost_allow_edition_change: false
+# check version and edition after start, roll back the link on mismatch:
+mattermost_verify_after_start: true
+mattermost_verify_url: "http://127.0.0.1:{{ mattermost_listenport }}/api/v4/config/client?format=old"
+mattermost_verify_retries: 60
+mattermost_verify_delay: 5
+# stop service and dump the database before a version change:
+mattermost_backup_before_update: false
+mattermost_backup_dir: /opt/mattermost/backups
+# stdout goes to the dump file, runs as root; empty: pg_dump with mattermost_db_*
+# example: mattermost_backup_command: "runuser -u postgres -- pg_dump -Fc mattermost"
+mattermost_backup_command: ""
+
 # paths:
 # - where to store download version:
-mattermost_download_path: "/opt/mattermost/version-available/mattermost-{{ mattermost_version }}"
+mattermost_download_path: "/opt/mattermost/version-available/{{ mattermost_download_name }}"
 # - link pointing to running version (makes version switching easy)
 mattermost_app_path: /opt/mattermost/version-running
 mattermost_app_binary: "{{ mattermost_app_path }}/bin/mattermost"
@@ -106,7 +132,6 @@ mattermost_app_binary: "{{ mattermost_app_path }}/bin/mattermost"
 mattermost_datadir_path: /opt/mattermost/mattermost-data
 
 
-nginx_ssl_protocols: "TLSv1.2 TLSv1.3"
 # TLS on appserver
 mattermost_tlsminver: "1.2"
 mattermost_tlscertfile: ""
@@ -124,19 +149,21 @@ mattermost_plugin_section_snippet: "./plugins-section-snippet.j2"
 mattermost_nginx_template: "templates/etc/nginx/sites-available/mattermost.j2"
 mattermost_config_json_template: "templates/opt/mattermost/config/config.json.j2"
 mattermost_linked_data_folders:
-- config
-- data
-- logs
-- plugins
+  - config
+  - data
+  - logs
+  - plugins
 
 # if service is upgraded, mattermost gets shutdown too (but not restarted):
-mattermost_unit_timeoutstartsec: 60
+# migrations run during start, a short timeout kills them:
+mattermost_unit_timeoutstartsec: 3600
 mattermost_unit_name: "mattermost.service"
-mattermost_db_unit_required: False
+mattermost_db_unit_required: false
 mattermost_db_unit_postgres: "postgresql.service"
 mattermost_db_unit_mysql: "mysql.service"
 
 # skip download for testing:
-mattermost_skip_download: False
+mattermost_skip_download: false
 
-mattermost_TerminateSessionsOnPasswordChange: true
+# old name mattermost_TerminateSessionsOnPasswordChange still works:
+mattermost_terminatesessionsonpasswordchange: "{{ mattermost_TerminateSessionsOnPasswordChange | default(true) }}"

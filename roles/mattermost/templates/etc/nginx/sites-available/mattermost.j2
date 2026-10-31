@@ -18,11 +18,19 @@ server {
 }
 
 server {
+{% if mattermost_nginx_http2_on %}
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  http2 on;
+{% else %}
   listen 443 ssl http2;
   listen [::]:443 ssl http2;
+{% endif %}
   server_name {{ mattermost_hostname }};
 
+{% if not mattermost_nginx_http2_on %}
   http2_push_preload on; # Enable HTTP/2 Server Push
+{% endif %}
 
   ssl_certificate {{ mattermost_nginx_ssl_certificate }};
   ssl_certificate_key {{ mattermost_nginx_ssl_certificate_key }};

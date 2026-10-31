@@ -6,7 +6,9 @@
     name: nginx
     state: restarted
 
+# failure is handled by the started/verify tasks and their rollback
 - name: Restart mattermost
   ansible.builtin.service:
     name: mattermost
     state: restarted
+  failed_when: false

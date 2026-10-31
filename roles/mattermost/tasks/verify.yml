@@ -1,0 +1,21 @@
+---
+- name: Wait for mattermost and read version and edition
+  ansible.builtin.uri:
+    url: "{{ mattermost_verify_url }}"
+    return_content: true
+    validate_certs: false
+    timeout: 10
+  register: mattermost_verify
+  until: mattermost_verify.status | default(-1) == 200
+  retries: "{{ mattermost_verify_retries }}"
+  delay: "{{ mattermost_verify_delay }}"
+
+- name: Check running version and edition
+  ansible.builtin.assert:
+    that:
+      - mattermost_verify.json.Version == (mattermost_version | string)
+      - (mattermost_verify.json.BuildEnterpriseReady | string | lower == 'true') == (mattermost_edition == 'enterprise')
+    fail_msg: >-
+      Running {{ mattermost_verify.json.Version }} (BuildEnterpriseReady {{ mattermost_verify.json.BuildEnterpriseReady }}),
+      expected {{ mattermost_version }} {{ mattermost_edition }}.
+    quiet: true
