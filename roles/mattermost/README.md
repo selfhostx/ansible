@@ -30,6 +30,8 @@ see [defaults/main.yml](defaults/main.yml)
 | `mattermost_backup_before_update` | `false` | stop service and dump database before a version change |
 | `mattermost_backup_dir` | `/opt/mattermost/backups` | dump target, dumps are not pruned |
 | `mattermost_backup_command` | pg_dump with `mattermost_db_*` | stdout goes to the dump file, required for MySQL |
+| `mattermost_env` | `{}` | settings as environment variables, names `MM_<SECTION>_<KEY>` |
+| `mattermost_env_file` | `/etc/mattermost/mattermost.env` | environment file, mode 0600 |
 
 Edition
 -------
@@ -62,6 +64,20 @@ Differences to the upstream defaults: `ListenAddress` is `mattermost_datalistena
 
 With `false` the role does not change `config.json`, except owner and mode by the recursive permission task
 on the data directory. Use it when the configuration is maintained in the System Console.
+
+Recommended for running servers: `mattermost_managed_config: false` plus `mattermost_env`.
+
+* `mattermost_env`: secrets and infrastructure (database, SMTP, `SiteURL`, `ListenAddress`, password rules).
+  These override `config.json`, are not written to it and are locked in the System Console.
+* System Console: everything else (branding, notifications, plugins, integrations).
+
+    mattermost_managed_config: false
+    mattermost_env:
+      MM_SQLSETTINGS_DATASOURCE: "postgres://mattermost:{{ vault_mattermost_db_password }}@localhost:5432/mattermost?sslmode=disable&connect_timeout=10"
+      MM_EMAILSETTINGS_SMTPPASSWORD: "{{ vault_mattermost_smtp_password }}"
+      MM_SERVICESETTINGS_TRUSTEDPROXYIPHEADER: "X-Forwarded-For X-Real-IP"
+
+Values already in `config.json` stay there: remove secrets from it by hand after moving them.
 
 
 Example Playbook

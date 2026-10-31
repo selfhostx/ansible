@@ -1,4 +1,9 @@
 ---
+- name: Fail on invalid mattermost_env names
+  ansible.builtin.fail:
+    msg: "mattermost_env names must match MM_[A-Z0-9_]+: {{ mattermost_env.keys() | reject('match', '^MM_[A-Z0-9_]+$') | list | join(', ') }}"
+  when: mattermost_env.keys() | reject('match', '^MM_[A-Z0-9_]+$') | list | length > 0
+
 - name: Read current link to the running version
   ansible.builtin.stat:
     path: "{{ mattermost_app_path }}"

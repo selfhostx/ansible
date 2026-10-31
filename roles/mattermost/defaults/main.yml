@@ -122,6 +122,14 @@ mattermost_backup_dir: /opt/mattermost/backups
 # example: mattermost_backup_command: "runuser -u postgres -- pg_dump -Fc mattermost"
 mattermost_backup_command: ""
 
+# settings as environment variables, they override config.json and are locked in the System Console.
+# names: MM_<SECTION>_<KEY>, lists separated by spaces. Example:
+# mattermost_env:
+#   MM_SQLSETTINGS_DATASOURCE: "postgres://mattermost:{{ vault_mattermost_db_password }}@localhost:5432/mattermost?sslmode=disable&connect_timeout=10"
+#   MM_EMAILSETTINGS_SMTPPASSWORD: "{{ vault_mattermost_smtp_password }}"
+mattermost_env: {}
+mattermost_env_file: /etc/mattermost/mattermost.env
+
 # paths:
 # - where to store download version:
 mattermost_download_path: "/opt/mattermost/version-available/{{ mattermost_download_name }}"
