@@ -107,12 +107,14 @@
   loop: "{{ mattermost_linked_data_folders }}"
   when: mattermost_target_present
 
+# no diff: contains database and SMTP passwords
 - name: Template mattermost config config.json
   ansible.builtin.template:
     backup: true
     dest: '{{ mattermost_datadir_path }}/config/config.json'
     mode: '0660'
     src: '{{ mattermost_config_json_template }}'
+  diff: false
   when: mattermost_managed_config | bool
   notify: Restart mattermost
 
