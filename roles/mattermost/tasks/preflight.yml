@@ -54,13 +54,3 @@
       mattermost_running_version | length == 0
       or (mattermost_running_version.split('.')[:2] != (mattermost_version | string).split('.')[:2])
       or (mattermost_version | string) is version(mattermost_running_version, '<')
-
-- name: Warn about the outdated config template
-  ansible.builtin.debug:
-    msg: >-
-      mattermost_managed_config is true: config.json is overwritten from a template dating from about v7,
-      which does not match this version. Use false or your own mattermost_config_json_template.
-  when:
-    - mattermost_managed_config | bool
-    - mattermost_config_json_template == 'templates/opt/mattermost/config/config.json.j2'
-    - (mattermost_version | string) is version('8.0', '>=')

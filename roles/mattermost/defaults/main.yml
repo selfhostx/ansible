@@ -91,7 +91,7 @@ mattermost_sendpushnotifications_content: "full"
 
 # optional vars ====
 # should ansible manage config/config.json?
-# the default template dates from about v7, use false after the initial run (or override "mattermost_config_json_template"):
+# true overwrites changes made in the System Console; template is based on v11.7 (override with "mattermost_config_json_template"):
 mattermost_managed_config: true
 
 mattermost_userstatusawaytimeout: 300

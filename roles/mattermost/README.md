@@ -53,10 +53,15 @@ version. Old versions stay in `version-available`.
 Config
 ------
 
-`mattermost_managed_config: true` overwrites `config.json` from a template dating from about v7. It lacks
-current sections and still contains removed ones. Use it for the initial run only, then set it to `false`,
-or provide your own `mattermost_config_json_template`. With `false` the role does not change `config.json`,
-except owner and mode by the recursive permission task on the data directory.
+The template is based on the `config.json` of 11.7. `mattermost_managed_config: true` overwrites it on
+every run, changes made in the System Console are lost (a backup file is kept). Mattermost ignores unknown
+keys and adds missing ones, on older or newer versions too.
+
+Differences to the upstream defaults: `ListenAddress` is `mattermost_datalistenaddress` (loopback),
+`TrustedProxyIPHeader` is set for nginx, `EnableOAuthServiceProvider` is off, passwords are stricter.
+
+With `false` the role does not change `config.json`, except owner and mode by the recursive permission task
+on the data directory. Use it when the configuration is maintained in the System Console.
 
 
 Example Playbook
