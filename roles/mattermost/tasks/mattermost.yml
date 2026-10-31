@@ -12,46 +12,66 @@
     system: true
     state: present
 
-- name: check if version are already installed
+- name: Check if version is already installed
   ansible.builtin.stat:
-    path: "{{ mattermost_download_path }}"
-  register: mattermost_folder
+    path: "{{ mattermost_target_path }}/bin/mattermost"
+  register: mattermost_binary
 
-- name: set fact if version already installed
+- name: Set fact if version already installed
   ansible.builtin.set_fact:
-    mattermost_already_installed: "{{ true if mattermost_folder.stat.exists and mattermost_folder.stat.isdir else false }}"
+    mattermost_already_installed: "{{ mattermost_binary.stat.exists }}"
+    mattermost_target_present: "{{ mattermost_binary.stat.exists or not ansible_check_mode }}"
 
-- name: Create download directory
-  ansible.builtin.file:
-    mode: '0775'
-    path: '{{ mattermost_download_path }}'
-    state: directory
-
-- name: Download and extract mattermost-archive from releases.mattermost.com
-  ansible.builtin.unarchive:
-    remote_src: true
-    src: 'https://releases.mattermost.com/{{ mattermost_version }}/mattermost-{{ mattermost_version }}-linux-amd64.tar.gz'
-    dest: '{{ mattermost_download_path }}'
-    # mode: '0770'
-    mode: 'u=rwX,g=rwX,o='
-    owner: "{{ mattermost_user }}"
-    group: "{{ mattermost_group }}"
-    # exclude:
-    #  - 'mattermost/config/config.json'
+- name: Download, verify and extract mattermost
   when:
     - not mattermost_skip_download
     - not mattermost_already_installed
-  notify:
-    - Restart mattermost
+    - not ansible_check_mode
+  block:
+    - name: Create download directory
+      ansible.builtin.file:
+        mode: '0775'
+        path: "{{ mattermost_download_path }}"
+        state: directory
 
-- name: Cleanup downloaded folder (directories linked to datadir)
-  ansible.builtin.file:
-    path: '{{ mattermost_download_path }}/mattermost/{{ item }}'
-    state: absent
-  loop: "{{ mattermost_linked_data_folders }}"
-  when:
-    - not mattermost_skip_download
-    - not mattermost_already_installed
+    - name: Download mattermost archive
+      ansible.builtin.get_url:
+        url: "{{ mattermost_download_url }}"
+        dest: "{{ mattermost_download_path }}.tar.gz"
+        checksum: "{{ mattermost_download_checksum if mattermost_download_checksum | length > 0 else omit }}"
+        mode: '0640'
+
+    - name: Extract mattermost archive
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: "{{ mattermost_download_path }}.tar.gz"
+        dest: "{{ mattermost_download_path }}"
+        mode: 'u=rwX,g=rwX,o='
+        owner: "{{ mattermost_user }}"
+        group: "{{ mattermost_group }}"
+
+    - name: Remove mattermost archive
+      ansible.builtin.file:
+        path: "{{ mattermost_download_path }}.tar.gz"
+        state: absent
+
+    - name: Cleanup downloaded folder (directories linked to datadir)
+      ansible.builtin.file:
+        path: "{{ mattermost_target_path }}/{{ item }}"
+        state: absent
+      loop: "{{ mattermost_linked_data_folders }}"
+  rescue:
+    - name: Remove incomplete download
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ mattermost_download_path }}"
+        - "{{ mattermost_download_path }}.tar.gz"
+
+    - name: Abort after failed download
+      ansible.builtin.fail:
+        msg: "Download or checksum of {{ mattermost_download_url }} failed: {{ ansible_failed_result.msg | default('') }}"
 
 - name: Create mattermost data directory
   ansible.builtin.file:
@@ -72,12 +92,6 @@
 #  - mattermost_folder_link_{{ item }}.stat.islnk == False
 #  loop: "{{ mattermost_linked_data_folders }}"
 
-- name: Link mattermost binary to current version
-  ansible.builtin.file:
-    src: '{{ mattermost_download_path }}/mattermost'
-    dest: '{{ mattermost_app_path }}'
-    state: link
-
 - name: Create folders in data dir (if they do not exist)
   ansible.builtin.file:
     path: '{{ mattermost_datadir_path }}/{{ item }}'
@@ -88,76 +102,142 @@
 - name: Link folders to datadir
   ansible.builtin.file:
     src: '{{ mattermost_datadir_path }}/{{ item }}'
-    dest: '{{ mattermost_download_path }}/mattermost/{{ item }}'
+    dest: '{{ mattermost_target_path }}/{{ item }}'
     state: link
   loop: "{{ mattermost_linked_data_folders }}"
+  when: mattermost_target_present
 
 - name: Template mattermost config config.json
-  template:
+  ansible.builtin.template:
     backup: true
     dest: '{{ mattermost_datadir_path }}/config/config.json'
     mode: '0660'
     src: '{{ mattermost_config_json_template }}'
-  when: mattermost_managed_config
+  when: mattermost_managed_config | bool
   notify: Restart mattermost
 
-- name: Ensure correct permissions on app path
-  ansible.builtin.file:
-    path: '{{ mattermost_app_path }}'
-    state: directory
-    owner: "{{ mattermost_user }}"
-    group: "{{ mattermost_group }}"
-    mode: 'g+w'
-    recurse: true
+- name: Dump database before version change
+  ansible.builtin.include_tasks: backup.yml
+  when:
+    - mattermost_backup_before_update | bool
+    - mattermost_switch_pending
+    - mattermost_target_present
+    - not ansible_check_mode
 
-- name: Ensure correct permissions on data directory
-  ansible.builtin.file:
-    path: '{{ mattermost_datadir_path }}'
-    state: directory
-    owner: "{{ mattermost_user }}"
-    group: "{{ mattermost_group }}"
-    mode: 'u=rwX,g=rwX,o='
-    recurse: true
+- name: Switch version and verify
+  block:
+    - name: Link mattermost binary to current version
+      ansible.builtin.file:
+        src: "{{ mattermost_target_path }}"
+        dest: "{{ mattermost_app_path }}"
+        state: link
+      register: mattermost_link_result
+      notify: Restart mattermost
+      when: mattermost_target_present
 
-- name: Ensure correct permissions on mattermost binary
-  ansible.builtin.file:
-    path: '{{ mattermost_app_binary }}'
-    state: 'file'
-    owner: "{{ mattermost_user }}"
-    group: "{{ mattermost_group }}"
-    mode: 'u=rwx,g=rwx,o='
+    - name: Ensure correct permissions on app path
+      ansible.builtin.file:
+        path: '{{ mattermost_app_path }}'
+        state: directory
+        owner: "{{ mattermost_user }}"
+        group: "{{ mattermost_group }}"
+        mode: 'g+w'
+        recurse: true
 
-- name: Ensure sufficient capabilities on mattermost binary
-  community.general.capabilities:
-    path: '{{ mattermost_app_binary }}'
-    capability: cap_net_bind_service=+ep
-    state: present
+    - name: Ensure correct permissions on data directory
+      ansible.builtin.file:
+        path: '{{ mattermost_datadir_path }}'
+        state: directory
+        owner: "{{ mattermost_user }}"
+        group: "{{ mattermost_group }}"
+        mode: 'u=rwX,g=rwX,o='
+        recurse: true
 
-- name: Ensure mattermost unit file exists
-  ansible.builtin.template:
-    backup: true
-    dest: '/etc/systemd/system/{{ mattermost_unit_name }}'
-    mode: '0644'
-    src: 'templates/etc/systemd/system/mattermost.service.j2'
-  register: mattermost_unitfile_changed
-  notify: Restart mattermost
+    - name: Ensure correct permissions on mattermost binary
+      ansible.builtin.file:
+        path: '{{ mattermost_app_binary }}'
+        state: 'file'
+        owner: "{{ mattermost_user }}"
+        group: "{{ mattermost_group }}"
+        mode: 'u=rwx,g=rwx,o='
+      when: mattermost_target_present
 
-- name: Reload unitfile with systemctl daemon-reload
-  # make sure daemon_reload happens before other handlers like restart
-  ansible.builtin.systemd:
-    daemon_reload: true
-  when: mattermost_unitfile_changed is defined
+    - name: Ensure sufficient capabilities on mattermost binary
+      community.general.capabilities:
+        path: '{{ mattermost_app_binary }}'
+        capability: cap_net_bind_service=+ep
+        state: present
+      when: mattermost_target_present
 
-- name: Enable unitfile
-  ansible.builtin.systemd:
-    name: "{{ mattermost_unit_name }}"
-    enabled: true
+    - name: Ensure mattermost unit file exists
+      ansible.builtin.template:
+        backup: true
+        dest: '/etc/systemd/system/{{ mattermost_unit_name }}'
+        mode: '0644'
+        src: 'templates/etc/systemd/system/mattermost.service.j2'
+      register: mattermost_unitfile_changed
+      notify: Restart mattermost
 
-- name: force handlers
-  ansible.builtin.meta: flush_handlers
+    - name: Reload unitfile with systemctl daemon-reload
+      # make sure daemon_reload happens before other handlers like restart
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when:
+        - mattermost_unitfile_changed is defined
+        - mattermost_target_present
 
-- name: Ensure mattermost service is started
-  ansible.builtin.service:
-    name: 'mattermost'
-    enabled: true
-    state: started
+    - name: Enable unitfile
+      ansible.builtin.systemd:
+        name: "{{ mattermost_unit_name }}"
+        enabled: true
+      when: mattermost_target_present
+
+    - name: Force handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Ensure mattermost service is started
+      ansible.builtin.service:
+        name: 'mattermost'
+        enabled: true
+        state: started
+      when: mattermost_target_present
+
+    - name: Verify running version and edition
+      ansible.builtin.include_tasks: verify.yml
+      when:
+        - mattermost_verify_after_start | bool
+        - not ansible_check_mode
+  rescue:
+    - name: Stop failed version
+      ansible.builtin.systemd:
+        name: "{{ mattermost_unit_name }}"
+        state: stopped
+      failed_when: false
+      when:
+        - mattermost_link_result | default({}) is changed
+        - mattermost_previous_path | length > 0
+
+    - name: Point link back to previous version
+      ansible.builtin.file:
+        src: "{{ mattermost_previous_path }}"
+        dest: "{{ mattermost_app_path }}"
+        state: link
+      when:
+        - mattermost_link_result | default({}) is changed
+        - mattermost_previous_path | length > 0
+
+    - name: Start mattermost after failed switch
+      ansible.builtin.systemd:
+        name: "{{ mattermost_unit_name }}"
+        state: started
+      failed_when: false
+
+    - name: Abort after failed switch
+      ansible.builtin.fail:
+        msg: >-
+          Switch to {{ mattermost_version }} {{ mattermost_edition }} failed at
+          "{{ ansible_failed_task.name | default('unknown') }}": {{ ansible_failed_result.msg | default('') }}
+          {% if mattermost_link_result | default({}) is changed and mattermost_previous_path | length > 0 %}
+          Link is back on {{ mattermost_previous_path }}. Migrations may already have run, the old version may
+          not start; the way back is then the dump {{ mattermost_backup_file | default('(none taken)') }}.
+          {% endif %}

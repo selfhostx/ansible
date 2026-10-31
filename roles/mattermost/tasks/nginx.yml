@@ -1,4 +1,15 @@
 ---
+- name: Read nginx version
+  ansible.builtin.command: nginx -v
+  register: mattermost_nginx_version_raw
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Choose http2 syntax by nginx version
+  ansible.builtin.set_fact:
+    mattermost_nginx_http2_on: "{{ (mattermost_nginx_version_raw.stderr | default('') | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') | default('0.0.0', true)) is version('1.25.1', '>=') }}"
+
 - name: Ensure /etc/nginx/sites-enabled/default is absent
   ansible.builtin.file:
     path: '/etc/nginx/sites-enabled/default'

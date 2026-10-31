@@ -6,5 +6,16 @@
     msg: mattermost_version is not defined (when in doubt choose latest LTS version)
   when: mattermost_version is not defined
 
-- include_tasks: nginx.yml
-- include_tasks: mattermost.yml
+- name: Fail when mattermost_edition is invalid
+  ansible.builtin.fail:
+    msg: "mattermost_edition must be team or enterprise, not {{ mattermost_edition }}"
+  when: mattermost_edition not in ['team', 'enterprise']
+
+- name: Check running version against the requested one
+  ansible.builtin.include_tasks: preflight.yml
+
+- name: Configure nginx
+  ansible.builtin.include_tasks: nginx.yml
+
+- name: Install mattermost
+  ansible.builtin.include_tasks: mattermost.yml

@@ -1,9 +1,11 @@
 ---
-# set to host or a group from inventory:
-- hosts: MYHOST.domain.tld
+# MySQL: Mattermost before v11 only, v11 requires PostgreSQL
+- name: Install mattermost
+  # set to host or a group from inventory:
+  hosts: MYHOST.domain.tld
 
   vars_files:
-#    - my_vault.yml
+    - my_vault.yml
 
   roles:
     # baserole:
@@ -12,7 +14,6 @@
     - { role: geerlingguy.mysql }
     - { role: stefanux.mysqlbackup }
     - { role: selfhostx.ansible.nginx_common }
-    - { role: selfhostx.certbot  }
     # - { role: selfhostx.ansible.mattermost } -> included at the end
 
   vars:
@@ -22,13 +23,13 @@
     mysql_root_password: "-> Vault"
     mattermost_db_password: "-> Vault"
     mattermost_atrestencryptkey: "-> Vault"
-    mattermost_smtppassword: "-> Vault" 
+    mattermost_smtppassword: "-> Vault"
 
     # letsencrypt:
     certbot_create_method: nginx
     certbot_certs:
       - domains:
-        - MYHOST.domain.tld
+          - MYHOST.domain.tld
     certbot_auto_renew_minute: 19
     certbot_auto_renew_hour: 3
     certbot_admin_email: mattermost@domain.tld
@@ -49,9 +50,9 @@
     mysql_user_password_update: true
 
     # initial run:
-    # mattermost_managed_config: True
+    # mattermost_managed_config: true
     # later:
-    mattermost_managed_config: False
+    mattermost_managed_config: false
 
     mattermost_publiclinksalt: "-> vault"
     mattermost_hostname: MYHOST.domain.tld
@@ -66,7 +67,7 @@
     mattermost_db_mysql_collation: "{{ mysql_collation }}"
 
     # enable user invites etc: https://docs.mattermost.com/configure/configuration-settings.html#enable-account-creation
-    mattermost_enableusercreation: True
+    mattermost_enableusercreation: true
 
     # mattermost_nginx_ssl_certificate: "/etc/letsencrypt/live/{{ mattermost_hostname }}/fullchain.pem"
     # mattermost_nginx_ssl_certificate_key: "/etc/letsencrypt/live/{{ mattermost_hostname }}/privkey.pem"

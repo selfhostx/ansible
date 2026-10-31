@@ -1,0 +1,52 @@
+---
+- name: Fail when no backup command is available
+  ansible.builtin.fail:
+    msg: Only postgres has a default dump command, set mattermost_backup_command.
+  when:
+    - mattermost_backup_command | length == 0
+    - mattermost_db_type != 'postgres'
+
+- name: Create backup directory
+  ansible.builtin.file:
+    path: "{{ mattermost_backup_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Set backup file name
+  ansible.builtin.set_fact:
+    mattermost_backup_file: "{{ mattermost_backup_dir }}/mattermost-{{ mattermost_running_version | default('unknown', true) }}-{{ now(fmt='%Y%m%d-%H%M%S') }}.dump"
+
+- name: Stop mattermost for a consistent dump
+  ansible.builtin.systemd:
+    name: "{{ mattermost_unit_name }}"
+    state: stopped
+
+- name: Dump database
+  block:
+    - name: Dump database
+      ansible.builtin.shell: >-
+        {{ mattermost_backup_command if mattermost_backup_command | length > 0 else
+        'pg_dump -h ' ~ (mattermost_db_server.split(':')[0] | quote) ~ ' -p ' ~ (mattermost_db_server.split(':')[1] | default('5432') | quote)
+        ~ ' -U ' ~ (mattermost_db_user | quote) ~ ' -Fc ' ~ (mattermost_db_database | quote) }}
+        > {{ mattermost_backup_file | quote }}
+      environment:
+        PGPASSWORD: "{{ mattermost_db_password }}"
+      args:
+        creates: "{{ mattermost_backup_file }}"
+      no_log: true
+  rescue:
+    - name: Remove incomplete dump
+      ansible.builtin.file:
+        path: "{{ mattermost_backup_file }}"
+        state: absent
+
+    - name: Start mattermost again after failed dump
+      ansible.builtin.systemd:
+        name: "{{ mattermost_unit_name }}"
+        state: started
+
+    - name: Abort after failed dump
+      ansible.builtin.fail:
+        msg: Database dump failed, version not changed. Check mattermost_db_* or mattermost_backup_command.
