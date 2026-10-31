@@ -12,18 +12,25 @@ nginx_group: nginx
 nginx_snippet_directory: "/etc/nginx/snippets"
 nginx_tls_hardening_snippet: "{{ nginx_snippet_directory }}/tls-hardening.conf"
 nginx_ssl_private_directory: "/etc/ssl/private"
+nginx_ssl_private_directory_owner: root
+# empty: ssl-cert and 0710 if the group exists (Debian default, postgres needs it for the snakeoil key), else root and 0700
+nginx_ssl_private_directory_group: ""
+# quote the mode:
+nginx_ssl_private_directory_mode: ""
 # you might want to disable DH-generation in some cases (takes too much time):
 nginx_dh_enable: true
 nginx_dh_filename: "{{ nginx_ssl_private_directory }}/dhparam.pem"
 nginx_dh_size: 4096
 
-nginx_tls_hsts_enable: True
+nginx_tls_hsts_enable: true
 nginx_tls_hsts_time: 31536000
 
-nginx_ocsp_resolver_enabled: False
+# Let's Encrypt certificates have no OCSP URL since 2025, nginx then warns: use false
+nginx_ssl_stapling_enable: true
+nginx_ocsp_resolver_enabled: false
 # define your own resolver to enable dnssec etc.:
 # nginx_ocsp_resolver_list: 127.0.0.1
 nginx_ocsp_resolver_list: "9.9.9.9 8.8.4.4"
 
-nginx_ssl_trusted_certificate_enabled: False
+nginx_ssl_trusted_certificate_enabled: false
 nginx_ssl_trusted_certificate_filename: "/etc/ssl/certs/ca-certificates.crt"

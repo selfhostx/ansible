@@ -36,13 +36,15 @@
     ssl_session_tickets on;
     ssl_session_timeout 30m;
 
+{% if nginx_ssl_stapling_enable | bool %}
     # Enable OCSP stapling.
     ssl_stapling on;
     ssl_stapling_verify on;
+{% endif %}
 
-{% if nginx_ssl_trusted_certificate_enabled|bool and nginx_ssl_trusted_certificate_file is defined and ssl_trusted_certificate_file|length>0 %}
+{% if nginx_ssl_trusted_certificate_enabled | bool and nginx_ssl_trusted_certificate_filename | length > 0 %}
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
-    ssl_trusted_certificate nginx_ssl_trusted_certificate {{ nginx_ssl_trusted_certificate_filename }};
+    ssl_trusted_certificate {{ nginx_ssl_trusted_certificate_filename }};
 {% endif %}
 
     # For a resolution of the OCSP responder hostname, the resolver directive should also be specified.

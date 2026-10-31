@@ -1,0 +1,3 @@
+# public variables, used by other roles
+roles/nginx_common/defaults/main.yml var-naming[no-role-prefix]
+roles/nginx_common/tasks/main.yml var-naming[no-role-prefix]
