@@ -171,6 +171,34 @@
         state: present
       when: mattermost_target_present
 
+    - name: Create directory for environment file
+      ansible.builtin.file:
+        path: "{{ mattermost_env_file | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0750'
+      when: mattermost_env | length > 0
+
+    # no diff: contains secrets
+    - name: Template environment file
+      ansible.builtin.template:
+        src: etc/mattermost/mattermost.env.j2
+        dest: "{{ mattermost_env_file }}"
+        owner: root
+        group: root
+        mode: '0600'
+      diff: false
+      notify: Restart mattermost
+      when: mattermost_env | length > 0
+
+    - name: Remove environment file when unused
+      ansible.builtin.file:
+        path: "{{ mattermost_env_file }}"
+        state: absent
+      notify: Restart mattermost
+      when: mattermost_env | length == 0
+
     - name: Ensure mattermost unit file exists
       ansible.builtin.template:
         backup: true

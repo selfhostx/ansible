@@ -17,6 +17,9 @@ Requires=mysql.service
 
 [Service]
 Type=notify
+{% if mattermost_env | length > 0 %}
+EnvironmentFile={{ mattermost_env_file }}
+{% endif %}
 ExecStart={{ mattermost_app_binary }}
 TimeoutStartSec={{ mattermost_unit_timeoutstartsec }}
 Restart=always
