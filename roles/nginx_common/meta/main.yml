@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: selfhostx
   description: nginx_common role
@@ -15,20 +16,19 @@ galaxy_info:
   # - CC-BY-4.0
   license: GPL-3.0-only
 
-  min_ansible_version: 2.10
+  min_ansible_version: "2.15"
 
   # If this a Container Enabled role, provide the minimum Ansible Container version.
   # min_ansible_container_version:
 
   platforms:
-  - name: Debian
-    versions:
-    - 10
-    - 11
-  - name: Ubuntu
-    versions:
-    - 18.04
-    - 20.04
-    - 22.04
+    - name: Debian
+      versions:
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
 
   galaxy_tags: []
